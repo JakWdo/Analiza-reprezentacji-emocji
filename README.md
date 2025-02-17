@@ -1,86 +1,37 @@
-# Cultural-Bias-LLMs
-Cross-Cultural Emotion Expression in Large Language Models
-I. Theoretical Introduction
-Background
-Recent decades have shown increasing interest in cross-cultural differences in emotional expression, driven by globalization and advances in communication technology. The intersection of cultural differences and artificial intelligence, particularly Large Language Models (LLMs), presents unique research opportunities and challenges.
-Historical Context
-The development of language models has evolved from early neural networks and natural language processing to breakthrough architectures like Transformer and BERT, leading to the revolutionary GPT models.
-Theoretical Framework
-The research integrates multiple theoretical perspectives:
+# Cross-Cultural Emotion Expression Analysis
+This repository contains research examining cross-cultural differences in emotional expression by Large Language Models (LLMs) in Polish and English contexts.
 
-Historical evolution of emotion understanding
-Emotions as multidimensional constructs
-Cultural construction of self
-Linguistic relativity in emotion expression
+## Project Overview
+The study analyzes how LLMs express and handle emotions across different cultural settings:
+- Polish language and cultural context
+- English language and cultural context
+- Culturally neutral expressions
 
-II. Research Plan
-Research Objectives
+## Research Goals
+- Evaluate Anglo-centrism in LLM emotional expressions
+- Assess cultural prompt impact on generated content
+- Compare model effectiveness in cultural nuance detection
+- Analyze individualistic vs. collectivistic patterns
+- Examine 15 diverse cultural scenarios
 
-Examine Anglo-centrism in emotional expression by LLMs in Polish and English
-Evaluate the impact of cultural prompts on emotional content generation
-Compare model effectiveness in capturing cultural nuances
-Analyze embeddings for individualistic and collectivistic patterns
-Expand scenarios to cover diverse cultural contexts
+## Models and Tools
+- GPT-4o (extended GPT-4 version)
+- GPT-o1 (enhanced reasoning capabilities)
+- Language pairs: Polish (PL) and English (EN)
 
-Materials and Methods
-Models
+## Methodology
+### Data Collection
+- Total responses: 3,600
+- 15 scenarios in 2 languages
+- 2 prompt types: neutral and cultural
+- 2 models
+- 30 iterations per combination
 
-GPT-4o (extended GPT-4 version)
-GPT-o1 (model with enhanced chain-of-thought reasoning)
+### Analysis Framework
+- Expert evaluation system
+- Embedding analysis
+- Cultural pattern detection
+- Statistical comparison
 
-Languages
-
-English (EN) - representing individualistic culture
-Polish (PL) - moderately individualistic culture with collectivistic elements
-
-Scenarios
-15 carefully designed situational scenarios including:
-
-Public praise at work
-Public criticism
-Family financial requests
-Workplace conflicts
-Social obligations
-Personal relationships
-
-System Prompts
-
-Neutral prompt (no cultural information)
-Cultural prompt EN (US-specific context)
-Cultural prompt PL (Polish-specific context)
-
-III. Research Procedure
-Data Collection
-
-Comprehensive testing across all scenarios
-Multiple language versions
-Various prompt types
-Multiple model comparisons
-
-Analysis Framework
-
-Expert Cultural Assessment
-
-Dual expert evaluation for each language
-Cultural appropriateness rating (1-7 scale)
-
-
-Embedding Analysis
-
-Vector space analysis
-Comparison with individualistic/collectivistic benchmarks
-Cosine distance measurements
-
-
-
-Statistical Analysis
-
-Multifactor ANOVA
-Mixed models analysis
-Variables:
-
-Model type
-Prompt type
-Language
-Cultural adequacy ratings
-Embedding distances
+## Usage
+This is a proprietary research project. For collaboration inquiries, please contact the research team.
