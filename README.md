@@ -15,7 +15,7 @@ The study analyzes how LLMs express and handle emotions across different cultura
 - Examine 15 diverse cultural scenarios
 
 ## Models and Tools
-- GPT-4o (extended GPT-4 version)
+- GPT-4o
 - GPT-o1 (enhanced reasoning capabilities)
 - Language pairs: Polish (PL) and English (EN)
 
