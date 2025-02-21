@@ -8,3 +8,4 @@ statsmodels
 streamlit
 jinja2
 plotly
+python-dotenv
