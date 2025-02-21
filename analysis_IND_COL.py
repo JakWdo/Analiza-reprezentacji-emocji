@@ -79,11 +79,9 @@ Przeprowadzam analizę statystyczną, aby sprawdzić, czy różnice między dyst
 #   ponieważ język ten jest silnie związany z kulturą indywidualistyczną.  
 # - **Dystans w języku polskim będzie mniejszy niż w angielskim**,  
 #   co wynika z bardziej kolektywistycznych cech języka polskiego w porównaniu do angielskiego.  
-# - **Dystans w języku japońskim będzie podobny do polskiego lub mniejszy**,  
+# - **Dystans w języku japońskim będzie mniejszy od angielskiego**,  
 #   ponieważ kultura japońska jest silnie kolektywistyczna,  
 #   co może skutkować większym podobieństwem semantycznym zdań indywidualistycznych i kolektywistycznych.  
-# - **Jeśli dystanse w języku polskim i japońskim okażą się podobne**,  
-#   może to sugerować, że język polski w większym stopniu niż angielski uwzględnia kolektywistyczne aspekty komunikacji.
 """
 
 
