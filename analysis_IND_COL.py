@@ -34,7 +34,7 @@ INTEGRATED_REPORT = r"""
 ## Opis Metody i Raport
 
 ### Wprowadzenie
-W moim projekcie zamieniam każde zdanie na ciąg 3072 liczb, zwany **wektorem**. Wektor to uporządkowana sekwencja liczb, która w kontekście przetwarzania języka naturalnego służy do reprezentowania znaczenia tekstu. Każda liczba w wektorze odpowiada pewnej cechie lub właściwości, którą model uznał za istotną dla zrozumienia znaczenia zdania.
+W moim projekcie zamieniam każde zdanie na ciąg 3072 liczb, zwany **wektorem**. Wektor to uporządkowana sekwencja liczb, która w kontekście przetwarzania języka naturalnego służy do reprezentowania znaczenia tekstu. Każda liczba w wektorze odpowiada pewnej cesze lub właściwości, którą model uznał za istotną dla zrozumienia znaczenia zdania.
 
 ### Dlaczego taki model?
 Do generowania wektorowych reprezentacji zdań używam modelu **text-embedding-3-large** od OpenAI. Model ten został wytrenowany na ogromnych zbiorach danych w wielu językach, co umożliwia mu tworzenie bardzo precyzyjnych i spójnych reprezentacji semantycznych. Dzięki temu jestem w stanie porównywać zdania, oceniać ich podobieństwo i badać subtelne różnice między wyrażeniami indywidualistycznymi i kolektywistycznymi.
