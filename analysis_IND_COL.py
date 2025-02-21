@@ -49,18 +49,18 @@ Celem projektu jest:
 Każde zdanie jest przetwarzane przez model text-embedding-3-large, który generuje 3072-wymiarowy wektor. Reprezentacja ta oddaje istotne aspekty znaczenia zdania – takie jak emocjonalny ton, kontekst oraz inne cechy semantyczne.
 
 #### 2. Pomiar Podobieństwa
-# Każde zdanie kolektywistyczne w danym języku jest porównywane z każdym zdaniem indywidualistycznym.  
-# Przy założeniu, że tłumaczenia są wysokiej jakości, reprezentacje semantyczne obu grup powinny być bardzo podobne.  
-# Jednak po obliczeniu średnich lub median dystansów może okazać się, że wartości te różnią się między językami,  
-# co może wskazywać na subtelne różnice w sposobie reprezentowania znaczenia zdań przez model.
+Każde zdanie kolektywistyczne w danym języku jest porównywane z każdym zdaniem indywidualistycznym.  
+Przy założeniu, że tłumaczenia są wysokiej jakości, reprezentacje semantyczne obu grup powinny być bardzo podobne.  
+Jednak po obliczeniu średnich lub median dystansów może okazać się, że wartości te różnią się między językami,  
+co może wskazywać na subtelne różnice w sposobie reprezentowania znaczenia zdań przez model.
 
 #### Dlaczego używam trzech metryk?  
-# - **Dystans euklidesowy**: Mierzy geometryczną odległość między wektorami, co pozwala ocenić,  
-#   jak blisko siebie znajdują się reprezentacje zdań w przestrzeni.  
-# - **Dystans kosinusowy**: Sprawdza różnicę kierunków wektorów, niezależnie od ich długości,  
-#   co umożliwia analizę podobieństwa semantycznego pod kątem ich orientacji.  
-# - **Dystans Manhattan**: Sumuje bezwzględne różnice poszczególnych wartości wektorów,  
-#   co pozwala wychwycić subtelne różnice w reprezentacjach, które mogą umknąć przy innych miarach.
+- **Dystans euklidesowy**: Mierzy geometryczną odległość między wektorami, co pozwala ocenić,  
+   jak blisko siebie znajdują się reprezentacje zdań w przestrzeni.  
+- **Dystans kosinusowy**: Sprawdza różnicę kierunków wektorów, niezależnie od ich długości,  
+   co umożliwia analizę podobieństwa semantycznego pod kątem ich orientacji.  
+ - **Dystans Manhattan**: Sumuje bezwzględne różnice poszczególnych wartości wektorów,  
+   co pozwala wychwycić subtelne różnice w reprezentacjach, które mogą umknąć przy innych miarach.
 
 #### 3. Redukcja Wymiarowości
 Wektory 3072-wymiarowe są trudne do wizualizacji. Dlatego stosuję:
@@ -73,15 +73,15 @@ Przeprowadzam analizę statystyczną, aby sprawdzić, czy różnice między dyst
 - **Testy różnic**: Jeśli rozkłady są normalne, stosuję t-test; w przeciwnym razie używam testu nieparametrycznego Mann–Whitneya. Poziom istotności ustawiam na **0.01**. Wyniki (np. wartości p oraz mediany) pozwalają mi ocenić, czy różnice są statystycznie znaczące.
 
 #### 5. Hipotezy badawcze  
-# W oparciu o teorię dotyczącą indywidualizmu i kolektywizmu, a także wcześniejsze badania  
-# nad różnicami językowymi, zakładam, że:  
-# - **Dystanse między zdaniami indywidualistycznymi i kolektywistycznymi będą największe w języku angielskim**,  
-#   ponieważ język ten jest silnie związany z kulturą indywidualistyczną.  
-# - **Dystans w języku polskim będzie mniejszy niż w angielskim**,  
-#   co wynika z bardziej kolektywistycznych cech języka polskiego w porównaniu do angielskiego.  
-# - **Dystans w języku japońskim będzie mniejszy od angielskiego**,  
-#   ponieważ kultura japońska jest silnie kolektywistyczna,  
-#   co może skutkować większym podobieństwem semantycznym zdań indywidualistycznych i kolektywistycznych.  
+W oparciu o teorię dotyczącą indywidualizmu i kolektywizmu, a także wcześniejsze badania  
+nad różnicami językowymi, zakładam, że:  
+- **Dystanse między zdaniami indywidualistycznymi i kolektywistycznymi będą największe w języku angielskim**,  
+  ponieważ język ten jest silnie związany z kulturą indywidualistyczną.  
+- **Dystans w języku polskim będzie mniejszy niż w angielskim**,  
+  co wynika z bardziej kolektywistycznych cech języka polskiego w porównaniu do angielskiego.  
+- **Dystans w języku japońskim będzie mniejszy od angielskiego**,  
+  ponieważ kultura japońska jest silnie kolektywistyczna,  
+  co może skutkować większym podobieństwem semantycznym zdań indywidualistycznych i kolektywistycznych.  
 """
 
 
