@@ -818,76 +818,57 @@ def min_max_normalize_2d(points):
     return points
 
 
-def generate_plots():
-    all_emb = np.concatenate([eng_ind_embeddings, eng_col_embeddings,
-                              pol_ind_embeddings, pol_col_embeddings,
-                              jap_ind_embeddings, jap_col_embeddings], axis=0)
-    all_lbl = (["ENG_IND"] * len(eng_ind_embeddings) +
-               ["ENG_COL"] * len(eng_col_embeddings) +
-               ["POL_IND"] * len(pol_ind_embeddings) +
-               ["POL_COL"] * len(pol_col_embeddings) +
-               ["JAP_IND"] * len(jap_ind_embeddings) +
-               ["JAP_COL"] * len(jap_col_embeddings))
-    colors = {"ENG_IND": "blue", "ENG_COL": "red",
-              "POL_IND": "green", "POL_COL": "orange",
-              "JAP_IND": "purple", "JAP_COL": "brown"}
-    labs = list(set(all_lbl))
-
-    # PCA 2D
+def generate_interactive_pca_2d(all_emb, all_lbl):
     pca = PCA(n_components=2, random_state=42)
     red_pca = pca.fit_transform(all_emb)
-    red_pca = min_max_normalize_2d(red_pca)
-    plt.figure(figsize=(6, 6))
-    for lab in labs:
-        idxs = [i for i, l in enumerate(all_lbl) if l == lab]
-        plt.scatter(red_pca[idxs, 0], red_pca[idxs, 1],
-                    color=colors.get(lab, "gray"), label=lab, alpha=0.7)
-    plt.title("PCA 2D (text-embedding-3-large)")
-    plt.legend()
-    plt.savefig("all_pca_centroids.png", dpi=300)
-    plt.close()
+    df = pd.DataFrame({
+        "PC1": red_pca[:, 0],
+        "PC2": red_pca[:, 1],
+        "Cluster": all_lbl
+    })
+    # Mapowanie kolorów: dla każdego języka inny odcień
+    color_map = {
+        "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
+        "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
+        "JAP": {"IND": "#ff9896", "COL": "#d62728"}
+    }
+    # Dodajemy kolumnę z kolorami na podstawie etykiety
+    df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
+    
+    available_clusters = df["Cluster"].unique().tolist()
+    selected_clusters = st.multiselect("Wybierz klastry (PCA 2D)",
+                                       options=available_clusters, default=available_clusters)
+    filtered_df = df[df["Cluster"].isin(selected_clusters)]
+    fig = px.scatter(filtered_df, x="PC1", y="PC2", color="Cluster",
+                     color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in available_clusters},
+                     title="Interaktywna PCA 2D (text-embedding-3-large)")
+    fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
+    return fig
 
-    # t-SNE 2D
+def generate_interactive_tsne_2d(all_emb, all_lbl):
     tsne = TSNE(n_components=2, perplexity=30, random_state=42)
     red_tsne = tsne.fit_transform(all_emb)
-    red_tsne = min_max_normalize_2d(red_tsne)
-    plt.figure(figsize=(6, 6))
-    for lab in labs:
-        idxs = [i for i, l in enumerate(all_lbl) if l == lab]
-        plt.scatter(red_tsne[idxs, 0], red_tsne[idxs, 1],
-                    color=colors.get(lab, "gray"), label=lab, alpha=0.7)
-    plt.title("t-SNE 2D (text-embedding-3-large)")
-    plt.legend()
-    plt.savefig("all_tsne_centroids.png", dpi=300)
-    plt.close()
-
-    # PCA 3D
-    pca_3d = PCA(n_components=3, random_state=42)
-    red_pca_3d = pca_3d.fit_transform(all_emb)
-    fig = plt.figure(figsize=(8, 8))
-    ax = fig.add_subplot(111, projection='3d')
-    for lab in labs:
-        idxs = [i for i, l in enumerate(all_lbl) if l == lab]
-        ax.scatter(red_pca_3d[idxs, 0], red_pca_3d[idxs, 1], red_pca_3d[idxs, 2],
-                   color=colors.get(lab, "gray"), label=lab, alpha=0.7)
-    ax.set_title("PCA 3D (text-embedding-3-large)")
-    ax.legend()
-    plt.savefig("all_pca_3d.png", dpi=300)
-    plt.close()
-
-    # t-SNE 3D
-    tsne_3d = TSNE(n_components=3, perplexity=30, random_state=42)
-    red_tsne_3d = tsne_3d.fit_transform(all_emb)
-    fig = plt.figure(figsize=(8, 8))
-    ax = fig.add_subplot(111, projection='3d')
-    for lab in labs:
-        idxs = [i for i, l in enumerate(all_lbl) if l == lab]
-        ax.scatter(red_tsne_3d[idxs, 0], red_tsne_3d[idxs, 1], red_tsne_3d[idxs, 2],
-                   color=colors.get(lab, "gray"), label=lab, alpha=0.7)
-    ax.set_title("t-SNE 3D (text-embedding-3-large)")
-    ax.legend()
-    plt.savefig("all_tsne_3d.png", dpi=300)
-    plt.close()
+    df = pd.DataFrame({
+        "Dim1": red_tsne[:, 0],
+        "Dim2": red_tsne[:, 1],
+        "Cluster": all_lbl
+    })
+    color_map = {
+        "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
+        "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
+        "JAP": {"IND": "#ff9896", "COL": "#d62728"}
+    }
+    df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
+    
+    available_clusters = df["Cluster"].unique().tolist()
+    selected_clusters = st.multiselect("Wybierz klastry (t-SNE 2D)",
+                                       options=available_clusters, default=available_clusters)
+    filtered_df = df[df["Cluster"].isin(selected_clusters)]
+    fig = px.scatter(filtered_df, x="Dim1", y="Dim2", color="Cluster",
+                     color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in available_clusters},
+                     title="Interaktywna t-SNE 2D (text-embedding-3-large)")
+    fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
+    return fig
 
 
 def generate_interactive_pca_3d(all_emb, all_lbl):
