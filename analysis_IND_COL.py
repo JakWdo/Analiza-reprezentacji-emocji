@@ -3,14 +3,13 @@ from openai import OpenAI
 import numpy as np
 import pickle
 from numpy.linalg import norm
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-from dotenv import load_dotenv
 import pandas as pd
 import json
 import plotly.express as px
-import streamlit as st
+import streamlit as st  # Funkcje Streamlit pozostają, gdyż są wykorzystywane przy imporcie do aplikacji
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+from dotenv import load_dotenv
 # Statystyka
 from scipy.stats import mannwhitneyu, ttest_ind, shapiro, kstest
 from sklearn.linear_model import LogisticRegression
@@ -73,58 +72,8 @@ które wpływają na sposób, w jaki model je reprezentuje.
 ## 3.1. Co chcemy sprawdzić?
 Chcemy zbadać, jak model przedstawia zdania wyrażające **indywidualizm** (np. „Jestem niezależny”) 
 i **kolektywizm** (np. „Działamy razem”).
-
-### Co porównujemy?
-Porównujemy **dystanse** między wektorami zdań indywidualistycznych i kolektywistycznych w różnych językach.
-Dzięki temu sprawdzamy, czy w każdym języku są one tak samo „oddalone” od siebie.
-
-Jeśli tłumaczenia zdań są dobre, dystanse powinny być podobne we wszystkich językach. 
-Jeśli jednak model nauczył się pewnych ukrytych różnic kulturowych, 
-to dystanse mogą się różnić, nawet jeśli zdania znaczą to samo.
-
-# Jak liczymy dystans między zdaniami?
-
-## 4.1. Krok 1 – Zamiana tekstu na wektory
-
-### Jak komputer przekształca tekst?
-- **Tokenizacja** – zdanie jest dzielone na mniejsze części (np. słowa lub ich fragmenty).
-- **Analiza kontekstu** – model bierze pod uwagę kolejność słów i ich znaczenie.
-- **Zamiana na liczby** – każde słowo jest kodowane liczbami, a całość tworzy wektor.
-
-## 4.2. Krok 2 – Obliczanie dystansu
-
-### Jak mierzymy podobieństwo zdań?
-Dla każdej pary zdań (jedno indywidualistyczne i jedno kolektywistyczne) liczymy dystans.
-Jeśli mamy 100 zdań indywidualistycznych i 100 kolektywistycznych, to obliczamy **100 × 100 = 10 000 dystansów**.
-
-Używamy trzech metod:
-- **Dystans euklidesowy** – mierzy, jak daleko od siebie są dwa punkty w przestrzeni.
-- **Dystans kosinusowy** – sprawdza, czy wektory są ustawione w podobnym kierunku.
-- **Dystans Manhattan** – sumuje różnice między odpowiadającymi sobie liczbami wektorów.
-
-## 4.3. Krok 3 – Porównanie dystansów w różnych językach
-Sprawdzamy, czy dystanse między zdaniami indywidualistycznymi i kolektywistycznymi w językach 
-polskim, angielskim i japońskim są podobne.
-
-- Jeśli dystanse są podobne we wszystkich językach, oznacza to, że model dobrze odwzorowuje znaczenie.
-- Jeśli dystanse się różnią, może to oznaczać, że model nauczył się pewnych ukrytych różnic między językami.
-
-Przykładowo, jeśli w języku angielskim dystanse są większe niż w języku japońskim, 
-może to sugerować, że model widzi większe różnice semantyczne między zdaniami w języku angielskim niż w japońskim.
-
-# Wnioski z badania
-
-Cały proces można podsumować w kilku krokach:
-1. **Zamiana tekstu na liczby** – każde zdanie jest kodowane jako wektor 3072 liczb.
-2. **Obliczenie odległości** – sprawdzamy, jak bardzo różnią się zdania indywidualistyczne od kolektywistycznych.
-3. **Porównanie języków** – sprawdzamy, czy dystanse są podobne w angielskim, polskim i japońskim.
-4. **Analiza wyników** – jeśli dystanse są różne, może to oznaczać, że model nauczył się specyficznych różnic kulturowych.
-
-To badanie pozwala nam lepiej zrozumieć, jak komputer przetwarza znaczenie tekstu. 
-Czy model faktycznie rozumie znaczenie zdań w różnych językach w taki sam sposób? 
-Czy może jednak różnice kulturowe wpływają na sposób, w jaki widzi tekst? 
-Odpowiedzi na te pytania mogą pomóc w dalszym ulepszaniu modeli językowych i ich zdolności do analizy semantycznej.
 '''
+
 
 ###############################################
 # FUNKCJE EMBEDDINGU I CACHE
@@ -136,6 +85,7 @@ def get_embedding(txt, model=EMBEDDING_MODEL):
         encoding_format="float"
     )
     return np.array(response.data[0].embedding)
+
 
 def get_embeddings_for_list(txt_list, cache_file=CACHE_FILE):
     try:
@@ -158,10 +108,10 @@ def get_embeddings_for_list(txt_list, cache_file=CACHE_FILE):
             pickle.dump(cache, f)
     return np.array(out)
 
+
 ###############################################
 # POBRANIE EMBEDDINGÓW I OBLICZENIE CENTROIDÓW
 ###############################################
-
 with open("zdania.json", "r", encoding="utf-8") as file:
     zdania = json.load(file)
 
@@ -197,18 +147,8 @@ centroid_jap_col = compute_centroid(jap_col_embeddings)
 
 
 ###############################################
-# REDUKCJA WYMIAROWOŚCI (PCA, t-SNE)
+# REDUKCJA WYMIAROWOŚCI I INTERAKTYWNE WIZUALIZACJE (PCA, t-SNE)
 ###############################################
-def min_max_normalize_2d(points):
-    x_min, x_max = points[:, 0].min(), points[:, 0].max()
-    y_min, y_max = points[:, 1].min(), points[:, 1].max()
-    dx = (x_max - x_min) if x_max != x_min else 1e-6
-    dy = (y_max - y_min) if y_max != y_min else 1e-6
-    points[:, 0] = (points[:, 0] - x_min) / dx
-    points[:, 1] = (points[:, 1] - y_min) / dy
-    return points
-
-
 def generate_interactive_pca_2d(all_emb, all_lbl):
     pca = PCA(n_components=2, random_state=42)
     red_pca = pca.fit_transform(all_emb)
@@ -217,24 +157,25 @@ def generate_interactive_pca_2d(all_emb, all_lbl):
         "PC2": red_pca[:, 1],
         "Cluster": all_lbl
     })
-    # Mapowanie kolorów: dla każdego języka inny odcień
+    # Definicja kolorów: dla każdego języka używamy odcieni danego koloru
     color_map = {
         "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
         "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
         "JAP": {"IND": "#ff9896", "COL": "#d62728"}
     }
-    # Dodajemy kolumnę z kolorami na podstawie etykiety
     df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
-    
-    available_clusters = df["Cluster"].unique().tolist()
+    # Filtrowanie klastrów – funkcja ta jest przeznaczona do użycia w Streamlit
     selected_clusters = st.multiselect("Wybierz klastry (PCA 2D)",
-                                       options=available_clusters, default=available_clusters)
+                                       options=df["Cluster"].unique().tolist(),
+                                       default=df["Cluster"].unique().tolist())
     filtered_df = df[df["Cluster"].isin(selected_clusters)]
     fig = px.scatter(filtered_df, x="PC1", y="PC2", color="Cluster",
-                     color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in available_clusters},
+                     color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in
+                                         df["Cluster"].unique()},
                      title="Interaktywna PCA 2D (text-embedding-3-large)")
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
     return fig
+
 
 def generate_interactive_tsne_2d(all_emb, all_lbl):
     tsne = TSNE(n_components=2, perplexity=30, random_state=42)
@@ -250,13 +191,13 @@ def generate_interactive_tsne_2d(all_emb, all_lbl):
         "JAP": {"IND": "#ff9896", "COL": "#d62728"}
     }
     df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
-    
-    available_clusters = df["Cluster"].unique().tolist()
     selected_clusters = st.multiselect("Wybierz klastry (t-SNE 2D)",
-                                       options=available_clusters, default=available_clusters)
+                                       options=df["Cluster"].unique().tolist(),
+                                       default=df["Cluster"].unique().tolist())
     filtered_df = df[df["Cluster"].isin(selected_clusters)]
     fig = px.scatter(filtered_df, x="Dim1", y="Dim2", color="Cluster",
-                     color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in available_clusters},
+                     color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in
+                                         df["Cluster"].unique()},
                      title="Interaktywna t-SNE 2D (text-embedding-3-large)")
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
     return fig
@@ -271,9 +212,9 @@ def generate_interactive_pca_3d(all_emb, all_lbl):
         "PC3": red_pca_3d[:, 2],
         "Cluster": all_lbl
     })
-    available_clusters = df["Cluster"].unique().tolist()
     selected_clusters = st.multiselect("Wybierz klastry (PCA 3D)",
-                                       options=available_clusters, default=available_clusters)
+                                       options=df["Cluster"].unique().tolist(),
+                                       default=df["Cluster"].unique().tolist())
     filtered_df = df[df["Cluster"].isin(selected_clusters)]
     fig = px.scatter_3d(filtered_df,
                         x="PC1", y="PC2", z="PC3",
@@ -293,9 +234,9 @@ def generate_interactive_tsne_3d(all_emb, all_lbl):
         "Dim3": red_tsne_3d[:, 2],
         "Cluster": all_lbl
     })
-    available_clusters = df["Cluster"].unique().tolist()
     selected_clusters = st.multiselect("Wybierz klastry (t-SNE 3D)",
-                                       options=available_clusters, default=available_clusters)
+                                       options=df["Cluster"].unique().tolist(),
+                                       default=df["Cluster"].unique().tolist())
     filtered_df = df[df["Cluster"].isin(selected_clusters)]
     fig = px.scatter_3d(filtered_df,
                         x="Dim1", y="Dim2", z="Dim3",
@@ -344,7 +285,6 @@ def test_normality(data):
 
 def generate_statistical_report():
     report = ""
-    # Tworzę raport tylko dla części statystycznej
     metrics = [("Euklides", dist_euclidean),
                ("Kosinus (1 - cos)", dist_cosine),
                ("Manhattan", dist_manhattan)]
@@ -398,11 +338,6 @@ def generate_statistical_report():
 # KLASYFIKACJA TEKSTU (METODA CENTROIDÓW)
 ###############################################
 def klasyfikuj_tekst(txt):
-    """
-    Przekształcam tekst na wektor przy użyciu modelu text-embedding-3-large (3072D),
-    normalizuję go, a następnie obliczam kosinusowe podobieństwo do centroidów ustalonych grup.
-    Zwracam ranking kategorii według podobieństwa.
-    """
     vec = get_embedding(txt, model=EMBEDDING_MODEL)
     vec /= norm(vec)
     centroidy = {
@@ -420,34 +355,24 @@ def klasyfikuj_tekst(txt):
     wyniki = {}
     for key, cent in centroidy.items():
         wyniki[key] = cos_sim(vec, cent)
+    # Wyniki sortujemy malejąco według podobieństwa
     return sorted(wyniki.items(), key=lambda x: x[1], reverse=True)
 
 
 ###############################################
-# KLASYFIKACJA TEKSTU (UCZENIE MASZYNOWE)
+# KLASYFIKACJA TEKSTU (UCZENIE MASZYNOWE) – ULEPSZONA WERSJA
 ###############################################
 def train_ml_classifier(embeddings, labels):
-    """
-    Trenuję klasyfikator (regresję logistyczną) przy użyciu Pipeline z optymalizacją hiperparametrów.
-    Dane dzielę na zbiór treningowy i testowy, a następnie dostrajam model za pomocą GridSearchCV.
-    Zwracam najlepszy wytrenowany model.
-    """
     X = np.array(embeddings)
     y = np.array(labels)
-
-    from sklearn.pipeline import Pipeline
-    from sklearn.preprocessing import StandardScaler
     pipe = Pipeline([
         ('scaler', StandardScaler()),
         ('clf', LogisticRegression(max_iter=1000))
     ])
-
     param_grid = {
         'clf__C': [0.01, 0.1, 1, 10, 100],
         'clf__penalty': ['l2']
     }
-
-    from sklearn.model_selection import GridSearchCV
     grid = GridSearchCV(pipe, param_grid, cv=5, scoring='accuracy', n_jobs=-1)
     grid.fit(X, y)
     best_model = grid.best_estimator_
@@ -457,39 +382,35 @@ def train_ml_classifier(embeddings, labels):
 
 
 def ml_klasyfikuj_tekst(txt, clf):
-    """
-    Przekształcam tekst na wektor, normalizuję go i używam wytrenowanego klasyfikatora do przypisania etykiety.
-    Zwracam przewidywaną kategorię oraz rozkład prawdopodobieństwa.
-    """
     vec = get_embedding(txt, model=EMBEDDING_MODEL)
     vec /= norm(vec)
     pred = clf.predict([vec])[0]
     proba = clf.predict_proba([vec])[0]
-    return pred, proba
+    # Tworzymy słownik z prawdopodobieństwami – klasy pobieramy z atrybutu modelu
+    prob_dict = {label: prob for label, prob in zip(clf.classes_, proba)}
+    # Sortujemy słownik według wartości malejąco
+    prob_dict = dict(sorted(prob_dict.items(), key=lambda x: x[1], reverse=True))
+    return pred, prob_dict
+
+
+def get_ml_classifier(all_embeddings, all_labels, model_path="ml_classifier.pkl"):
+    if os.path.exists(model_path):
+        with open(model_path, "rb") as f:
+            clf = pickle.load(f)
+        print("Wczytano zapisany model ML.")
+    else:
+        clf = train_ml_classifier(all_embeddings, all_labels)
+        with open(model_path, "wb") as f:
+            pickle.dump(clf, f)
+        print("Wytrenowano i zapisano nowy model ML.")
+    return clf
 
 
 ###############################################
-# GŁÓWNA FUNKCJA URUCHOMIENIA
+# BLOK GŁÓWNY – NIE URUCHAMIAMY INTERFEJSU STREAMLIT
 ###############################################
 if __name__ == "__main__":
-    # 1) Generuję wykresy PCA i t-SNE
-    generate_plots()
-    print("✅ Wygenerowano all_pca_centroids.png oraz all_tsne_centroids.png")
-
-    # 2) Generuję raport statystyczny i zapisuję go do pliku
-    report_text = generate_statistical_report()
-    with open("raport_statystyczny.txt", "w", encoding="utf-8") as f:
-        f.write(report_text)
-    print("Raport statystyczny zapisany w 'raport_statystyczny.txt'")
-
-    # 3) Przykładowa klasyfikacja tekstu (metoda centroidów)
-    test_txt = "I believe in working together for the greater good."
-    ranking = klasyfikuj_tekst(test_txt)
-    print("Klasyfikacja testowego zdania (centroidy):")
-    for item in ranking:
-        print(" ", item)
-
-    # 4) Trenowanie klasyfikatora ML (na przykładowym zbiorze)
+    # Przygotowanie wspólnego zbioru embeddingów i etykiet
     all_embeddings = np.concatenate([eng_ind_embeddings, eng_col_embeddings,
                                      pol_ind_embeddings, pol_col_embeddings,
                                      jap_ind_embeddings, jap_col_embeddings], axis=0)
@@ -499,12 +420,30 @@ if __name__ == "__main__":
                   ["POL_COL"] * len(pol_col_embeddings) +
                   ["JAP_IND"] * len(jap_ind_embeddings) +
                   ["JAP_COL"] * len(jap_col_embeddings))
-    clf = train_ml_classifier(all_embeddings, all_labels)
 
-    # 5) Klasyfikacja tekstu przy użyciu ML
-    pred_label, proba = ml_klasyfikuj_tekst(test_txt, clf)
-    print("Klasyfikacja testowego zdania (ML):")
-    print(" Przewidywana etykieta:", pred_label)
-    print(" Rozkład prawdopodobieństwa:", proba)
+    # Wyświetlamy informacje o dostępnych wykresach – funkcje interaktywne są przeznaczone do wykorzystania w Streamlit
+    print("Funkcje generujące wykresy interaktywne (2D i 3D) są dostępne przy imporcie modułu do aplikacji Streamlit.")
 
-    print("=== KONIEC ===")
+    # 1) Generowanie raportu statystycznego i zapis do pliku
+    report_text = generate_statistical_report()
+    with open("raport_statystyczny.txt", "w", encoding="utf-8") as f:
+        f.write(report_text)
+    print("Raport statystyczny zapisany w pliku 'raport_statystyczny.txt'.")
+
+    # 2) Przykładowa klasyfikacja metodą centroidów
+    test_txt = "I believe in working together for the greater good."
+    ranking = klasyfikuj_tekst(test_txt)
+    print("\nKlasyfikacja testowego zdania (metoda centroidów):")
+    for cat, sim in ranking:
+        print(f" - {cat}: {sim:.4f}")
+
+    # 3) Użycie klasyfikatora ML – model jest trenowany tylko raz (lub wczytywany z pliku)
+    clf = get_ml_classifier(all_embeddings, all_labels)
+    pred_label, prob_dict = ml_klasyfikuj_tekst(test_txt, clf)
+    print("\nKlasyfikacja testowego zdania (ML):")
+    print(f" Przewidywana etykieta: {pred_label}")
+    print(" Rozkład prawdopodobieństwa:")
+    for label, prob in prob_dict.items():
+        print(f"   {label}: {prob * 100:.2f}%")
+
+    print("\n=== KONIEC ===")
