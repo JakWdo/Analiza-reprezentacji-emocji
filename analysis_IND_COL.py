@@ -28,7 +28,7 @@ EMBEDDING_MODEL = "text-embedding-3-large"  # Model generuje wektory 3072D
 CACHE_FILE = "embeddings_cache_3_large.pkl"
 
 INTEGRATED_REPORT = '''
-# Jak Komputer Rozumie Tekst?
+# Jak komputer rozumie tekst?
 
 ## 1.1. Jak komputer widzi zdania?
 Kiedy my czytamy tekst, od razu rozumiemy jego sens dzięki naszym doświadczeniom i wiedzy. 
@@ -49,7 +49,7 @@ To tak, jakby każde zdanie miało unikalny "odcisk palca" opisujący jego sens.
 Jeśli dwa zdania mają podobne znaczenie, ich wektory będą podobne. 
 Możemy więc mierzyć, jak bardzo różnią się znaczeniowo, sprawdzając dystans między nimi.
 
-# Model Tworzący Wektory: text-embedding-3-large
+# Model tworzący wektory: text-embedding-3-large
 
 ## 2.1. Jak działa model?
 Model **text-embedding-3-large** od OpenAI to zaawansowany system sztucznej inteligencji, 
@@ -67,7 +67,7 @@ nawet jeśli są napisane w różnych językach.
 W praktyce jednak może się okazać, że pewne języki niosą inne ukryte niuanse, 
 które wpływają na sposób, w jaki model je reprezentuje.
 
-# Cel Badania
+# Cel badania
 
 ## 3.1. Co chcemy sprawdzić?
 Chcemy zbadać, jak model przedstawia zdania wyrażające **indywidualizm** (np. „Jestem niezależny”) 
@@ -81,16 +81,16 @@ Jeśli tłumaczenia zdań są dobre, dystanse powinny być podobne we wszystkich
 Jeśli jednak model nauczył się pewnych ukrytych różnic kulturowych, 
 to dystanse mogą się różnić, nawet jeśli zdania znaczą to samo.
 
-# Jak Liczymy Dystans Między Zdaniami?
+# Jak liczymy dystans między zdaniami?
 
-## 4.1. Krok 1 – Zamiana Tekstu na Wektory
+## 4.1. Krok 1 – Zamiana tekstu na wektory
 
 ### Jak komputer przekształca tekst?
 - **Tokenizacja** – zdanie jest dzielone na mniejsze części (np. słowa lub ich fragmenty).
 - **Analiza kontekstu** – model bierze pod uwagę kolejność słów i ich znaczenie.
 - **Zamiana na liczby** – każde słowo jest kodowane liczbami, a całość tworzy wektor.
 
-## 4.2. Krok 2 – Obliczanie Dystansu
+## 4.2. Krok 2 – Obliczanie dystansu
 
 ### Jak mierzymy podobieństwo zdań?
 Dla każdej pary zdań (jedno indywidualistyczne i jedno kolektywistyczne) liczymy dystans.
@@ -101,7 +101,7 @@ Używamy trzech metod:
 - **Dystans kosinusowy** – sprawdza, czy wektory są ustawione w podobnym kierunku.
 - **Dystans Manhattan** – sumuje różnice między odpowiadającymi sobie liczbami wektorów.
 
-## 4.3. Krok 3 – Porównanie Dystansów w Różnych Językach
+## 4.3. Krok 3 – Porównanie dystansów w różnych językach
 Sprawdzamy, czy dystanse między zdaniami indywidualistycznymi i kolektywistycznymi w językach 
 polskim, angielskim i japońskim są podobne.
 
@@ -111,7 +111,7 @@ polskim, angielskim i japońskim są podobne.
 Przykładowo, jeśli w języku angielskim dystanse są większe niż w języku japońskim, 
 może to sugerować, że model widzi większe różnice semantyczne między zdaniami w języku angielskim niż w japońskim.
 
-# Wnioski z Badania
+# Wnioski z badania
 
 Cały proces można podsumować w kilku krokach:
 1. **Zamiana tekstu na liczby** – każde zdanie jest kodowane jako wektor 3072 liczb.
