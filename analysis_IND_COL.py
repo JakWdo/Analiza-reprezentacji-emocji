@@ -54,11 +54,15 @@ Model text-embedding-3-large od OpenAI to zaawansowane narzędzie uczenia maszyn
 które konwertuje tekst na wektor o ustalonej długości (3072).
 
 ### Trening na dużych zbiorach danych
-Model nauczył się rozpoznawać subtelne niuanse semantyczne dzięki analizie milionów zdań.
+Model nauczył się rozpoznawać subtelne niuanse semantyczne dzięki analizie milionów, 
+a nawet miliardów zdań, w różnych językach. Dzięki temu potrafi wychwycić głębokie związki 
+semantyczne w tekście.
 
 ### Uniwersalność językowa
 Dzięki treningowi na danych z różnych języków, model tworzy spójne reprezentacje semantyczne 
-niezależnie od języka wejściowego.
+niezależnie od języka wejściowego. Te reprezentacje mogą być używane do porównywania 
+tekstów napisanych w różnych językach, pod warunkiem, że model prawidłowo rozpoznaje 
+kontekst kulturowy każdego z nich.
 
 # Cele Badawcze Projektu
 
@@ -68,11 +72,15 @@ Celem jest porównanie reprezentacji tych zdań w różnych językach
 i sprawdzenie, jak różnice kulturowe wpływają na semantyczną strukturę tekstu.
 
 ### Porównanie reprezentacji semantycznych
-Analiza polega na porównywaniu wygenerowanych wektorów i ocenie, 
-czy zdania dotyczące indywidualizmu różnią się od zdań kolektywistycznych.
+Analiza polega na obliczaniu dystansu między wektorami wygenerowanymi dla zdań 
+indywidualistycznych i kolektywistycznych w każdym języku.
 
 ### Analiza międzyjęzykowa
-Badanie obejmuje różne języki, aby sprawdzić, czy język wpływa na różnice semantyczne.
+Porównanie tych dystansów pozwala ocenić, czy różnice między tymi typami zdań 
+są podobne we wszystkich językach. Jeśli model jest dobrze wytrenowany 
+i tłumaczenia zdań są precyzyjne, dystanse powinny być podobne. Jednak jeśli model 
+podczas treningu wykrył, że w różnych językach te same koncepcje osadzone są w innych 
+kontekstach, różnice mogą być większe.
 
 # Szczegółowa Metodologia
 
@@ -94,47 +102,18 @@ Badanie obejmuje różne języki, aby sprawdzić, czy język wpływa na różnic
 - **Dystans kosinusowy**: Oblicza kąt między wektorami (mierzy podobieństwo kierunkowe).
 - **Dystans Manhattan**: Sumuje różnice między odpowiadającymi sobie elementami wektorów.
 
-Każda metryka pozwala uchwycić różne aspekty podobieństwa semantycznego.
-
-## 4.3. Etap III – Redukcja Wymiarowości
-
-### Problem wysokowymiarowych danych
-- Wektor 3072-wymiarowy jest trudny do wizualizacji.
-- Stosuje się techniki redukcji wymiarowości (PCA, t-SNE).
-
-### Metody redukcji
-- **PCA**: Znalezienie głównych kierunków największej wariancji w danych.
-- **t-SNE**: Wizualizacja, w której podobne semantycznie punkty grupują się w klastery.
-
-## 4.4. Etap IV – Analiza Statystyczna
-
-### Weryfikacja istotności różnic
-- **Testy normalności**: Sprawdzenie, czy dane mają rozkład normalny (Shapiro–Wilk, Kolmogorov–Smirnov).
-- **Testy różnic**:
-  - Jeśli dane są normalne → **t-test**.
-  - Jeśli nie są normalne → **test Mann–Whitneya**.
-
-Poziom istotności ustalono na **0.01** (minimalizowanie błędu odrzucenia hipotezy zerowej).
-
-# Formułowanie Hipotez Badawczych
-
-### Hipoteza dla języka angielskiego
-- Reprezentacje zdań dotyczących indywidualizmu i kolektywizmu będą wyraźnie różne.
-
-### Hipoteza dla języka polskiego
-- Odległości między wektorami zdań będą mniejsze niż w angielskim.
-
-### Hipoteza dla języka japońskiego
-- Podobnie jak w polskim, odległości będą mniejsze niż w angielskim.
+Dystanse obliczane są pomiędzy każdą parą zdań indywidualistycznych 
+i kolektywistycznych w danym języku. Dzięki temu możliwe jest porównanie, 
+czy struktura semantyczna w poszczególnych językach jest zbliżona.
 
 # Podsumowanie Procesu
 
 Cały proces obejmuje:
 1. **Przekształcenie tekstu w wektory** – Model text-embedding-3-large generuje reprezentację 3072-wymiarową.
 2. **Porównanie reprezentacji** – Trzy miary odległości oceniają podobieństwo zdań.
-3. **Redukcja wymiarowości** – PCA i t-SNE ułatwiają interpretację danych.
+3. **Analiza międzyjęzykowa** – Sprawdzenie, czy dystanse między wektorami w różnych językach są spójne.
 4. **Analiza statystyczna** – Testy normalności i różnic zapewniają rzetelność wyników.
-5. **Formułowanie hipotez** – Weryfikacja wpływu języka i kultury na reprezentację semantyczną.
+5. **Weryfikacja hipotez** – Ocena, czy różnice kulturowe wpływają na osadzenie semantyczne tekstu.
 
 Dzięki temu badaniu można określić, jak model przetwarza znaczenie zdań 
 i jakie różnice kulturowe mogą wpływać na ich reprezentację.
