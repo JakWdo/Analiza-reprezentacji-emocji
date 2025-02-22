@@ -28,12 +28,9 @@ EMBEDDING_MODEL = "text-embedding-3-large"  # Model generuje wektory 3072D
 CACHE_FILE = "embeddings_cache_3_large.pkl"
 
 INTEGRATED_REPORT = '''
-===========================================
-Podstawy Reprezentacji Tekstu
-===========================================
+# Podstawy Reprezentacji Tekstu
 
-1.1. Co to jest wektor i dlaczego go używamy?
-----------------------------------------------
+## 1.1. Co to jest wektor i dlaczego go używamy?
 W przetwarzaniu języka naturalnego (NLP) często stosuje się reprezentacje numeryczne tekstu, 
 aby umożliwić komputerom analizę semantyczną. Każde zdanie, jako ciąg słów, 
 jest przekształcane w uporządkowaną sekwencję liczb – wektor.
@@ -50,12 +47,9 @@ czy złożonym relacjom między słowami.
 Dzięki tej reprezentacji komputer może "zrozumieć" i porównywać znaczenia zdań, 
 mierząc ich podobieństwo w wielowymiarowej przestrzeni.
 
-===========================================
-Model Generowania Reprezentacji: text-embedding-3-large
-===========================================
+# Model Generowania Reprezentacji: text-embedding-3-large
 
-2.1. Charakterystyka modelu
-------------------------------
+## 2.1. Charakterystyka modelu
 Model text-embedding-3-large od OpenAI to zaawansowane narzędzie uczenia maszynowego, 
 które konwertuje tekst na wektor o ustalonej długości (3072).
 
@@ -66,12 +60,9 @@ Model nauczył się rozpoznawać subtelne niuanse semantyczne dzięki analizie m
 Dzięki treningowi na danych z różnych języków, model tworzy spójne reprezentacje semantyczne 
 niezależnie od języka wejściowego.
 
-===========================================
-Cele Badawcze Projektu
-===========================================
+# Cele Badawcze Projektu
 
-3.1. Główne zagadnienia
---------------------------
+## 3.1. Główne zagadnienia
 Projekt analizuje semantykę zdań wyrażających indywidualizm i kolektywizm.
 Celem jest porównanie reprezentacji tych zdań w różnych językach 
 i sprawdzenie, jak różnice kulturowe wpływają na semantyczną strukturę tekstu.
@@ -83,43 +74,41 @@ czy zdania dotyczące indywidualizmu różnią się od zdań kolektywistycznych.
 ### Analiza międzyjęzykowa
 Badanie obejmuje różne języki, aby sprawdzić, czy język wpływa na różnice semantyczne.
 
-===========================================
-Szczegółowa Metodologia
-===========================================
+# Szczegółowa Metodologia
 
-4.1. Etap I – Generowanie Wektorów (Embedding)
--------------------------------------------------
-#### Proces przekształcania tekstu
+## 4.1. Etap I – Generowanie Wektorów (Embedding)
+
+### Proces przekształcania tekstu
 - **Tokenizacja**: Dzielenie zdania na tokeny (słowa, fragmenty słów).
 - **Analiza kontekstowa**: Model uwzględnia kolejność i relacje między tokenami.
 - **Przekształcenie numeryczne**: Każdemu tokenowi przypisany jest fragment wektora.
 
-#### Interpretacja wektora (3072-wymiarowego)
+### Interpretacja wektora (3072-wymiarowego)
 - Każda liczba jest wynikiem obliczeń matematycznych uwzględniających semantykę.
 - Wektor stanowi unikalny "odcisk palca" zdania.
 
-4.2. Etap II – Pomiar Podobieństwa Wektorów
-----------------------------------------------
-#### Metryki odległości
+## 4.2. Etap II – Pomiar Podobieństwa Wektorów
+
+### Metryki odległości
 - **Dystans euklidesowy**: Mierzy geometryczną odległość między wektorami.
 - **Dystans kosinusowy**: Oblicza kąt między wektorami (mierzy podobieństwo kierunkowe).
 - **Dystans Manhattan**: Sumuje różnice między odpowiadającymi sobie elementami wektorów.
 
 Każda metryka pozwala uchwycić różne aspekty podobieństwa semantycznego.
 
-4.3. Etap III – Redukcja Wymiarowości
---------------------------------------
-#### Problem wysokowymiarowych danych
+## 4.3. Etap III – Redukcja Wymiarowości
+
+### Problem wysokowymiarowych danych
 - Wektor 3072-wymiarowy jest trudny do wizualizacji.
 - Stosuje się techniki redukcji wymiarowości (PCA, t-SNE).
 
-#### Metody redukcji
+### Metody redukcji
 - **PCA**: Znalezienie głównych kierunków największej wariancji w danych.
 - **t-SNE**: Wizualizacja, w której podobne semantycznie punkty grupują się w klastery.
 
-4.4. Etap IV – Analiza Statystyczna
-------------------------------------
-#### Weryfikacja istotności różnic
+## 4.4. Etap IV – Analiza Statystyczna
+
+### Weryfikacja istotności różnic
 - **Testy normalności**: Sprawdzenie, czy dane mają rozkład normalny (Shapiro–Wilk, Kolmogorov–Smirnov).
 - **Testy różnic**:
   - Jeśli dane są normalne → **t-test**.
@@ -127,9 +116,7 @@ Każda metryka pozwala uchwycić różne aspekty podobieństwa semantycznego.
 
 Poziom istotności ustalono na **0.01** (minimalizowanie błędu odrzucenia hipotezy zerowej).
 
-===========================================
-Formułowanie Hipotez Badawczych
-===========================================
+# Formułowanie Hipotez Badawczych
 
 ### Hipoteza dla języka angielskiego
 - Reprezentacje zdań dotyczących indywidualizmu i kolektywizmu będą wyraźnie różne.
@@ -140,9 +127,7 @@ Formułowanie Hipotez Badawczych
 ### Hipoteza dla języka japońskiego
 - Podobnie jak w polskim, odległości będą mniejsze niż w angielskim.
 
-===========================================
-Podsumowanie Procesu
-===========================================
+# Podsumowanie Procesu
 
 Cały proces obejmuje:
 1. **Przekształcenie tekstu w wektory** – Model text-embedding-3-large generuje reprezentację 3072-wymiarową.
@@ -154,9 +139,6 @@ Cały proces obejmuje:
 Dzięki temu badaniu można określić, jak model przetwarza znaczenie zdań 
 i jakie różnice kulturowe mogą wpływać na ich reprezentację.
 '''
-
-
-
 
 ###############################################
 # FUNKCJE EMBEDDINGU I CACHE
