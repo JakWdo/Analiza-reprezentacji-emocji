@@ -212,13 +212,24 @@ def generate_interactive_pca_3d(all_emb, all_lbl):
         "PC3": red_pca_3d[:, 2],
         "Cluster": all_lbl
     })
-    selected_clusters = st.multiselect("Wybierz klastry (PCA 3D)",
-                                       options=df["Cluster"].unique().tolist(),
-                                       default=df["Cluster"].unique().tolist())
+    # Używamy tego samego color_map co w funkcji 2D
+    color_map = {
+        "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
+        "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
+        "JAP": {"IND": "#ff9896", "COL": "#d62728"}
+    }
+    try:
+        selected_clusters = st.multiselect("Wybierz klastry (PCA 3D)",
+                                           options=df["Cluster"].unique().tolist(),
+                                           default=df["Cluster"].unique().tolist())
+    except Exception:
+        selected_clusters = df["Cluster"].unique().tolist()
     filtered_df = df[df["Cluster"].isin(selected_clusters)]
     fig = px.scatter_3d(filtered_df,
                         x="PC1", y="PC2", z="PC3",
                         color="Cluster",
+                        color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] 
+                                              for cl in df["Cluster"].unique()},
                         title="Interaktywna PCA 3D (text-embedding-3-large)",
                         labels={"PC1": "PC1", "PC2": "PC2", "PC3": "PC3"})
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
@@ -234,17 +245,29 @@ def generate_interactive_tsne_3d(all_emb, all_lbl):
         "Dim3": red_tsne_3d[:, 2],
         "Cluster": all_lbl
     })
-    selected_clusters = st.multiselect("Wybierz klastry (t-SNE 3D)",
-                                       options=df["Cluster"].unique().tolist(),
-                                       default=df["Cluster"].unique().tolist())
+    # Używamy tego samego color_map co w funkcjach 2D
+    color_map = {
+        "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
+        "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
+        "JAP": {"IND": "#ff9896", "COL": "#d62728"}
+    }
+    try:
+        selected_clusters = st.multiselect("Wybierz klastry (t-SNE 3D)",
+                                           options=df["Cluster"].unique().tolist(),
+                                           default=df["Cluster"].unique().tolist())
+    except Exception:
+        selected_clusters = df["Cluster"].unique().tolist()
     filtered_df = df[df["Cluster"].isin(selected_clusters)]
     fig = px.scatter_3d(filtered_df,
                         x="Dim1", y="Dim2", z="Dim3",
                         color="Cluster",
+                        color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] 
+                                              for cl in df["Cluster"].unique()},
                         title="Interaktywna t-SNE 3D (text-embedding-3-large)",
                         labels={"Dim1": "Dim1", "Dim2": "Dim2", "Dim3": "Dim3"})
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
     return fig
+
 
 
 ###############################################
