@@ -28,95 +28,101 @@ EMBEDDING_MODEL = "text-embedding-3-large"  # Model generuje wektory 3072D
 CACHE_FILE = "embeddings_cache_3_large.pkl"
 
 INTEGRATED_REPORT = '''
-# Podstawy Reprezentacji Tekstu
+# Jak Komputer Rozumie Tekst?
 
-## 1.1. Co to jest wektor i dlaczego go używamy?
-W przetwarzaniu języka naturalnego (NLP) często stosuje się reprezentacje numeryczne tekstu, 
-aby umożliwić komputerom analizę semantyczną. Każde zdanie, jako ciąg słów, 
-jest przekształcane w uporządkowaną sekwencję liczb – wektor.
+## 1.1. Jak komputer widzi zdania?
+Kiedy my czytamy tekst, od razu rozumiemy jego sens dzięki naszym doświadczeniom i wiedzy. 
+Komputer nie ma takich zdolności – dla niego tekst to tylko zbiór liter. 
+Żeby umożliwić mu analizę, zamieniamy każde zdanie na zestaw liczb, czyli **wektor**.
 
-W tym przypadku każdy wektor składa się z 3072 liczb, co oznacza, że zdanie 
-reprezentowane jest jako punkt w przestrzeni o 3072 wymiarach.
+W tym badaniu każde zdanie zamieniane jest na **wektor o 3072 liczbach**. 
+To tak, jakby każde zdanie było punktem w ogromnej przestrzeni liczącej 3072 wymiary. 
+Dzięki temu można porównywać zdania pod względem podobieństwa ich znaczenia.
 
-### Dlaczego 3072?
-Liczba ta wynika z konfiguracji modelu, który generuje reprezentację o stałej długości. 
-Każda z tych liczb odpowiada pewnej cesze semantycznej zdania, np. emocjonalnemu tonowi 
-czy złożonym relacjom między słowami.
+### Dlaczego akurat 3072 liczby?
+Ta liczba pochodzi z konfiguracji modelu, który generuje reprezentację zdań. 
+Każda liczba w wektorze odpowiada pewnej cesze zdania – może wskazywać na jego emocjonalny ton, 
+kontekst użycia albo zależności między słowami. 
+To tak, jakby każde zdanie miało unikalny "odcisk palca" opisujący jego sens.
 
-### Znaczenie numeryczne
-Dzięki tej reprezentacji komputer może "zrozumieć" i porównywać znaczenia zdań, 
-mierząc ich podobieństwo w wielowymiarowej przestrzeni.
+### Co daje taka reprezentacja?
+Jeśli dwa zdania mają podobne znaczenie, ich wektory będą podobne. 
+Możemy więc mierzyć, jak bardzo różnią się znaczeniowo, sprawdzając dystans między nimi.
 
-# Model Generowania Reprezentacji: text-embedding-3-large
+# Model Tworzący Wektory: text-embedding-3-large
 
-## 2.1. Charakterystyka modelu
-Model text-embedding-3-large od OpenAI to zaawansowane narzędzie uczenia maszynowego, 
-które konwertuje tekst na wektor o ustalonej długości (3072).
+## 2.1. Jak działa model?
+Model **text-embedding-3-large** od OpenAI to zaawansowany system sztucznej inteligencji, 
+który uczył się na milionach zdań w wielu językach.
+Jego zadaniem jest zamiana dowolnego tekstu na liczby w taki sposób, 
+żeby odzwierciedlały jego znaczenie.
 
-### Trening na dużych zbiorach danych
-Model nauczył się rozpoznawać subtelne niuanse semantyczne dzięki analizie milionów, 
-a nawet miliardów zdań, w różnych językach. Dzięki temu potrafi wychwycić głębokie związki 
-semantyczne w tekście.
+### Jak model się uczył?
+Model analizował ogromne ilości tekstów, ucząc się zależności między słowami. 
+Dzięki temu rozpoznaje podobieństwa i różnice między zdaniami.
 
-### Uniwersalność językowa
-Dzięki treningowi na danych z różnych języków, model tworzy spójne reprezentacje semantyczne 
-niezależnie od języka wejściowego. Te reprezentacje mogą być używane do porównywania 
-tekstów napisanych w różnych językach, pod warunkiem, że model prawidłowo rozpoznaje 
-kontekst kulturowy każdego z nich.
+### Czy język ma znaczenie?
+Teoretycznie model powinien generować podobne liczby dla zdań o tym samym znaczeniu, 
+nawet jeśli są napisane w różnych językach. 
+W praktyce jednak może się okazać, że pewne języki niosą inne ukryte niuanse, 
+które wpływają na sposób, w jaki model je reprezentuje.
 
-# Cele Badawcze Projektu
+# Cel Badania
 
-## 3.1. Główne zagadnienia
-Projekt analizuje semantykę zdań wyrażających indywidualizm i kolektywizm.
-Celem jest porównanie reprezentacji tych zdań w różnych językach 
-i sprawdzenie, jak różnice kulturowe wpływają na semantyczną strukturę tekstu.
+## 3.1. Co chcemy sprawdzić?
+Chcemy zbadać, jak model przedstawia zdania wyrażające **indywidualizm** (np. „Jestem niezależny”) 
+i **kolektywizm** (np. „Działamy razem”).
 
-### Porównanie reprezentacji semantycznych
-Analiza polega na obliczaniu dystansu między wektorami wygenerowanymi dla zdań 
-indywidualistycznych i kolektywistycznych w każdym języku.
+### Co porównujemy?
+Porównujemy **dystanse** między wektorami zdań indywidualistycznych i kolektywistycznych w różnych językach.
+Dzięki temu sprawdzamy, czy w każdym języku są one tak samo „oddalone” od siebie.
 
-### Analiza międzyjęzykowa
-Porównanie tych dystansów pozwala ocenić, czy różnice między tymi typami zdań 
-są podobne we wszystkich językach. Jeśli model jest dobrze wytrenowany 
-i tłumaczenia zdań są precyzyjne, dystanse powinny być podobne. Jednak jeśli model 
-podczas treningu wykrył, że w różnych językach te same koncepcje osadzone są w innych 
-kontekstach, różnice mogą być większe.
+Jeśli tłumaczenia zdań są dobre, dystanse powinny być podobne we wszystkich językach. 
+Jeśli jednak model nauczył się pewnych ukrytych różnic kulturowych, 
+to dystanse mogą się różnić, nawet jeśli zdania znaczą to samo.
 
-# Szczegółowa Metodologia
+# Jak Liczymy Dystans Między Zdaniami?
 
-## 4.1. Etap I – Generowanie Wektorów (Embedding)
+## 4.1. Krok 1 – Zamiana Tekstu na Wektory
 
-### Proces przekształcania tekstu
-- **Tokenizacja**: Dzielenie zdania na tokeny (słowa, fragmenty słów).
-- **Analiza kontekstowa**: Model uwzględnia kolejność i relacje między tokenami.
-- **Przekształcenie numeryczne**: Każdemu tokenowi przypisany jest fragment wektora.
+### Jak komputer przekształca tekst?
+- **Tokenizacja** – zdanie jest dzielone na mniejsze części (np. słowa lub ich fragmenty).
+- **Analiza kontekstu** – model bierze pod uwagę kolejność słów i ich znaczenie.
+- **Zamiana na liczby** – każde słowo jest kodowane liczbami, a całość tworzy wektor.
 
-### Interpretacja wektora (3072-wymiarowego)
-- Każda liczba jest wynikiem obliczeń matematycznych uwzględniających semantykę.
-- Wektor stanowi unikalny "odcisk palca" zdania.
+## 4.2. Krok 2 – Obliczanie Dystansu
 
-## 4.2. Etap II – Pomiar Podobieństwa Wektorów
+### Jak mierzymy podobieństwo zdań?
+Dla każdej pary zdań (jedno indywidualistyczne i jedno kolektywistyczne) liczymy dystans.
+Jeśli mamy 100 zdań indywidualistycznych i 100 kolektywistycznych, to obliczamy **100 × 100 = 10 000 dystansów**.
 
-### Metryki odległości
-- **Dystans euklidesowy**: Mierzy geometryczną odległość między wektorami.
-- **Dystans kosinusowy**: Oblicza kąt między wektorami (mierzy podobieństwo kierunkowe).
-- **Dystans Manhattan**: Sumuje różnice między odpowiadającymi sobie elementami wektorów.
+Używamy trzech metod:
+- **Dystans euklidesowy** – mierzy, jak daleko od siebie są dwa punkty w przestrzeni.
+- **Dystans kosinusowy** – sprawdza, czy wektory są ustawione w podobnym kierunku.
+- **Dystans Manhattan** – sumuje różnice między odpowiadającymi sobie liczbami wektorów.
 
-Dystanse obliczane są pomiędzy każdą parą zdań indywidualistycznych 
-i kolektywistycznych w danym języku. Dzięki temu możliwe jest porównanie, 
-czy struktura semantyczna w poszczególnych językach jest zbliżona.
+## 4.3. Krok 3 – Porównanie Dystansów w Różnych Językach
+Sprawdzamy, czy dystanse między zdaniami indywidualistycznymi i kolektywistycznymi w językach 
+polskim, angielskim i japońskim są podobne.
 
-# Podsumowanie Procesu
+- Jeśli dystanse są podobne we wszystkich językach, oznacza to, że model dobrze odwzorowuje znaczenie.
+- Jeśli dystanse się różnią, może to oznaczać, że model nauczył się pewnych ukrytych różnic między językami.
 
-Cały proces obejmuje:
-1. **Przekształcenie tekstu w wektory** – Model text-embedding-3-large generuje reprezentację 3072-wymiarową.
-2. **Porównanie reprezentacji** – Trzy miary odległości oceniają podobieństwo zdań.
-3. **Analiza międzyjęzykowa** – Sprawdzenie, czy dystanse między wektorami w różnych językach są spójne.
-4. **Analiza statystyczna** – Testy normalności i różnic zapewniają rzetelność wyników.
-5. **Weryfikacja hipotez** – Ocena, czy różnice kulturowe wpływają na osadzenie semantyczne tekstu.
+Przykładowo, jeśli w języku angielskim dystanse są większe niż w języku japońskim, 
+może to sugerować, że model widzi większe różnice semantyczne między zdaniami w języku angielskim niż w japońskim.
 
-Dzięki temu badaniu można określić, jak model przetwarza znaczenie zdań 
-i jakie różnice kulturowe mogą wpływać na ich reprezentację.
+# Wnioski z Badania
+
+Cały proces można podsumować w kilku krokach:
+1. **Zamiana tekstu na liczby** – każde zdanie jest kodowane jako wektor 3072 liczb.
+2. **Obliczenie odległości** – sprawdzamy, jak bardzo różnią się zdania indywidualistyczne od kolektywistycznych.
+3. **Porównanie języków** – sprawdzamy, czy dystanse są podobne w angielskim, polskim i japońskim.
+4. **Analiza wyników** – jeśli dystanse są różne, może to oznaczać, że model nauczył się specyficznych różnic kulturowych.
+
+To badanie pozwala nam lepiej zrozumieć, jak komputer przetwarza znaczenie tekstu. 
+Czy model faktycznie rozumie znaczenie zdań w różnych językach w taki sam sposób? 
+Czy może jednak różnice kulturowe wpływają na sposób, w jaki widzi tekst? 
+Odpowiedzi na te pytania mogą pomóc w dalszym ulepszaniu modeli językowych i ich zdolności do analizy semantycznej.
 '''
 
 ###############################################
