@@ -30,59 +30,169 @@ CACHE_FILE = "embeddings_cache_3_large.pkl"
 ###############################################
 # INTEGRATED REPORT – OPIS METODY I RAPORT
 ###############################################
-INTEGRATED_REPORT = r"""
-## Opis Metody i Raport
+REPORT_COMMENT = r"""
+=========================================================
+1. Podstawy Reprezentacji Tekstu
+=========================================================
 
-### Wprowadzenie
-W moim projekcie zamieniam każde zdanie na ciąg 3072 liczb, zwany **wektorem**. Wektor to uporządkowana sekwencja liczb, która w kontekście przetwarzania języka naturalnego służy do reprezentowania znaczenia tekstu. Każda liczba w wektorze odpowiada pewnej cesze lub właściwości, którą model uznał za istotną dla zrozumienia znaczenia zdania.
+__1.1. Co to jest wektor i dlaczego go używamy?__
+---------------------------------------------------------
+W przetwarzaniu języka naturalnego (NLP) bardzo często stosuje się reprezentacje numeryczne tekstu, aby umożliwić komputerom analizę semantyczną. Każde zdanie – będące ciągiem słów – jest przekształcane w uporządkowaną sekwencję liczb, czyli wektor. W naszym przypadku każdy wektor składa się z 3072 liczb, co oznacza, że zdanie jest reprezentowane jako punkt w przestrzeni o 3072 wymiarach.
 
-### Dlaczego taki model?
-Do generowania wektorowych reprezentacji zdań używam modelu **text-embedding-3-large** od OpenAI. Model ten został wytrenowany na ogromnych zbiorach danych w wielu językach, co umożliwia mu tworzenie bardzo precyzyjnych i spójnych reprezentacji semantycznych. Dzięki temu jestem w stanie porównywać zdania, oceniać ich podobieństwo i badać subtelne różnice między wyrażeniami indywidualistycznymi i kolektywistycznymi.
+__Dlaczego 3072?__
+---------------------------------------------------------
+Liczba ta wynika z konfiguracji modelu, który generuje reprezentację o stałej długości. Każda z tych liczb odpowiada pewnej cechie lub właściwości semantycznej zdania, na przykład emocjonalnemu tonowi, kontekstowi, czy złożonym relacjom między słowami.
 
-### Cele Badawcze
-Celem projektu jest:
-- **Porównanie reprezentacji semantycznych** zdań, które wyrażają indywidualizm i kolektywizm, w różnych językach (np. angielskim, polskim, japońskim).
-- **Analiza różnic między grupami**: Sprawdzam, czy zdania wyrażające indywidualizm i kolektywizm są „bliżej” siebie (czyli mają mniejsze dystanse) w jednym języku niż w innym. W szczególności bada mnie, czy model wykrywa mniejsze różnice w języku polskim w porównaniu do angielskiego, a także jak plasują się wyniki dla języka japońskiego.
+__Znaczenie numeryczne__
+---------------------------------------------------------
+Dzięki takiej reprezentacji komputer jest w stanie "zrozumieć" i porównywać znaczenia zdań, mierząc podobieństwo między nimi na podstawie odległości w wielowymiarowej przestrzeni.
 
-### Metodologia
-#### 1. Generowanie Wektorów (Embedding)
-Każde zdanie jest przetwarzane przez model text-embedding-3-large, który generuje 3072-wymiarowy wektor. Reprezentacja ta oddaje istotne aspekty znaczenia zdania – takie jak emocjonalny ton, kontekst oraz inne cechy semantyczne.
+=========================================================
+2. Model Generowania Reprezentacji: text-embedding-3-large
+=========================================================
 
-#### 2. Pomiar Podobieństwa
-Każde zdanie kolektywistyczne w danym języku jest porównywane z każdym zdaniem indywidualistycznym.  
-Przy założeniu, że tłumaczenia są wysokiej jakości, reprezentacje semantyczne obu grup powinny być bardzo podobne.  
-Jednak po obliczeniu średnich lub median dystansów może okazać się, że wartości te różnią się między językami,  
-co może wskazywać na subtelne różnice w sposobie reprezentowania znaczenia zdań przez model.
+__2.1. Charakterystyka modelu__
+---------------------------------------------------------
+Model text-embedding-3-large od OpenAI to zaawansowane narzędzie uczenia maszynowego, które zostało wytrenowane na ogromnych zbiorach danych tekstowych w wielu językach. Jego głównym zadaniem jest konwersja dowolnego tekstu na wektor o ustalonej długości (w naszym przypadku 3072).
 
-#### Dlaczego używam trzech metryk?  
-- **Dystans euklidesowy**: Mierzy geometryczną odległość między wektorami, co pozwala ocenić,  
-   jak blisko siebie znajdują się reprezentacje zdań w przestrzeni.  
-- **Dystans kosinusowy**: Sprawdza różnicę kierunków wektorów, niezależnie od ich długości,  
-   co umożliwia analizę podobieństwa semantycznego pod kątem ich orientacji.  
- - **Dystans Manhattan**: Sumuje bezwzględne różnice poszczególnych wartości wektorów,  
-   co pozwala wychwycić subtelne różnice w reprezentacjach, które mogą umknąć przy innych miarach.
+__Trening na dużych zbiorach danych__
+---------------------------------------------------------
+Dzięki analizie milionów zdań model nauczył się wychwytywać subtelne niuanse semantyczne, co pozwala mu tworzyć reprezentacje oddające zarówno znaczenie słów, jak i kontekst całych zdań.
 
-#### 3. Redukcja Wymiarowości
-Wektory 3072-wymiarowe są trudne do wizualizacji. Dlatego stosuję:
-- **PCA (Principal Component Analysis)**: Metoda liniowa, która redukuje wymiary danych, zachowując kierunki o największej wariancji. Pozwala mi uzyskać wykresy 2D lub 3D, które pokazują ogólny rozkład danych.
-- **t-SNE (t-Distributed Stochastic Neighbor Embedding)**: Metoda nieliniowa, która skupia się na zachowaniu lokalnych struktur danych. Dzięki niej mogę wizualizować klastery, czyli grupy podobnych wektorów.
+__Uniwersalność językowa__
+---------------------------------------------------------
+Wytrenowanie na danych z różnych języków umożliwia modelowi tworzenie spójnych reprezentacji semantycznych niezależnie od języka wejściowego. To jest istotne przy porównywaniu tekstów napisanych w języku angielskim, polskim czy japońskim.
 
-#### 4. Analiza Statystyczna
-Przeprowadzam analizę statystyczną, aby sprawdzić, czy różnice między dystansami wyliczonymi dla zdań indywidualistycznych i kolektywistycznych są istotne. W tym celu:
-- **Testy normalności**: Używam testów Shapiro–Wilk i Kolmogorov–Smirnov (po standaryzacji danych), aby sprawdzić, czy rozkłady dystansów są normalne.
-- **Testy różnic**: Jeśli rozkłady są normalne, stosuję t-test; w przeciwnym razie używam testu nieparametrycznego Mann–Whitneya. Poziom istotności ustawiam na **0.01**. Wyniki (np. wartości p oraz mediany) pozwalają mi ocenić, czy różnice są statystycznie znaczące.
+=========================================================
+3. Cele Badawcze Projektu
+=========================================================
 
-#### 5. Hipotezy badawcze  
-W oparciu o teorię dotyczącą indywidualizmu i kolektywizmu, a także wcześniejsze badania  
-nad różnicami językowymi, zakładam, że:  
-- **Dystanse między zdaniami indywidualistycznymi i kolektywistycznymi będą największe w języku angielskim**,  
-  ponieważ język ten jest silnie związany z kulturą indywidualistyczną.  
-- **Dystans w języku polskim będzie mniejszy niż w angielskim**,  
-  co wynika z bardziej kolektywistycznych cech języka polskiego w porównaniu do angielskiego.  
-- **Dystans w języku japońskim będzie mniejszy od angielskiego**,  
-  ponieważ kultura japońska jest silnie kolektywistyczna,  
-  co może skutkować większym podobieństwem semantycznym zdań indywidualistycznych i kolektywistycznych.  
+__3.1. Główne zagadnienia__
+---------------------------------------------------------
+Projekt skupia się na analizie semantycznej zdań wyrażających dwa odmienne podejścia: indywidualizm i kolektywizm. Celem jest porównanie reprezentacji tych zdań w różnych językach oraz zbadanie, jak różnice kulturowe mogą wpływać na semantyczną strukturę tekstu.
+
+__Porównanie reprezentacji semantycznych__
+---------------------------------------------------------
+Analiza polega na porównywaniu wygenerowanych wektorów, aby ocenić, jak bardzo reprezentacje zdań dotyczących indywidualizmu różnią się od reprezentacji zdań kolektywistycznych.
+
+__Analiza międzyjęzykowa__
+---------------------------------------------------------
+Badanie obejmuje zdania w różnych językach, co pozwala sprawdzić, czy na przykład język angielski, silnie związany z kulturą indywidualistyczną, generuje bardziej rozbieżne reprezentacje niż języki o bardziej kolektywistycznych cechach, takie jak polski czy japoński.
+
+=========================================================
+4. Szczegółowa Metodologia
+=========================================================
+
+__4.1. Etap I – Generowanie Wektorów (Embedding)__
+---------------------------------------------------------
+__4.1.1. Proces przekształcania tekstu__
+Każde zdanie poddawane jest analizie przez model text-embedding-3-large, który przekształca tekst w wektor o wymiarze 3072. Proces ten obejmuje:
+- **Tokenizację**: Dzielenie zdania na mniejsze jednostki (tokeny), takie jak słowa lub fragmenty słów.
+- **Analizę kontekstową**: Model uwzględnia kolejność i relacje między tokenami, aby uchwycić pełne znaczenie zdania.
+- **Przekształcenie do postaci numerycznej**: Każdemu tokenowi przypisywany jest fragment wektora, a wynikowy wektor stanowi zbiór wszystkich tych informacji.
+
+__4.1.2. Interpretacja wygenerowanego wektora__
+---------------------------------------------------------
+Wektor 3072-wymiarowy to zbiór liczb, gdzie:
+- Każda liczba jest wynikiem skomplikowanych obliczeń matematycznych uwzględniających relacje semantyczne.
+- Całość stanowi unikalny "odcisk palca" zdania, który można porównywać z innymi zdaniami.
+
+__4.2. Etap II – Pomiar Podobieństwa Wektorów__
+---------------------------------------------------------
+__4.2.1. Metryki używane do porównania__
+Aby oszacować, jak bardzo dwa zdania są do siebie podobne, stosowane są trzy rodzaje miar odległości:
+
+- **Dystans euklidesowy**
+  - **Definicja**: Mierzy geometryczną odległość między dwoma punktami (wektorami) w przestrzeni.
+  - **Interpretacja**: Im mniejsza wartość, tym bliżej siebie znajdują się reprezentacje semantyczne zdań.
+
+- **Dystans kosinusowy**
+  - **Definicja**: Oblicza kąt między dwoma wektorami, co odzwierciedla podobieństwo kierunków.
+  - **Interpretacja**: Ta metryka koncentruje się na orientacji wektorów, niezależnie od ich długości. Mniejsze wartości wskazują na większe podobieństwo semantyczne.
+
+- **Dystans Manhattan**
+  - **Definicja**: Sumuje bezwzględne różnice między odpowiadającymi sobie elementami dwóch wektorów.
+  - **Interpretacja**: Można to porównać do mierzenia dystansu w siatce ulic – sumuje "kroki" potrzebne do przejścia od jednego punktu do drugiego.
+
+__4.2.2. Cel zastosowania różnych metryk__
+---------------------------------------------------------
+Stosowanie trzech różnych miar umożliwia wychwycenie różnych aspektów podobieństwa:
+- Dystans euklidesowy daje ogólne pojęcie o "odległości" między wektorami.
+- Dystans kosinusowy koncentruje się na kierunkowych relacjach.
+- Dystans Manhattan pozwala uchwycić różnice w poszczególnych wymiarach, co może być szczególnie cenne przy analizie subtelnych różnic.
+
+__4.3. Etap III – Redukcja Wymiarowości__
+---------------------------------------------------------
+__4.3.1. Problem wysokowymiarowych danych__
+Wektor o 3072 wymiarach jest zbyt złożony, by móc go łatwo przedstawić graficznie lub intuicyjnie zinterpretować. Dlatego stosuje się techniki redukcji wymiarowości, które pozwalają na przedstawienie danych w przestrzeni 2D lub 3D.
+
+__4.3.2. Metody redukcji__
+---------------------------------------------------------
+- **PCA (Principal Component Analysis)**
+  - **Cel**: Znalezienie najważniejszych kierunków (głównych składowych) w danych, w których występuje największa wariancja.
+  - **Rezultat**: Uproszczona reprezentacja danych, która zachowuje najistotniejsze informacje o zmienności.
+- **t-SNE (t-Distributed Stochastic Neighbor Embedding)**
+  - **Cel**: Zachowanie lokalnych struktur danych poprzez skupienie się na relacjach między sąsiadującymi punktami.
+  - **Rezultat**: Wizualizacja, w której punkty o podobnych właściwościach semantycznych grupują się w klastery, ułatwiając identyfikację podobieństw między zdaniami.
+
+__4.4. Etap IV – Analiza Statystyczna__
+---------------------------------------------------------
+__4.4.1. Weryfikacja istotności różnic__
+Po obliczeniu odległości między wektorami dla zdań indywidualistycznych i kolektywistycznych, przeprowadzam analizę statystyczną, aby ustalić, czy obserwowane różnice są istotne, a nie przypadkowe.
+
+__4.4.2. Testy statystyczne__
+---------------------------------------------------------
+- **Testy normalności**
+  - **Cel**: Sprawdzenie, czy rozkład wyników (np. odległości między wektorami) przypomina rozkład normalny.
+  - **Metody**: Testy Shapiro–Wilk oraz Kolmogorov–Smirnov po uprzedniej standaryzacji danych.
+- **Testy różnic**
+  - **Przebieg**:
+    - Jeżeli dane wykazują rozkład normalny, stosowany jest t-test, który porównuje średnie wartości.
+    - Jeśli dane nie spełniają założenia normalności, wykorzystywany jest test nieparametryczny, taki jak test Mann–Whitneya.
+  - **Ustalony poziom istotności**:
+    - Poziom istotności ustalony jest na 0.01, co oznacza, że przyjęte kryterium pozwala na bardzo niewielkie prawdopodobieństwo popełnienia błędu przy odrzuceniu hipotezy zerowej.
+
+=========================================================
+5. Formułowanie Hipotez Badawczych
+=========================================================
+
+__Hipoteza dla języka angielskiego__
+---------------------------------------------------------
+- **Założenie**: Reprezentacje zdań opisujących indywidualizm i kolektywizm będą wyraźnie różne, co przełoży się na większe odległości między wektorami.
+- **Uzasadnienie**: Angielski, będący językiem o silnych tradycjach indywidualistycznych, prawdopodobnie generuje bardziej rozbieżne reprezentacje semantyczne.
+
+__Hipoteza dla języka polskiego__
+---------------------------------------------------------
+- **Założenie**: Odległości między wektorami zdań będą mniejsze niż w przypadku języka angielskiego.
+- **Uzasadnienie**: Polskie zdania, wyrażające elementy kolektywizmu, mogą być reprezentowane w sposób bardziej spójny, co skutkuje mniejszymi różnicami semantycznymi.
+
+__Hipoteza dla języka japońskiego__
+---------------------------------------------------------
+- **Założenie**: Podobnie jak w języku polskim, odległości między reprezentacjami zdań będą mniejsze niż w angielskim.
+- **Uzasadnienie**: Kultura japońska, o silnych elementach kolektywistycznych, sprzyja tworzeniu bardziej zbliżonych semantycznie reprezentacji zdań dotyczących zarówno indywidualizmu, jak i kolektywizmu.
+
+=========================================================
+6. Podsumowanie Procesu
+=========================================================
+
+Przekształcenie tekstu w wektory  
+– Każde zdanie jest analizowane przez model text-embedding-3-large, który generuje 3072-wymiarową reprezentację numeryczną, oddającą wszystkie istotne cechy semantyczne.
+
+Porównanie reprezentacji  
+– Wykorzystanie trzech miar odległości (euklidesowej, kosinusowej, Manhattan) pozwala na ocenę podobieństwa lub różnic między wektorami zdań, co daje wgląd w subtelne aspekty ich znaczenia.
+
+Redukcja wymiarowości  
+– Dzięki metodom PCA i t-SNE możliwe jest przekształcenie wysokowymiarowych danych do formatu graficznego, który ułatwia wizualizację i interpretację wyników.
+
+Analiza statystyczna  
+– Weryfikacja istotności uzyskanych różnic przy użyciu testów normalności oraz testów porównawczych (t-test lub test Mann–Whitneya) zapewnia naukową rzetelność wyników.
+
+Formułowanie i weryfikacja hipotez  
+– Na podstawie teorii kulturowych oraz dotychczasowych badań określam hipotezy dotyczące różnic w reprezentacji semantycznej zdań w różnych językach, co stanowi ostateczny cel badania.
+
+Każdy z tych etapów został zaprojektowany tak, aby proces badawczy był przejrzysty, powtarzalny i oparty na solidnych podstawach matematycznych oraz statystycznych. Dzięki temu możliwe jest wyciągnięcie wniosków na temat sposobu, w jaki model przetwarza i reprezentuje znaczenie zdań, a także jakie różnice kulturowe mogą wpływać na te reprezentacje.
 """
+
 
 
 ###############################################
