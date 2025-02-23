@@ -602,7 +602,7 @@ def ml_klasyfikuj_tekst(txt, clf, pca):
     prob_dict = dict(sorted(prob_dict.items(), key=lambda x: x[1], reverse=True))
     return pred, prob_dict
 
-def get_ml_classifier(all_embeddings, all_labels, model_path="ml_classifier.pkl"):
+def get_ml_classifier(all_embeddings, all_labels, model_path="xgboost_classifier.pkl"):
     if os.path.exists(model_path):
         with open(model_path, "rb") as f:
             clf, pca = pickle.load(f)
