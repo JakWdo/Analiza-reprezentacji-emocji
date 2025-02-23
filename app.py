@@ -18,9 +18,7 @@ from analysis_IND_COL import (
     EMBEDDING_MODEL,
     train_ml_classifier, ml_klasyfikuj_tekst, get_ml_classifier,
     generate_statistical_report,
-    INTEGRATED_REPORT,
-    generate_interactive_umap_2d,
-    generate_interactive_umap_3d
+    INTEGRATED_REPORT
 )
 
 # Ustawienia układu strony Streamlit (wyśrodkowany widok)
@@ -35,8 +33,8 @@ def run_streamlit_app():
     Zawiera:
       1) Raport teoretyczny wyjaśniający kontekst i używane metody (INTEGRATED_REPORT).
       2) Przykładowe zdania z trzech języków: angielski, polski, japoński.
-      3) Wizualizacje 2D i 3D (PCA, t-SNE, UMAP) pozwalające zrozumieć,
-         jak zdania o różnych cechach wyglądają w przestrzeni wektorowej.
+      3) Wizualizacje 2D i 3D (PCA, t-SNE) pozwalające zrozumieć, jak zdania o różnych cechach
+         wyglądają w przestrzeni wektorowej. **Uwaga:** Aby filtrować klastry, kliknij na legendzie wykresu.
       4) Klasyfikację nowego tekstu:
          - Metoda centroidów (porównanie z uśrednionym wektorem każdej kategorii).
          - Model ML (regresja logistyczna), który "uczy się" rozpoznawać kategorie.
@@ -94,33 +92,30 @@ def run_streamlit_app():
         ["JAP_COL"] * len(jap_col_embeddings)
     )
 
-    # 5. Wizualizacje 2D (PCA, t-SNE, UMAP)
+    # 5. Wizualizacje 2D (PCA, t-SNE)
     st.subheader("Interaktywne wizualizacje 2D")
     st.write("""
     **PCA** – metoda liniowa, przedstawia dane w 2D na podstawie głównych kierunków wariancji.
     
     **t-SNE** – metoda nieliniowa, zachowuje lokalne podobieństwa oryginalnych wektorów.
     
-    **UMAP** – efektywna redukcja wymiarowości, która często lepiej zachowuje globalną strukturę.
+    **Uwaga:** Aby filtrować klastry, kliknij na legendzie wykresu.
     """)
     fig_pca_2d = generate_interactive_pca_2d(all_emb, all_lbl)
     fig_tsne_2d = generate_interactive_tsne_2d(all_emb, all_lbl)
-    fig_umap_2d = generate_interactive_umap_2d(all_emb, all_lbl)
     st.plotly_chart(fig_pca_2d, use_container_width=True)
     st.plotly_chart(fig_tsne_2d, use_container_width=True)
-    st.plotly_chart(fig_umap_2d, use_container_width=True)
 
-    # 6. Wizualizacje 3D (PCA, t-SNE, UMAP)
+    # 6. Wizualizacje 3D (PCA, t-SNE)
     st.subheader("Interaktywne wizualizacje 3D")
     st.write("""
     Poniżej znajdują się interaktywne wykresy 3D, które pozwalają lepiej zbadać strukturę danych.
+    **Uwaga:** Filtrowanie klastrów odbywa się przez interaktywną legendę – kliknij na niej, aby ukrywać lub pokazywać grupy.
     """)
     fig_pca_3d = generate_interactive_pca_3d(all_emb, all_lbl)
     fig_tsne_3d = generate_interactive_tsne_3d(all_emb, all_lbl)
-    fig_umap_3d = generate_interactive_umap_3d(all_emb, all_lbl)
     st.plotly_chart(fig_pca_3d, use_container_width=True)
     st.plotly_chart(fig_tsne_3d, use_container_width=True)
-    st.plotly_chart(fig_umap_3d, use_container_width=True)
 
     # 7. Klasyfikacja metodą centroidów
     st.subheader("Klasyfikacja nowego tekstu (metoda centroidów)")
@@ -151,7 +146,8 @@ def run_streamlit_app():
     # 9. Raport statystyczny
     st.subheader("Raport statystyczny")
     st.write("""
-    Poniżej znajdują się wyniki testów statystycznych sprawdzających istotność różnic między językami.
+    Poniżej znajdują się wyniki testów statystycznych sprawdzających istotność różnic między językami oraz
+    wewnątrz jednego języka (hipoteza H₁: różnicowanie kategorii IND vs. COL).
     """)
     report_text = generate_statistical_report()
     st.text_area("Raport statystyczny", report_text, height=300)
@@ -174,7 +170,7 @@ def run_streamlit_app():
     st.write("""
 Analiza sugeruje, że model `text-embedding-3-large` różnicuje zdania indywidualistyczne i kolektywistyczne w różnych językach.
 Polskie zdania IND i COL są w przestrzeni wektorowej bliżej siebie niż ich angielskie odpowiedniki,
-a japońskie zdania plasują się pośrednio. Testy statystyczne potwierdzają, że te różnice nie są przypadkowe.
+a japońskie zdania plasują się pośrednio. Testy statystyczne (w tym dodatkowe testy H₁) potwierdzają, że te różnice nie są przypadkowe.
     """)
     with open("raport_statystyczny.txt", "w", encoding="utf-8") as f:
         f.write(report_text)
