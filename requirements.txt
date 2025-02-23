@@ -9,4 +9,4 @@ streamlit
 jinja2
 plotly
 python-dotenv
-umap
+umap-learn
