@@ -201,11 +201,6 @@ def run_streamlit_app():
 3. **Testy statystyczne**  
    - Jeśli p < 0.01, różnice raczej nie są przypadkowe. Wyraźnie widać,
      że polskie i japońskie zdania IND–COL różnią się od angielskich.
-
-**Dlaczego tak się dzieje?**
-- Metoda centroidów pozwala prosto porównać nowy tekst z uśrednionymi wektorami kategorii.
-- Model ML (regresja logistyczna) daje bardziej szczegółowy rozkład prawdopodobieństw
-  i jest zwykle dokładniejszy.
     """)
 
     # 11. Podsumowanie
