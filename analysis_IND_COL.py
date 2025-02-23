@@ -5,8 +5,9 @@ import pickle
 from numpy.linalg import norm
 import pandas as pd
 import json
+import matplotlib.pyplot as plt
 import plotly.express as px
-import streamlit as st  # Funkcje Streamlit pozostają, gdyż są wykorzystywane przy imporcie do aplikacji
+import streamlit as st 
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from dotenv import load_dotenv
@@ -184,7 +185,7 @@ Jeżeli wyniki pokazują, że:
 
 - **Polskie zdania IND i COL** są wyraźnie bliżej siebie niż zdania angielskie IND i COL, można przypuszczać, że w polskiej praktyce językowej te dwie postawy **nie są** aż tak od siebie oddalone. Może na to wpływać gramatyka, specyfika kultury, czy ograniczenia danych, na których wytrenowano model.
 
-- **Język japoński** często uważa się za bardziej kolektywistyczny. Jednak gdy model wskazuje rezultat pośredni (np. pomiędzy polskim a angielskim), przyczyn może być wiele – od liczby dostępnych w korpusie tekstów japońskich, przez konkretny dobór zdań, po faktyczne różnice w sposobie wyrażania kolektywizmu.
+- **Język japoński** często uważa się za bardziej kolektywistyczny. Jednak jeśli model nie wskazuje jednoznacznej różnicy w porównaniu do polskiego i angielskiego, przyczyn może być wiele – od liczby dostępnych w korpusie tekstów japońskich, przez konkretny dobór zdań, po faktyczne różnice w sposobie wyrażania kolektywizmu.
 
 Celem jest zatem **pokazanie, że różnice kulturowe mogą być widoczne matematycznie** w przestrzeni wektorowej, a jednocześnie uwzględnienie, że model nie jest doskonały i zależy od korpusu, na którym się uczył.
 
@@ -375,6 +376,17 @@ def generate_interactive_tsne_3d(all_emb, all_lbl):
 ###############################################
 # METRYKI ODLEGŁOŚCI I TESTY STATYSTYCZNE
 ###############################################
+def plot_distribution(data1, data2, label1, label2, title, filename):
+    plt.figure()
+    plt.hist(data1, bins=30, alpha=0.5, label=label1, density=True)
+    plt.hist(data2, bins=30, alpha=0.5, label=label2, density=True)
+    plt.title(title)
+    plt.xlabel("Dystans")
+    plt.ylabel("Gęstość")
+    plt.legend()
+    plt.savefig(filename)
+    plt.close()
+
 def dist_euclidean(a, b):
     return norm(a - b)
 
@@ -409,6 +421,9 @@ def generate_statistical_report():
                ("Kosinus (1 - cos)", dist_cosine),
                ("Manhattan", dist_manhattan)]
     
+    # Przyjmujemy, że embeddingi dla poszczególnych kategorii są dostępne:
+    # pol_ind_embeddings, pol_col_embeddings, eng_ind_embeddings, eng_col_embeddings, jap_ind_embeddings, jap_col_embeddings
+
     for metric_name, metric_func in metrics:
         report += f"\n=== Metryka: {metric_name} ===\n"
         
@@ -437,8 +452,22 @@ def generate_statistical_report():
         dist_eng = all_pairwise(eng_ind_embeddings, eng_col_embeddings, metric_func)
         dist_jap = all_pairwise(jap_ind_embeddings, jap_col_embeddings, metric_func)
         
+        # Tworzymy wykresy rozkładu dla każdego języka, aby wizualnie ocenić normalność
+        plot_distribution(intra_pol, dist_pol,
+                          "Intra POL", "Inter POL",
+                          f"Dystrybucja dystansów dla języka polskiego ({metric_name} - H1)",
+                          f"dist_pol_{metric_name.replace(' ','_')}.png")
+        plot_distribution(intra_eng, dist_eng,
+                          "Intra ENG", "Inter ENG",
+                          f"Dystrybucja dystansów dla języka angielskiego ({metric_name} - H1)",
+                          f"dist_eng_{metric_name.replace(' ','_')}.png")
+        plot_distribution(intra_jap, dist_jap,
+                          "Intra JAP", "Inter JAP",
+                          f"Dystrybucja dystansów dla języka japońskiego ({metric_name} - H1)",
+                          f"dist_jap_{metric_name.replace(' ','_')}.png")
+        
         # Testujemy, czy dystanse inter-kategorii są wyższe niż dystanse intra-kategorii dla każdego języka
-        from scipy.stats import mannwhitneyu
+        # Używamy testu nieparametrycznego Mann-Whitney U, ponieważ nie zakładamy rozkładu normalnego.
         stat_h1_pol, p_h1_pol = mannwhitneyu(dist_pol, intra_pol, alternative='greater')
         stat_h1_eng, p_h1_eng = mannwhitneyu(dist_eng, intra_eng, alternative='greater')
         stat_h1_jap, p_h1_jap = mannwhitneyu(dist_jap, intra_jap, alternative='greater')
@@ -472,8 +501,20 @@ def generate_statistical_report():
         report += f"\n[H2/H3] Shapiro (Pol) p={p_s_pol:.4f}, K-S (Pol) p={p_k_pol:.4f}\n"
         report += f"[H2/H3] Shapiro (Eng) p={p_s_eng:.4f}, K-S (Eng) p={p_k_eng:.4f}\n"
         report += f"[H2/H3] Shapiro (Jap) p={p_s_jap:.4f}, K-S (Jap) p={p_k_jap:.4f}\n"
+        
+        # Rysujemy wykresy rozkładu dla testów H2/H3
+        plt.figure()
+        plt.hist(dist_pol, bins=30, alpha=0.7, label="Polish")
+        plt.hist(dist_eng, bins=30, alpha=0.7, label="English")
+        plt.hist(dist_jap, bins=30, alpha=0.7, label="Japanese")
+        plt.title(f"Dystrybucja dystansów między IND i COL ({metric_name} - H2/H3)")
+        plt.xlabel("Dystans")
+        plt.ylabel("Liczba przypadków")
+        plt.legend()
+        plt.savefig(f"dist_all_{metric_name.replace(' ','_')}.png")
+        plt.close()
+        
         if normal_pol and normal_eng and normal_jap:
-            from scipy.stats import ttest_ind
             stat_t_eng, p_t_eng = ttest_ind(dist_pol, dist_eng, equal_var=False)
             p_one_eng = p_t_eng / 2.0
             stat_t_jap, p_t_jap = ttest_ind(dist_jap, dist_eng, equal_var=False)
@@ -481,7 +522,6 @@ def generate_statistical_report():
             report += f" [H2/H3] T-test Eng (dwustronny): p(dwu)={p_t_eng:.4f} => p(jednostronne)={p_one_eng:.4f}\n"
             report += f" [H2/H3] T-test Jap (dwustronny): p(dwu)={p_t_jap:.4f} => p(jednostronne)={p_one_jap:.4f}\n"
         else:
-            from scipy.stats import mannwhitneyu
             stat_m_eng, p_m_eng = mannwhitneyu(dist_pol, dist_eng, alternative='two-sided')
             p_one_eng = p_m_eng / 2.0
             stat_m_jap, p_m_jap = mannwhitneyu(dist_jap, dist_eng, alternative='two-sided')
