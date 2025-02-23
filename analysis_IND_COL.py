@@ -491,33 +491,27 @@ def generate_statistical_report():
         stat_h1_pol, p_h1_pol, test_name_pol, pol_txt = compare_intra_inter(intra_pol, dist_pol, "POL")
         report += pol_txt
         if p_h1_pol < 0.01:
-            report += (f"  [H1] Polski: p={p_h1_pol:.4f} < 0.01 => istotne stat. (inter > intra), "
-                       f"Test: {test_name_pol}\n")
+            report += "  [H1] Polski: Model wyraźnie różnicuje zdania IND od COL.\n"
         else:
-            report += (f"  [H1] Polski: p={p_h1_pol:.4f} >= 0.01 => BRAK istotnej różnicy, "
-                       f"Test: {test_name_pol}\n")
+            report += "  [H1] Polski: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
 
         # Angielski
         stat_h1_eng, p_h1_eng, test_name_eng, eng_txt = compare_intra_inter(intra_eng, dist_eng, "ENG")
         report += eng_txt
         if p_h1_eng < 0.01:
-            report += (f"  [H1] Angielski: p={p_h1_eng:.4f} < 0.01 => istotne stat. (inter > intra), "
-                       f"Test: {test_name_eng}\n")
+            report += "  [H1] Angielski: Model wyraźnie różnicuje zdania IND od COL.\n"
         else:
-            report += (f"  [H1] Angielski: p={p_h1_eng:.4f} >= 0.01 => BRAK istotnej różnicy, "
-                       f"Test: {test_name_eng}\n")
+            report += "  [H1] Angielski: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
 
         # Japoński
         stat_h1_jap, p_h1_jap, test_name_jap, jap_txt = compare_intra_inter(intra_jap, dist_jap, "JAP")
         report += jap_txt
         if p_h1_jap < 0.01:
-            report += (f"  [H1] Japoński: p={p_h1_jap:.4f} < 0.01 => istotne stat. (inter > intra), "
-                       f"Test: {test_name_jap}\n")
+            report += "  [H1] Japoński: Model wyraźnie różnicuje zdania IND od COL.\n"
         else:
-            report += (f"  [H1] Japoński: p={p_h1_jap:.4f} >= 0.01 => BRAK istotnej różnicy, "
-                       f"Test: {test_name_jap}\n")
+            report += "  [H1] Japoński: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
 
-        report += "--- KONIEC TESTU (H1) ---\n\n"
+        report += "--- KONIEC TESTU (H1: intra vs. inter) ---\n"
         
         p_s_pol, p_k_pol = test_normality(dist_pol)
         p_s_eng, p_k_eng = test_normality(dist_eng)
