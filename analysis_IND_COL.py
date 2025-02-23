@@ -177,27 +177,6 @@ W aplikacji możemy sprawdzić, czy np. zdania indywidualistyczne i kolektywisty
 #### **Interpretacja wyników**  
 - **Niższa mediana odległości** w danym języku (IND vs. COL) → zdania indywidualistyczne i kolektywistyczne są **bliżej** siebie w przestrzeni wektorowej (model słabiej je rozróżnia).  
 - **Wartość p** < 0.01 → różnica między np. polskim a angielskim jest statystycznie **istotna**.
-
----
-
-## **5. Interpretacja w kontekście kulturowym**
-
-Jeżeli wyniki pokazują, że:
-
-- **Polskie zdania IND i COL** są wyraźnie bliżej siebie niż zdania angielskie IND i COL, można przypuszczać, że w polskiej praktyce językowej te dwie postawy **nie są** aż tak od siebie oddalone. Może na to wpływać gramatyka, specyfika kultury, czy ograniczenia danych, na których wytrenowano model.
-
-- **Język japoński** często uważa się za bardziej kolektywistyczny. Jednak jeśli model nie wskazuje jednoznacznej różnicy w porównaniu do polskiego i angielskiego, przyczyn może być wiele – od liczby dostępnych w korpusie tekstów japońskich, przez konkretny dobór zdań, po faktyczne różnice w sposobie wyrażania kolektywizmu.
-
-Celem jest zatem **pokazanie, że różnice kulturowe mogą być widoczne matematycznie** w przestrzeni wektorowej, a jednocześnie uwzględnienie, że model nie jest doskonały i zależy od korpusu, na którym się uczył.
-
----
-
-## **6. Implikacje praktyczne**
-
-1. **Rozpoznawanie biasów**: Modele językowe mogą niedoszacowywać lub wzmacniać niektóre cechy (np. kolektywizm w japońskim) w zależności od ilości i jakości danych.  
-2. **Rozszerzenie badań**: Badanie można przenieść na inne języki, sprawdzić więcej kategorii kulturowych (np. high vs. low context), a także rozważyć inne typy modeli embeddingowych.  
-3. **Wkład w lingwistykę i psychologię**: Pomiar różnic kulturowych za pomocą odległości wektorowych pozwala łączyć metody matematyczne z obserwacjami społecznymi. Może to wspierać teorie dotyczące **uniwersalności** (bądź jej braku) pewnych pojęć psychologicznych w różnych kulturach.
-
 '''
 
 
@@ -427,57 +406,118 @@ def generate_statistical_report():
         
         def intra_category_dist(embeddings):
             dists = all_pairwise(embeddings, embeddings, metric_func)
+            # odfiltrowujemy dystanse (0 lub bardzo małe), powstające przy porównaniu identycznych wektorów
             return [d for d in dists if d > 1e-12]
-        
+
+        # INTRA: dystanse w obrębie danej kategorii (IND lub COL), a następnie łączone
         intra_pol_ind = intra_category_dist(pol_ind_embeddings)
         intra_pol_col = intra_category_dist(pol_col_embeddings)
+        intra_pol = intra_pol_ind + intra_pol_col
+
         intra_eng_ind = intra_category_dist(eng_ind_embeddings)
         intra_eng_col = intra_category_dist(eng_col_embeddings)
+        intra_eng = intra_eng_ind + intra_eng_col
+
         intra_jap_ind = intra_category_dist(jap_ind_embeddings)
         intra_jap_col = intra_category_dist(jap_col_embeddings)
-        
-        intra_pol = intra_pol_ind + intra_pol_col
-        intra_eng = intra_eng_ind + intra_eng_col
         intra_jap = intra_jap_ind + intra_jap_col
-        
+
+        # INTER: dystanse między różnymi podkategoriami w ramach tego samego języka (IND vs. COL)
         dist_pol = all_pairwise(pol_ind_embeddings, pol_col_embeddings, metric_func)
         dist_eng = all_pairwise(eng_ind_embeddings, eng_col_embeddings, metric_func)
         dist_jap = all_pairwise(jap_ind_embeddings, jap_col_embeddings, metric_func)
-        
+
+        # Rysujemy histogramy do wizualnej oceny
         plot_distribution(intra_pol, dist_pol,
                           "Intra POL", "Inter POL",
-                          f"Dystrybucja dystansów dla języka polskiego ({metric_name} - H1)",
+                          f"Dystrybucja (Polski) [{metric_name}]",
                           f"dist_pol_{metric_name.replace(' ','_')}.png")
         plot_distribution(intra_eng, dist_eng,
                           "Intra ENG", "Inter ENG",
-                          f"Dystrybucja dystansów dla języka angielskiego ({metric_name} - H1)",
+                          f"Dystrybucja (Angielski) [{metric_name}]",
                           f"dist_eng_{metric_name.replace(' ','_')}.png")
         plot_distribution(intra_jap, dist_jap,
                           "Intra JAP", "Inter JAP",
-                          f"Dystrybucja dystansów dla języka japońskiego ({metric_name} - H1)",
+                          f"Dystrybucja (Japoński) [{metric_name}]",
                           f"dist_jap_{metric_name.replace(' ','_')}.png")
-        
-        stat_h1_pol, p_h1_pol = mannwhitneyu(dist_pol, intra_pol, alternative='greater')
-        stat_h1_eng, p_h1_eng = mannwhitneyu(dist_eng, intra_eng, alternative='greater')
-        stat_h1_jap, p_h1_jap = mannwhitneyu(dist_jap, intra_jap, alternative='greater')
-        
-        report += f"\n[H1] Test różnicowania kategorii w ramach jednego języka (intra vs. inter):\n"
-        report += f"  - Polski: p={p_h1_pol:.4f} (oczekiwane p < 0.01 dla potwierdzenia, że inter > intra)\n"
-        report += f"  - Angielski: p={p_h1_eng:.4f} (oczekiwane p < 0.01 dla potwierdzenia, że inter > intra)\n"
-        report += f"  - Japoński: p={p_h1_jap:.4f} (oczekiwane p < 0.01 dla potwierdzenia, że inter > intra)\n"
+
+        # =====================================================================
+        # == BADANIE H1: Czy inter > intra? (różnicowanie kategorii w jednym języku)
+        # =====================================================================
+        report += "\n[H1] Porównanie INTRA vs. INTER w ramach jednego języka.\n"
+        report += ("Hipoteza: odległości inter (IND vs. COL) są większe niż intra (w obrębie IND lub COL). "
+                   "Inaczej mówiąc, model rozróżnia te podkategorie.\n\n")
+
+        # Sprawdźmy normalność rozkładów inter i intra dla danego języka
+        def compare_intra_inter(intra_distances, inter_distances, lang_code):
+            """
+            Zwraca (stat, pval, test_name) i buduje fragment raportu z testu.
+            """
+
+            # Najpierw test normalności obu rozkładów
+            p_s_intra, p_k_intra = test_normality(intra_distances)
+            p_s_inter, p_k_inter = test_normality(inter_distances)
+
+            normal_intra = (p_s_intra > 0.05 and p_k_intra > 0.05)
+            normal_inter = (p_s_inter > 0.05 and p_k_inter > 0.05)
+
+            # Raport o normalności
+            txt = (f"  -> Normalność {lang_code} (intra): Shapiro p={p_s_intra:.4f}, K-S p={p_k_intra:.4f}, "
+                   f"czy normalny? {normal_intra}\n")
+            txt += (f"  -> Normalność {lang_code} (inter): Shapiro p={p_s_inter:.4f}, K-S p={p_k_inter:.4f}, "
+                    f"czy normalny? {normal_inter}\n")
+
+            # Jeśli oba rozkłady normalne, używamy testu t-Studenta (jednostronnego).
+            # Jeżeli przynajmniej jeden nie jest normalny -> Mann-Whitney (jednostronny).
+            if normal_intra and normal_inter:
+                # Test t-Studenta (jednostronny). Najpierw liczymy dwustronny, potem p/2
+                stat_t, p_t = ttest_ind(inter_distances, intra_distances, equal_var=False)
+                p_one_sided = p_t / 2.0  # jednostronny
+                txt += (f"  -> Test t-Studenta (dwustronny) stat={stat_t:.4f}, p={p_t:.4f} => p(jednostronne)={p_one_sided:.4f}\n")
+                stat_val = stat_t
+                p_val = p_one_sided
+                test_used = "t-test (jednostronny)"
+            else:
+                # Test Manna-Whitneya (jednostronny)
+                stat_m, p_m = mannwhitneyu(inter_distances, intra_distances, alternative='greater')
+                txt += (f"  -> Test Manna-Whitneya (jednostronny) stat={stat_m:.4f}, p={p_m:.4f}\n")
+                stat_val = stat_m
+                p_val = p_m
+                test_used = "Mann-Whitney (jednostronny)"
+
+            return stat_val, p_val, test_used, txt
+
+        # Polski
+        stat_h1_pol, p_h1_pol, test_name_pol, pol_txt = compare_intra_inter(intra_pol, dist_pol, "POL")
+        report += pol_txt
         if p_h1_pol < 0.01:
-            report += "  [H1] Polski: Model wyraźnie różnicuje zdania IND od COL.\n"
+            report += (f"  [H1] Polski: p={p_h1_pol:.4f} < 0.01 => istotne stat. (inter > intra), "
+                       f"Test: {test_name_pol}\n")
         else:
-            report += "  [H1] Polski: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
+            report += (f"  [H1] Polski: p={p_h1_pol:.4f} >= 0.01 => BRAK istotnej różnicy, "
+                       f"Test: {test_name_pol}\n")
+
+        # Angielski
+        stat_h1_eng, p_h1_eng, test_name_eng, eng_txt = compare_intra_inter(intra_eng, dist_eng, "ENG")
+        report += eng_txt
         if p_h1_eng < 0.01:
-            report += "  [H1] Angielski: Model wyraźnie różnicuje zdania IND od COL.\n"
+            report += (f"  [H1] Angielski: p={p_h1_eng:.4f} < 0.01 => istotne stat. (inter > intra), "
+                       f"Test: {test_name_eng}\n")
         else:
-            report += "  [H1] Angielski: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
+            report += (f"  [H1] Angielski: p={p_h1_eng:.4f} >= 0.01 => BRAK istotnej różnicy, "
+                       f"Test: {test_name_eng}\n")
+
+        # Japoński
+        stat_h1_jap, p_h1_jap, test_name_jap, jap_txt = compare_intra_inter(intra_jap, dist_jap, "JAP")
+        report += jap_txt
         if p_h1_jap < 0.01:
-            report += "  [H1] Japoński: Model wyraźnie różnicuje zdania IND od COL.\n"
+            report += (f"  [H1] Japoński: p={p_h1_jap:.4f} < 0.01 => istotne stat. (inter > intra), "
+                       f"Test: {test_name_jap}\n")
         else:
-            report += "  [H1] Japoński: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
-        report += "--- KONIEC TESTU (H1: intra vs. inter) ---\n"
+            report += (f"  [H1] Japoński: p={p_h1_jap:.4f} >= 0.01 => BRAK istotnej różnicy, "
+                       f"Test: {test_name_jap}\n")
+
+        report += "--- KONIEC TESTU (H1) ---\n\n"
         
         p_s_pol, p_k_pol = test_normality(dist_pol)
         p_s_eng, p_k_eng = test_normality(dist_eng)
