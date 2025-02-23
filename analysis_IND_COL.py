@@ -49,10 +49,14 @@ W przetwarzaniu języka naturalnego (NLP) komputer musi "zrozumieć" tekst, któ
 
 ### **2.1. Co oznacza 3072 wymiary?**
 
-W modelu `text-embedding-3-large` każde zdanie jest reprezentowane przez **3072 liczby**. Możemy traktować te liczby jako ukryte „cechy” języka, które model wyodrębnił podczas treningu. Każdy wymiar może odpowiadać:
-- Na przykład za ton emocjonalny zdania,
-- Za formalność lub rejestr językowy,
-- Za aspekty kulturowe czy specyficzne słownictwo.
+W modelu `text-embedding-3-large` każde zdanie jest reprezentowane przez **3072 liczby**. Możemy traktować te liczby jako ukryte „cechy” języka czy informację zawarte w danym tekście, które model wyodrębnił podczas treningu. Każdy wymiar może odpowiadać (w dużym uproszczeniu):
+ - Na przykład za ton emocjonalny zdania,
+ - Za formalność lub rejestr językowy,
+ - Za aspekty kulturowe czy specyficzne słownictwo,
+ - Za kontekst semantyczny, umożliwiający rozróżnienie między wieloma znaczeniami słów (np. „zamek” jako budowla obronna, zamek od drzwi lub zamek błyskawiczny),
+ - Za intencje wypowiedzi, pomagając określić, czy zdanie jest pytaniem, stwierdzeniem czy rozkazem,
+ - Za specyficzne domeny tematyczne, takie jak język medyczny, prawniczy czy technologiczny,
+ - Oraz za niuanse językowe, które pozwalają modelowi uchwycić gramatykę, składnię i idiomatyczność języka, co jest kluczowe dla rozumienia zarówno języka mówionego, jak i pisanego.
 
 Z uwagi na bardzo wysoką liczbę wymiarów trudno jest bezpośrednio wizualizować takie dane. Dlatego stosuje się metody redukcji wymiarowości, takie jak **PCA** (Principal Component Analysis) czy **t-SNE** (t-Distributed Stochastic Neighbor Embedding). Pozwalają one „spłaszczyć” przestrzeń 3072-wymiarową do 2D lub 3D, co umożliwia nam wizualne porównanie położeń wektorów. W ten sposób, jeśli dwa wektory (czyli reprezentacje dwóch zdań) są blisko siebie w przestrzeni, uznajemy, że zdania te są semantycznie podobne.
 
@@ -267,14 +271,12 @@ def generate_interactive_pca_2d(all_emb, all_lbl):
         "JAP": {"IND": "#ff9896", "COL": "#d62728"}
     }
     df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
-    selected_clusters = st.multiselect("Wybierz klastry (PCA 2D)",
-                                       options=df["Cluster"].unique().tolist(),
-                                       default=df["Cluster"].unique().tolist())
-    filtered_df = df[df["Cluster"].isin(selected_clusters)]
-    fig = px.scatter(filtered_df, x="PC1", y="PC2", color="Cluster",
-                     color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in
-                                         df["Cluster"].unique()},
-                     title="Interaktywna PCA 2D (text-embedding-3-large)")
+    # Tworzymy wykres z pełnym zbiorem danych.
+    fig = px.scatter(
+        df, x="PC1", y="PC2", color="Cluster",
+        color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in df["Cluster"].unique()},
+        title="Interaktywna PCA 2D (text-embedding-3-large)"
+    )
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
     return fig
 
@@ -293,14 +295,12 @@ def generate_interactive_tsne_2d(all_emb, all_lbl):
         "JAP": {"IND": "#ff9896", "COL": "#d62728"}
     }
     df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
-    selected_clusters = st.multiselect("Wybierz klastry (t-SNE 2D)",
-                                       options=df["Cluster"].unique().tolist(),
-                                       default=df["Cluster"].unique().tolist())
-    filtered_df = df[df["Cluster"].isin(selected_clusters)]
-    fig = px.scatter(filtered_df, x="Dim1", y="Dim2", color="Cluster",
-                     color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in
-                                         df["Cluster"].unique()},
-                     title="Interaktywna t-SNE 2D (text-embedding-3-large)")
+    # Tworzymy wykres z pełnym zbiorem danych.
+    fig = px.scatter(
+        df, x="Dim1", y="Dim2", color="Cluster",
+        color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in df["Cluster"].unique()},
+        title="Interaktywna t-SNE 2D (text-embedding-3-large)"
+    )
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
     return fig
 
@@ -319,20 +319,14 @@ def generate_interactive_pca_3d(all_emb, all_lbl):
         "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
         "JAP": {"IND": "#ff9896", "COL": "#d62728"}
     }
-    try:
-        selected_clusters = st.multiselect("Wybierz klastry (PCA 3D)",
-                                           options=df["Cluster"].unique().tolist(),
-                                           default=df["Cluster"].unique().tolist())
-    except Exception:
-        selected_clusters = df["Cluster"].unique().tolist()
-    filtered_df = df[df["Cluster"].isin(selected_clusters)]
-    fig = px.scatter_3d(filtered_df,
-                        x="PC1", y="PC2", z="PC3",
-                        color="Cluster",
-                        color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] 
-                                              for cl in df["Cluster"].unique()},
-                        title="Interaktywna PCA 3D (text-embedding-3-large)",
-                        labels={"PC1": "PC1", "PC2": "PC2", "PC3": "PC3"})
+    df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
+    # Tworzymy interaktywny wykres 3D z pełnym zbiorem danych.
+    fig = px.scatter_3d(
+        df, x="PC1", y="PC2", z="PC3", color="Cluster",
+        color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in df["Cluster"].unique()},
+        title="Interaktywna PCA 3D (text-embedding-3-large)",
+        labels={"PC1": "PC1", "PC2": "PC2", "PC3": "PC3"}
+    )
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
     return fig
 
@@ -351,22 +345,17 @@ def generate_interactive_tsne_3d(all_emb, all_lbl):
         "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
         "JAP": {"IND": "#ff9896", "COL": "#d62728"}
     }
-    try:
-        selected_clusters = st.multiselect("Wybierz klastry (t-SNE 3D)",
-                                           options=df["Cluster"].unique().tolist(),
-                                           default=df["Cluster"].unique().tolist())
-    except Exception:
-        selected_clusters = df["Cluster"].unique().tolist()
-    filtered_df = df[df["Cluster"].isin(selected_clusters)]
-    fig = px.scatter_3d(filtered_df,
-                        x="Dim1", y="Dim2", z="Dim3",
-                        color="Cluster",
-                        color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] 
-                                              for cl in df["Cluster"].unique()},
-                        title="Interaktywna t-SNE 3D (text-embedding-3-large)",
-                        labels={"Dim1": "Dim1", "Dim2": "Dim2", "Dim3": "Dim3"})
+    df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
+    # Tworzymy interaktywny wykres 3D z pełnym zbiorem danych.
+    fig = px.scatter_3d(
+        df, x="Dim1", y="Dim2", z="Dim3", color="Cluster",
+        color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in df["Cluster"].unique()},
+        title="Interaktywna t-SNE 3D (text-embedding-3-large)",
+        labels={"Dim1": "Dim1", "Dim2": "Dim2", "Dim3": "Dim3"}
+    )
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
     return fig
+
 
 ###############################################
 # METRYKI ODLEGŁOŚCI I TESTY STATYSTYCZNE
