@@ -199,7 +199,7 @@ def run_streamlit_app():
 
 - **Różnice kulturowe i lingwistyczne:**  
   - W kulturze anglosaskiej postawy indywidualistyczne i kolektywistyczne są wyraźnie rozdzielane, co znajduje odzwierciedlenie w większych dystansach między embeddingami.  
-  - Japoński, mimo że kojarzony z kolektywizmem, posiada złożony system wyrażeń oraz form grzecznościowych, które mogą wprowadzać większą różnorodność semantyczną.
+  - Japoński kojarzony z kolektywizmem, posiada złożony system wyrażeń oraz form grzecznościowych, które mogą wprowadzać większą różnorodność semantyczną.
   - Polski, charakteryzujący się bogatą fleksją, może wyrażać te postawy w bardziej ujednolicony sposób, co skutkuje mniejszymi różnicami w reprezentacjach wektorowych.
 
 - **Specyfika korpusu i danych treningowych:**  
