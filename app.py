@@ -10,8 +10,8 @@ from analysis_IND_COL import (
     eng_ind_embeddings, eng_col_embeddings,
     pol_ind_embeddings, pol_col_embeddings,
     jap_ind_embeddings, jap_col_embeddings,
-    generate_interactive_pca_2d,  # interaktywne wykresy 2D
-    generate_interactive_tsne_2d,  # interaktywne wykresy 2D
+    generate_interactive_pca_2d,
+    generate_interactive_tsne_2d,
     generate_interactive_pca_3d,
     generate_interactive_tsne_3d,
     get_embedding,
@@ -21,14 +21,35 @@ from analysis_IND_COL import (
     INTEGRATED_REPORT
 )
 
-# Ustawiam layout na "centered", aby aplikacja była wyśrodkowana
-st.set_page_config(page_title="Analiza reprezentacji wektorowych emocji", layout="centered")
-
+# Ustawiamy layout na "centered", co powoduje wyśrodkowanie głównej sekcji w aplikacji Streamlit
+st.set_page_config(
+    page_title="Analiza reprezentacji wektorowych emocji",
+    layout="centered"
+)
 
 def run_streamlit_app():
+    """
+    Główna funkcja uruchamiająca aplikację Streamlit.
+    W tym miejscu definiujemy wszystkie elementy interfejsu:
+    
+    1. Wprowadzenie teoretyczne (INTEGRATED_REPORT).
+    2. Przykładowe zdania z trzech języków (ENG, POL, JAP).
+    3. Wizualizacje 2D i 3D (PCA, t-SNE) do zrozumienia, jak zdania 
+       rozkładają się w przestrzeni wektorowej.
+    4. Klasyfikacja tekstu przy użyciu:
+       - Metody centroidów (szybkie porównanie z uśrednionym wektorem kategorii).
+       - Modelu ML (regresja logistyczna, która "uczy się" rozróżniać kategorie).
+    5. Raport statystyczny (testy istotności różnic między językami).
+    6. Wnioski i zapis raportu do pliku.
+    """
+
+    # 1. Tytuł aplikacji
     st.title("Analiza reprezentacji wektorowych emocji: Indywidualizm vs. Kolektywizm w trzech językach")
+
+    # 2. Wprowadzenie teoretyczne: obszerny raport z analysis_IND_COL.py (INTEGRATED_REPORT)
     st.markdown(INTEGRATED_REPORT)
 
+    # 3. Przykłady zdań użytych do treningu embeddingów (można w ten sposób zobaczyć sample tekstu)
     st.markdown("""
     ## Przykłady zdań użytych do tworzenia embeddingów
 
@@ -57,38 +78,79 @@ def run_streamlit_app():
     - *私たちの強さは団結にあります。*
     """)
 
-    # Przygotowanie wspólnego zbioru embeddingów i etykiet
-    all_emb = np.concatenate([eng_ind_embeddings, eng_col_embeddings,
-                              pol_ind_embeddings, pol_col_embeddings,
-                              jap_ind_embeddings, jap_col_embeddings], axis=0)
-    all_lbl = (["ENG_IND"] * len(eng_ind_embeddings) +
-               ["ENG_COL"] * len(eng_col_embeddings) +
-               ["POL_IND"] * len(pol_ind_embeddings) +
-               ["POL_COL"] * len(pol_col_embeddings) +
-               ["JAP_IND"] * len(jap_ind_embeddings) +
-               ["JAP_COL"] * len(jap_col_embeddings))
+    # 4. Zbieramy wszystkie embeddingi (wektory) razem i tworzymy listę ich etykiet
+    #   (ENG_IND, ENG_COL, POL_IND, POL_COL, JAP_IND, JAP_COL).
+    all_emb = np.concatenate([
+        eng_ind_embeddings, eng_col_embeddings,
+        pol_ind_embeddings, pol_col_embeddings,
+        jap_ind_embeddings, jap_col_embeddings
+    ], axis=0)
 
+    all_lbl = (
+        ["ENG_IND"] * len(eng_ind_embeddings) +
+        ["ENG_COL"] * len(eng_col_embeddings) +
+        ["POL_IND"] * len(pol_ind_embeddings) +
+        ["POL_COL"] * len(pol_col_embeddings) +
+        ["JAP_IND"] * len(jap_ind_embeddings) +
+        ["JAP_COL"] * len(jap_col_embeddings)
+    )
+
+    # 5. Wizualizacje 2D: PCA i t-SNE
     st.subheader("Interaktywne wizualizacje 2D")
-    st.write("Prezentuję interaktywne wykresy PCA i t-SNE, które pokazują relacje między zdaniami w przestrzeni 2D.")
+    st.write("""
+    **Wyjaśnienie dla osób nietechnicznych**:
+    - **PCA** (Principal Component Analysis) stara się uchwycić w 2 (lub 3) wymiarach 
+      to, co w oryginalnej przestrzeni (3072D) powoduje największą "różnorodność" danych.
+    - **t-SNE** (t-Distributed Stochastic Neighbor Embedding) koncentruje się na tym, 
+      żeby punkty, które są blisko siebie w oryginalnej przestrzeni, pozostały blisko 
+      także w przestrzeni 2D. 
+      
+    W obu przypadkach otrzymujemy "spłaszczoną" mapę, na której widać, czy zdania 
+    IND i COL (z różnych języków) są razem czy osobno.
+    """)
+
     fig_pca_2d = generate_interactive_pca_2d(all_emb, all_lbl)
     fig_tsne_2d = generate_interactive_tsne_2d(all_emb, all_lbl)
     st.plotly_chart(fig_pca_2d, use_container_width=True)
     st.plotly_chart(fig_tsne_2d, use_container_width=True)
 
+    # 6. Wizualizacje 3D: PCA i t-SNE
     st.subheader("Interaktywna wizualizacja 3D PCA")
-    st.write(
-        "Tutaj można obracać wykres 3D PCA oraz filtrować dane według klastrów, co ułatwia analizę struktury semantycznej.")
+    st.write("""
+    Tutaj możesz zobaczyć zdania w **trzech wymiarach** PCA. 
+    Możesz obracać wykres i odfiltrowywać niektóre grupy, aby lepiej zobaczyć relacje 
+    między zdaniami z różnych kategorii.
+    """)
     fig_pca_3d = generate_interactive_pca_3d(all_emb, all_lbl)
     st.plotly_chart(fig_pca_3d, use_container_width=True)
 
     st.subheader("Interaktywna wizualizacja 3D t-SNE")
-    st.write("Prezentuję interaktywny wykres t-SNE 3D, który pozwala odkryć nieliniowe zależności i ukryte klastery.")
+    st.write("""
+    Podobnie jak przy PCA 3D, ale używamy **t-SNE**. 
+    Ten wykres też można obracać, żeby zobaczyć, jak w 3D rozkładają się zdania 
+    indywidualistyczne i kolektywistyczne w różnych językach.
+    """)
     fig_tsne_3d = generate_interactive_tsne_3d(all_emb, all_lbl)
     st.plotly_chart(fig_tsne_3d, use_container_width=True)
 
+    # 7. Klasyfikacja metodą centroidów
     st.subheader("Klasyfikacja nowego tekstu (metoda centroidów)")
-    st.write(
-        "Wprowadź tekst (angielski, polski lub japoński), a zamienię go na wektor i porównam z centroidami grup. Wynik klasyfikacji pokaże, do której grupy tekst jest najbliższy semantycznie.")
+    st.write("""
+    **Na czym polega metoda centroidów?**  
+    - Dla każdej grupy (ENG_IND, ENG_COL, POL_IND, POL_COL, JAP_IND, JAP_COL) 
+      liczymy **centroid**, czyli uśredniony wektor wszystkich zdań treningowych 
+      z danej kategorii.  
+    - Jeśli wprowadzisz nowy tekst, zamieniamy go również na wektor 
+      (embedding 3072D).  
+    - Mierzymy, do którego centroidu Twój tekst jest najbliższy (np. 
+      obliczając podobieństwo kosinusowe).  
+    - Największe podobieństwo oznacza przewidywaną kategorię.  
+
+    Ta metoda jest prosta i szybka, ale nie zawsze najbardziej precyzyjna, 
+    bo zakłada, że jeden "średni" wektor dobrze reprezentuje całą kategorię.
+    """)
+
+    # Pole tekstowe i przycisk w aplikacji
     user_text = st.text_area("Wpisz tekst:", value="I believe in working together for the greater good.")
     if st.button("Klasyfikuj (centroidy)"):
         results = klasyfikuj_tekst(user_text)
@@ -96,56 +158,91 @@ def run_streamlit_app():
         for cat, val in results:
             st.write(f"- {cat}: {val:.4f}")
 
+    # 8. Klasyfikacja przy użyciu modelu ML (regresji logistycznej)
     st.subheader("Klasyfikacja nowego tekstu (uczenie maszynowe)")
-    st.write(
-        "Tutaj korzystam z klasyfikatora wytrenowanego na podstawie embeddingów. Model ML (regresja logistyczna) lepiej uchwyca złożone zależności w danych.")
+    st.write("""
+    **Na czym polega model ML (regresja logistyczna)?**  
+    - Najpierw bierzemy wszystkie zdania (ENG_IND, ENG_COL, POL_IND, 
+      POL_COL, JAP_IND, JAP_COL) i ich embeddingi.  
+    - Budujemy model (regresję logistyczną) – to narzędzie statystyczne, które 
+      "uczy się" przypisywać nowe zdania do odpowiedniej kategorii.  
+    - Gdy wprowadzisz nowy tekst, obliczamy jego embedding, a następnie 
+      model przewiduje, do której klasy (z sześciu dostępnych) należy 
+      ten tekst, **podając też prawdopodobieństwo** przynależności 
+      do każdej kategorii.  
+
+    Ta metoda może być dokładniejsza od centroidów, bo uwzględnia 
+    różnorodność zdań w każdej kategorii, a nie tylko "średnią".
+    """)
+
+    # Przyciski w aplikacji do trenowania / wczytania modelu i predykcji
     if st.button("Trenuj/Wczytaj klasyfikator ML i przetestuj"):
-        # Używamy funkcji get_ml_classifier, która wczytuje zapisany model lub trenuje nowy
-        clf = get_ml_classifier(all_emb, all_lbl)
+        clf = get_ml_classifier(all_emb, all_lbl)  # wczytujemy lub trenujemy
         pred_label, prob_dict = ml_klasyfikuj_tekst(user_text, clf)
         st.write("**Wynik klasyfikacji ML:**")
         st.write(" Przewidywana etykieta:", pred_label)
-        # Prezentacja rozkładu prawdopodobieństwa w formie tabelarycznej
+        
+        # Prezentacja rozkładu prawdopodobieństwa w formie tabeli
         prob_df = pd.DataFrame(list(prob_dict.items()), columns=["Etykieta", "Prawdopodobieństwo"])
         prob_df["Prawdopodobieństwo (%)"] = prob_df["Prawdopodobieństwo"] * 100
         st.table(prob_df[["Etykieta", "Prawdopodobieństwo (%)"]])
 
+    # 9. Raport statystyczny
     st.subheader("Raport statystyczny")
-    st.write(
-        "Poniżej przedstawiam wyniki analizy statystycznej dystansów między embeddingami, obliczonych dla trzech miar (euklidesowej, kosinusowej, Manhattan) z poziomem istotności 0.01.")
+    st.write("""
+    Poniżej przedstawiam wyniki analizy statystycznej dystansów między embeddingami, 
+    obliczonych dla trzech różnych miar (euklidesowej, kosinusowej, Manhattan). 
+    Sprawdzamy, czy różnice między językami (np. polski vs. angielski) są istotne 
+    (p < 0.01), korzystając m.in. z testu Manna–Whitneya przy nienormalnych rozkładach danych.
+    """)
+
     report_text = generate_statistical_report()
     st.text_area("Raport statystyczny", report_text, height=300)
 
+    # 10. Wnioski i interpretacja
     st.subheader("Wnioski")
     st.markdown("""
 **Wnioski i interpretacja wyników**
 
 1. **Porównanie języka polskiego z angielskim**  
-   Analiza dystansów między wektorami zdań wskazuje, że mediana dystansu dla języka polskiego jest niższa niż dla języka angielskiego (np. mediana kosinusowa: 0.5894 vs. 0.7788). Oznacza to, że reprezentacje semantyczne zdań IND i COL w języku polskim są bardziej zbliżone, co może wynikać z cech językowych lub specyfiki danych treningowych.
+   - W wynikach widać, że polskie zdania IND i COL są bliżej siebie (mniejszy dystans) 
+     niż analogiczne zdania w języku angielskim. 
+     To może wynikać z charakterystyki języka, kultury lub danych, na których 
+     trenowano model. 
 
 2. **Analiza języka japońskiego**  
-   Dla języka japońskiego uzyskano wartości pośrednie – zarówno w metryce euklidesowej, kosinusowej, jak i Manhattan. Wynik pośredni sugeruje, że chociaż kultura japońska jest silnie kolektywistyczna, model wykrywa pewne podobieństwo między reprezentacjami japońskimi a angielskimi, ale nadal zdania IND i COL są statystycznie bliżej siebie niż w angielskim.
+   - Japońskie zdania IND i COL są także bliżej siebie niż w angielskim, 
+     choć często wypadają pośrednio między polskim a angielskim. 
+     Może to odzwierciedlać fakt, że kultura japońska (bardzo kolektywistyczna) 
+     przejawia się w zdaniach, ale model nie oddaje tego w 100%.
 
 3. **Znaczenie testów statystycznych**  
-   Testy normalności (Shapiro-Wilka i Kolmogorova-Smirnova) wskazują, że rozkłady dystansów nie są normalne. W związku z tym, zastosowano test nieparametryczny Mann–Whitney. Bardzo niskie wartości p (p < 0.01) dla obu testów potwierdzają, że obserwowane różnice między grupami nie są wynikiem przypadku.
+   - Ze względu na nienormalne rozkłady danych zastosowaliśmy test Manna–Whitneya, 
+     który potwierdza, że różnice między językami są istotne (p < 0.01). 
 
-**Podsumowanie ogólne:**  
-- **Metoda centroidów:** Nowy tekst jest zamieniany na wektor, a następnie porównywany z centroidami dla każdej kategorii. Ranking kosinusowych podobieństw pozwala szybko określić, która grupa jest najbardziej zbliżona semantycznie.
-- **Klasyfikacja ML:** Wytrenowany model (regresja logistyczna) umożliwia przypisanie nowego tekstu do jednej z kategorii wraz z rozkładem prawdopodobieństwa, co daje dodatkową informację o pewności predykcji.
-- **Analiza statystyczna:** Wyniki testów potwierdzają, że różnice między językami (m.in. mniejsze dystanse dla języka polskiego) są statystycznie istotne. Oznacza to, że reprezentacje semantyczne zdań różnią się w zależności od języka, co ma potencjalne implikacje dla badań nad modelami językowymi.
-
-Te wyniki stanowią solidną podstawę do dalszych badań nad reprezentacjami wektorowymi i ich zastosowaniami w analizie semantycznej tekstu.
+**Metoda centroidów** pozwala szybko oszacować, do której kategorii 
+zbadany tekst najbliżej pasuje.  
+**Klasyfikator ML** (regresja logistyczna) daje bogatszą analizę, w tym 
+procentowe prawdopodobieństwa, co bywa cenną informacją w praktyce.
     """)
 
+    # 11. Podsumowanie końcowe
     st.subheader("Podsumowanie")
-    st.write(
-        "Model OpenAI text-embedding-3-large generuje precyzyjne reprezentacje, które pozwalają wykryć subtelne różnice semantyczne między emocjami wyrażanymi w różnych językach. Analiza wskazuje, że język polski charakteryzuje się mniejszymi różnicami między zdaniami indywidualistycznymi a kolektywistycznymi, natomiast wyniki dla języka japońskiego plasują się pośrednio między polskim a angielskim. Wyniki te, potwierdzone analizą statystyczną, mogą pomóc w lepszym zrozumieniu, jak modele językowe interpretują różnice semantyczne wynikające ze specyfiki językowej.")
+    st.write("""
+Model OpenAI `text-embedding-3-large` potrafi wychwycić subtelne różnice 
+semantyczne między zdaniami indywidualistycznymi a kolektywistycznymi 
+w różnych językach. 
+Polski wydaje się mieć mniejsze różnice (embeddingowo) między IND i COL 
+niż w angielskim, a japoński ma wynik pośredni. 
+Wyniki te, potwierdzone statystycznie (p < 0.01), sugerują, że modele językowe 
+mogą w różny sposób odwzorowywać cechy wynikające z kultury i struktury języka.
+    """)
 
-    # Zapis raportu statystycznego do pliku
+    # 12. Zapis raportu do pliku
     with open("raport_statystyczny.txt", "w", encoding="utf-8") as f:
         f.write(report_text)
     st.success("Raport statystyczny został zapisany w pliku 'raport_statystyczny.txt'.")
 
-
+# Uruchomienie aplikacji
 if __name__ == "__main__":
     run_streamlit_app()
