@@ -421,18 +421,11 @@ def generate_statistical_report():
                ("Kosinus (1 - cos)", dist_cosine),
                ("Manhattan", dist_manhattan)]
     
-    # Przyjmujemy, że embeddingi dla poszczególnych kategorii są dostępne:
-    # pol_ind_embeddings, pol_col_embeddings, eng_ind_embeddings, eng_col_embeddings, jap_ind_embeddings, jap_col_embeddings
-
     for metric_name, metric_func in metrics:
         report += f"\n=== Metryka: {metric_name} ===\n"
         
-        # TESTY H1: RÓŻNICOWANIE KATEGORII W RAMACH JEDNEGO JĘZYKA
-        # Obliczamy dystanse między zdaniami IND a COL (inter-kategoria)
-        # oraz dystanse wewnątrz tej samej kategorii (intra-kategoria) dla każdego języka.
         def intra_category_dist(embeddings):
             dists = all_pairwise(embeddings, embeddings, metric_func)
-            # Usuwamy dystanse zerowe (self-pary)
             return [d for d in dists if d > 1e-12]
         
         intra_pol_ind = intra_category_dist(pol_ind_embeddings)
@@ -442,17 +435,14 @@ def generate_statistical_report():
         intra_jap_ind = intra_category_dist(jap_ind_embeddings)
         intra_jap_col = intra_category_dist(jap_col_embeddings)
         
-        # Łączymy dystanse wewnątrz jednej kategorii dla danego języka
         intra_pol = intra_pol_ind + intra_pol_col
         intra_eng = intra_eng_ind + intra_eng_col
         intra_jap = intra_jap_ind + intra_jap_col
         
-        # Obliczamy dystanse między zdaniami IND i COL (inter-kategoria)
         dist_pol = all_pairwise(pol_ind_embeddings, pol_col_embeddings, metric_func)
         dist_eng = all_pairwise(eng_ind_embeddings, eng_col_embeddings, metric_func)
         dist_jap = all_pairwise(jap_ind_embeddings, jap_col_embeddings, metric_func)
         
-        # Tworzymy wykresy rozkładu dla każdego języka, aby wizualnie ocenić normalność
         plot_distribution(intra_pol, dist_pol,
                           "Intra POL", "Inter POL",
                           f"Dystrybucja dystansów dla języka polskiego ({metric_name} - H1)",
@@ -466,8 +456,6 @@ def generate_statistical_report():
                           f"Dystrybucja dystansów dla języka japońskiego ({metric_name} - H1)",
                           f"dist_jap_{metric_name.replace(' ','_')}.png")
         
-        # Testujemy, czy dystanse inter-kategorii są wyższe niż dystanse intra-kategorii dla każdego języka
-        # Używamy testu nieparametrycznego Mann-Whitney U, ponieważ nie zakładamy rozkładu normalnego.
         stat_h1_pol, p_h1_pol = mannwhitneyu(dist_pol, intra_pol, alternative='greater')
         stat_h1_eng, p_h1_eng = mannwhitneyu(dist_eng, intra_eng, alternative='greater')
         stat_h1_jap, p_h1_jap = mannwhitneyu(dist_jap, intra_jap, alternative='greater')
@@ -490,8 +478,6 @@ def generate_statistical_report():
             report += "  [H1] Japoński: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
         report += "--- KONIEC TESTU (H1: intra vs. inter) ---\n"
         
-        # TESTY H2/H3: PORÓWNANIE MIĘDZY JĘZYKAMI
-        # Testujemy rozkłady dystansów między IND i COL dla poszczególnych języków
         p_s_pol, p_k_pol = test_normality(dist_pol)
         p_s_eng, p_k_eng = test_normality(dist_eng)
         p_s_jap, p_k_jap = test_normality(dist_jap)
@@ -502,7 +488,6 @@ def generate_statistical_report():
         report += f"[H2/H3] Shapiro (Eng) p={p_s_eng:.4f}, K-S (Eng) p={p_k_eng:.4f}\n"
         report += f"[H2/H3] Shapiro (Jap) p={p_s_jap:.4f}, K-S (Jap) p={p_k_jap:.4f}\n"
         
-        # Rysujemy wykresy rozkładu dla testów H2/H3
         plt.figure()
         plt.hist(dist_pol, bins=30, alpha=0.7, label="Polish")
         plt.hist(dist_eng, bins=30, alpha=0.7, label="English")
@@ -565,7 +550,6 @@ def klasyfikuj_tekst(txt):
     wyniki = {}
     for key, cent in centroidy.items():
         wyniki[key] = cos_sim(vec, cent)
-    # Sortujemy wyniki malejąco według podobieństwa
     return sorted(wyniki.items(), key=lambda x: x[1], reverse=True)
 
 ###############################################
@@ -594,9 +578,7 @@ def ml_klasyfikuj_tekst(txt, clf):
     vec /= norm(vec)
     pred = clf.predict([vec])[0]
     proba = clf.predict_proba([vec])[0]
-    # Tworzymy słownik z prawdopodobieństwami – klasy pobieramy z atrybutu modelu
     prob_dict = {label: prob for label, prob in zip(clf.classes_, proba)}
-    # Sortujemy słownik malejąco
     prob_dict = dict(sorted(prob_dict.items(), key=lambda x: x[1], reverse=True))
     return pred, prob_dict
 
@@ -613,10 +595,43 @@ def get_ml_classifier(all_embeddings, all_labels, model_path="ml_classifier.pkl"
     return clf
 
 ###############################################
+# DODATKOWE FUNKCJE: INTERAKTYWNE WYKRESY ROZKŁADU
+###############################################
+import plotly.graph_objects as go
+
+def generate_distribution_chart(data1, data2, label1, label2, title):
+    fig = go.Figure()
+    fig.add_trace(go.Histogram(x=data1, histnorm='probability density', name=label1, opacity=0.5))
+    fig.add_trace(go.Histogram(x=data2, histnorm='probability density', name=label2, opacity=0.5))
+    fig.update_layout(title=title, xaxis_title="Dystans", yaxis_title="Gęstość", barmode="overlay")
+    return fig
+
+def generate_interactive_distribution_charts():
+    metrics = [("Euklides", dist_euclidean),
+               ("Kosinus", dist_cosine),
+               ("Manhattan", dist_manhattan)]
+    figures = {}
+    for metric_name, metric_func in metrics:
+        def intra_category_dist(embeddings):
+            dists = all_pairwise(embeddings, embeddings, metric_func)
+            return [d for d in dists if d > 1e-12]
+        intra_pol = intra_category_dist(pol_ind_embeddings) + intra_category_dist(pol_col_embeddings)
+        intra_eng = intra_category_dist(eng_ind_embeddings) + intra_category_dist(eng_col_embeddings)
+        intra_jap = intra_category_dist(jap_ind_embeddings) + intra_category_dist(jap_col_embeddings)
+        dist_pol = all_pairwise(pol_ind_embeddings, pol_col_embeddings, metric_func)
+        dist_eng = all_pairwise(eng_ind_embeddings, eng_col_embeddings, metric_func)
+        dist_jap = all_pairwise(jap_ind_embeddings, jap_col_embeddings, metric_func)
+
+        fig_pol = generate_distribution_chart(intra_pol, dist_pol, "Intra POL", "Inter POL", f"Dystrybucja dystansów (Polski) - {metric_name}")
+        fig_eng = generate_distribution_chart(intra_eng, dist_eng, "Intra ENG", "Inter ENG", f"Dystrybucja dystansów (Angielski) - {metric_name}")
+        fig_jap = generate_distribution_chart(intra_jap, dist_jap, "Intra JAP", "Inter JAP", f"Dystrybucja dystansów (Japoński) - {metric_name}")
+        figures[metric_name] = {"POL": fig_pol, "ENG": fig_eng, "JAP": fig_jap}
+    return figures
+
+###############################################
 # BLOK GŁÓWNY – NIE URUCHAMIAMY INTERFEJSU STREAMLIT
 ###############################################
 if __name__ == "__main__":
-    # Przygotowanie wspólnego zbioru embeddingów i etykiet
     all_embeddings = np.concatenate([eng_ind_embeddings, eng_col_embeddings,
                                      pol_ind_embeddings, pol_col_embeddings,
                                      jap_ind_embeddings, jap_col_embeddings], axis=0)
@@ -627,23 +642,18 @@ if __name__ == "__main__":
                   ["JAP_IND"] * len(jap_ind_embeddings) +
                   ["JAP_COL"] * len(jap_col_embeddings))
 
-    # Informacja o dostępnych funkcjach wizualizacji
     print("Funkcje generujące wykresy interaktywne (PCA, t-SNE, UMAP 2D/3D) są dostępne przy imporcie modułu do aplikacji Streamlit.")
-
-    # 1) Generowanie raportu statystycznego i zapis do pliku
     report_text = generate_statistical_report()
     with open("raport_statystyczny.txt", "w", encoding="utf-8") as f:
         f.write(report_text)
     print("Raport statystyczny zapisany w pliku 'raport_statystyczny.txt'.")
 
-    # 2) Przykładowa klasyfikacja metodą centroidów
     test_txt = "I believe in working together for the greater good."
     ranking = klasyfikuj_tekst(test_txt)
     print("\nKlasyfikacja testowego zdania (metoda centroidów):")
     for cat, sim in ranking:
         print(f" - {cat}: {sim:.4f}")
 
-    # 3) Użycie klasyfikatora ML – model jest trenowany tylko raz (lub wczytywany z pliku)
     clf = get_ml_classifier(all_embeddings, all_labels)
     pred_label, prob_dict = ml_klasyfikuj_tekst(test_txt, clf)
     print("\nKlasyfikacja testowego zdania (ML):")
