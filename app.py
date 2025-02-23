@@ -153,25 +153,70 @@ def run_streamlit_app():
     fig_distribution = distribution_figures[selected_metric][selected_language]
     st.plotly_chart(fig_distribution, use_container_width=True)
 
-    st.subheader("Wnioski")
     st.markdown("""
-**Główne spostrzeżenia**:
+# Wnioski
 
-1. **Polski vs. Angielski**  
-   - Polskie zdania IND i COL są zazwyczaj bliżej siebie niż angielskie, co może wynikać z cech językowych.
+1. **Skuteczne rozróżnienie kategorii (H₁):**  
+   Wyniki testów statystycznych dla trzech metryk (Euklides, Kosinus, Manhattan) potwierdzają, że model `text-embedding-3-large` potrafi wyraźnie rozróżnić zdania indywidualistyczne (IND) od kolektywistycznych (COL) w każdym z badanych języków (polskim, angielskim, japońskim). Testy normalności wykazały, że rozkłady odległości nie są normalne, co uzasadniło użycie testu nieparametrycznego Manna–Whitneya, dającego p < 0.01 dla wszystkich języków.
 
-2. **Język japoński**  
-   - Wyniki wskazują, że japońskie zdania IND i COL plasują się pośrednio między polskimi a angielskimi.
+2. **Różnice między językami (H₂/H₃):**  
+   - **Metryka Euklides:**  
+     - median(Pol)=1.0858  
+     - median(Jap)=1.1835  
+     - median(Eng)=1.2480  
+   - **Metryka Kosinus:**  
+     - median(Pol)=0.5894  
+     - median(Jap)=0.7004  
+     - median(Eng)=0.7788  
+   - **Metryka Manhattan:**  
+     - median(Pol)=46.7398  
+     - median(Jap)=50.8755  
+     - median(Eng)=53.7099  
+     
+   We wszystkich metrykach obserwujemy, że zdania w języku polskim wykazują najmniejsze dystanse między IND a COL, a angielskie – największe. Zaskakujące jest jednak, że mimo teoretycznego przyporządkowania japońskiego jako kultury o najbardziej kolektywistycznym charakterze, polskie zdania wykazują jeszcze mniejsze różnice (czyli są bardziej zbliżone semantycznie) niż japońskie.
 
-3. **Testy statystyczne**  
-   - Jeśli p < 0.01, różnice są statystycznie istotne.
+# Dyskusja
+
+## Niezgodność oczekiwań teoretycznych z wynikami empirycznymi
+
+**Teoretyczne założenie:**  
+W literaturze kulturowej japoński model komunikacji jest często opisywany jako najbardziej kolektywistyczny, co sugerowałoby, że zdania wyrażające zarówno postawy indywidualistyczne, jak i kolektywistyczne powinny być bardziej jednorodne (czyli ich reprezentacje wektorowe – embeddingi – powinny być bardzo zbliżone).  
+
+**Obserwacja:**  
+Wyniki analizy pokazują, że choć zarówno japońskie, jak i polskie zdania IND i COL są bliżej siebie niż ich angielskie odpowiedniki, to jednak dystanse między zdaniami w języku polskim są najmniejsze. To zaskakujące rozbieżność, ponieważ można by oczekiwać, że najbardziej kolektywistyczna kultura (japońska) wykazywałaby najmniejsze różnice między kategoriami.
+
+## Możliwe przyczyny tej anomalii
+
+- **Specyfika korpusu i wyboru danych:**  
+  - Zdania w języku polskim mogły zostać wyselekcjonowane lub skonstruowane w taki sposób, że cechy indywidualizmu i kolektywizmu są wyrażone w sposób bardzo jednoznaczny i skoncentrowany, co prowadzi do bardziej zwartych klastrów.
+  - W przypadku języka japońskiego, pomimo teoretycznego kolektywizmu, wyrażenia mogą być bardziej subtelne i wielowarstwowe (np. dzięki użyciu honoryfikatywnych form i kontekstowych niuansów), co skutkuje nieco większą rozpiętością reprezentacji.
+
+- **Cechy językowe i struktura gramatyczna:**  
+  - Język polski, będący językiem fleksyjnym, może wykazywać mniejszą różnorodność w zakresie wyrażania postaw społecznych, co powoduje, że zdania IND i COL są bardziej podobne semantycznie.
+  - Japoński, mimo swojej kolektywistycznej natury kulturowej, posiada bogaty system wyrażeń i form grzecznościowych, co może wpływać na większą rozbieżność w reprezentacjach, nawet przy wyraźnie kolektywistycznych wartościach.
+
+- **Wpływ modelu i danych treningowych:**  
+  - Model `text-embedding-3-large` mógł być trenowany głównie na danych anglojęzycznych, co mogło wpłynąć na sposób reprezentowania cech kulturowych w innych językach.
+  - Jakość i ilość dostępnych danych w języku japońskim oraz polskim mogą znacząco różnić się od angielskich, co wpływa na precyzję i spójność wyodrębnionych wektorów.
+
+- **Efekt tłumaczenia:**  
+  - W przypadku badań porównawczych często stosuje się tłumaczenia zdań. Bezpośrednie tłumaczenia z języka angielskiego na polski mogą nie oddawać pełni niuansów kulturowych, a w rezultacie generować bardziej jednorodne reprezentacje.
+  
+- **Różnice w interpretacji pojęć kulturowych:**  
+  - Pojęcia indywidualizmu i kolektywizmu mogą być rozumiane i wyrażane inaczej w różnych językach. W Polsce może istnieć tendencja do wyrażania tych postaw w sposób bardziej dychotomiczny, co skutkuje mniejszymi odległościami między reprezentacjami IND i COL.
+
+# Podsumowanie
+
+Badanie wskazuje, że:
+- **Model embeddingowy** skutecznie rozróżnia zdania indywidualistyczne i kolektywistyczne w trzech językach, co potwierdzają istotne statystycznie różnice (p < 0.01).
+- **Różnice semantyczne** (mierzone dystansami wektorowymi) są największe w języku angielskim, natomiast zarówno polskie, jak i japońskie zdania wykazują mniejsze rozbieżności.
+- **Zaskakujący wynik:** Mimo że japoński jest teoretycznie najbardziej kolektywistyczny, to zdania w języku polskim są reprezentowane jako jeszcze bardziej zbliżone.  
+- **Potencjalne przyczyny** tej anomalii mogą obejmować specyfikę korpusu, cechy językowe, wpływ danych treningowych oraz ewentualne efekty tłumaczenia i interpretacji kulturowych.  
+
+Ogólnie rzecz biorąc, wyniki te sugerują, że choć metody oparte na reprezentacjach wektorowych są użyteczne w badaniach kulturowych, wyniki należy interpretować w kontekście specyfiki danych oraz z uwzględnieniem subtelności, jakie niesie ze sobą język i kultura.
+
     """)
-    st.subheader("Podsumowanie")
-    st.write("""
-Analiza sugeruje, że model `text-embedding-3-large` różnicuje zdania indywidualistyczne i kolektywistyczne w różnych językach.
-Polskie zdania IND i COL są w przestrzeni wektorowej bliżej siebie niż ich angielskie odpowiedniki,
-a japońskie zdania plasują się pośrednio. Testy statystyczne (w tym dodatkowe testy H₁) potwierdzają, że te różnice nie są przypadkowe.
-    """)
+
     with open("raport_statystyczny.txt", "w", encoding="utf-8") as f:
         f.write(report_text)
     st.success("Raport statystyczny został zapisany w pliku 'raport_statystyczny.txt'.")
