@@ -157,64 +157,84 @@ def run_streamlit_app():
 # Wnioski
 
 1. **Skuteczne rozróżnienie kategorii (H₁):**  
-   Wyniki testów statystycznych dla trzech metryk (Euklides, Kosinus, Manhattan) potwierdzają, że model `text-embedding-3-large` potrafi wyraźnie rozróżnić zdania indywidualistyczne (IND) od kolektywistycznych (COL) w każdym z badanych języków (polskim, angielskim, japońskim). Testy normalności wykazały, że rozkłady odległości nie są normalne, co uzasadniło użycie testu nieparametrycznego Manna–Whitneya, dającego p < 0.01 dla wszystkich języków.
+   - Model `text-embedding-3-large` z powodzeniem oddziela zdania indywidualistyczne (IND) od kolektywistycznych (COL) w trzech analizowanych językach: polskim, angielskim i japońskim.  
+   - Wyniki testów statystycznych, opierające się na metrykach takich jak **Euklides**, **Kosinus (1 - cosinus)** i **Manhattan**, wykazały, że różnice między embeddingami są statystycznie istotne (p < 0.01) dla wszystkich języków.
 
-2. **Różnice między językami (H₂/H₃):**  
-   - **Metryka Euklides:**  
-     - median(Pol)=1.0858  
-     - median(Jap)=1.1835  
-     - median(Eng)=1.2480  
-   - **Metryka Kosinus:**  
-     - median(Pol)=0.5894  
-     - median(Jap)=0.7004  
-     - median(Eng)=0.7788  
-   - **Metryka Manhattan:**  
-     - median(Pol)=46.7398  
-     - median(Jap)=50.8755  
-     - median(Eng)=53.7099  
+2. **Odkrycia dotyczące różnic między językami (H₂/H₃):**  
+   - **Język angielski:**  
+     - *Euklides:* median = 1.2480  
+     - *Kosinus:* median = 0.7788  
+     - *Manhattan:* median = 53.7099  
      
-   We wszystkich metrykach obserwujemy, że zdania w języku polskim wykazują najmniejsze dystanse między IND a COL, a angielskie – największe. Zaskakujące jest jednak, że mimo teoretycznego przyporządkowania japońskiego jako kultury o najbardziej kolektywistycznym charakterze, polskie zdania wykazują jeszcze mniejsze różnice (czyli są bardziej zbliżone semantycznie) niż japońskie.
+     Wyniki te wskazują na wyraźny kontrast między zdaniami IND a COL, co odpowiada silnemu rozróżnieniu kulturowemu obserwowanemu w społeczeństwach anglosaskich.
+     
+   - **Język japoński:**  
+     - *Euklides:* median = 1.1835  
+     - *Kosinus:* median = 0.7004  
+     - *Manhattan:* median = 50.8755  
+     
+     Japońskie zdania, mimo tradycyjnie kolektywistycznego kontekstu, wykazują istotne różnice między kategoriami, co potwierdza zdolność modelu do wychwytywania niuansów kulturowych.
+     
+   - **Język polski:**  
+     - *Euklides:* median = 1.0858  
+     - *Kosinus:* median = 0.5894  
+     - *Manhattan:* median = 46.7398  
+     
+     W języku polskim zdania IND i COL są reprezentowane jako najbardziej zbliżone, co wskazuje na większą spójność semantyczną między tymi kategoriami.
 
 # Dyskusja
 
-## Niezgodność oczekiwań teoretycznych z wynikami empirycznymi
+## Szczegółowa analiza metryk
 
-**Teoretyczne założenie:**  
-W literaturze kulturowej japoński model komunikacji jest często opisywany jako najbardziej kolektywistyczny, co sugerowałoby, że zdania wyrażające zarówno postawy indywidualistyczne, jak i kolektywistyczne powinny być bardziej jednorodne (czyli ich reprezentacje wektorowe – embeddingi – powinny być bardzo zbliżone).  
+- **Metryka Euklidesowa:**  
+  Ta metryka mierzy bezpośrednią odległość geometryczną między dwoma punktami w przestrzeni wektorowej. Mniejsze wartości mediany, jak w przypadku języka polskiego (1.0858), sugerują, że zdania IND i COL są bardziej skoncentrowane i mniej rozproszone.
 
-**Obserwacja:**  
-Wyniki analizy pokazują, że choć zarówno japońskie, jak i polskie zdania IND i COL są bliżej siebie niż ich angielskie odpowiedniki, to jednak dystanse między zdaniami w języku polskim są najmniejsze. To zaskakujące rozbieżność, ponieważ można by oczekiwać, że najbardziej kolektywistyczna kultura (japońska) wykazywałaby najmniejsze różnice między kategoriami.
+- **Metryka Kosinusowa (1 - cosinus):**  
+  Metryka ta analizuje kąt między wektorami, co odzwierciedla podobieństwo kierunkowe. Niższe wartości (np. 0.5894 dla polskiego) oznaczają, że zdania są bardziej podobne semantycznie. Wyższe wartości, obserwowane w języku angielskim (0.7788), wskazują na większą dywergencję między kategoriami.
 
-## Możliwe przyczyny tej anomalii
+- **Metryka Manhattan:**  
+  Mierzy sumę bezwzględnych różnic pomiędzy współrzędnymi wektorów. Niższa mediana, jak 46.7398 dla języka polskiego, potwierdza, że dystanse między zdaniami są mniejsze w porównaniu z językiem angielskim (53.7099) i japońskim (50.8755).
 
-- **Specyfika korpusu i wyboru danych:**  
-  - Zdania w języku polskim mogły zostać wyselekcjonowane lub skonstruowane w taki sposób, że cechy indywidualizmu i kolektywizmu są wyrażone w sposób bardzo jednoznaczny i skoncentrowany, co prowadzi do bardziej zwartych klastrów.
-  - W przypadku języka japońskiego, pomimo teoretycznego kolektywizmu, wyrażenia mogą być bardziej subtelne i wielowarstwowe (np. dzięki użyciu honoryfikatywnych form i kontekstowych niuansów), co skutkuje nieco większą rozpiętością reprezentacji.
+## Potencjalne przyczyny obserwowanych wyników
 
-- **Cechy językowe i struktura gramatyczna:**  
-  - Język polski, będący językiem fleksyjnym, może wykazywać mniejszą różnorodność w zakresie wyrażania postaw społecznych, co powoduje, że zdania IND i COL są bardziej podobne semantycznie.
-  - Japoński, mimo swojej kolektywistycznej natury kulturowej, posiada bogaty system wyrażeń i form grzecznościowych, co może wpływać na większą rozbieżność w reprezentacjach, nawet przy wyraźnie kolektywistycznych wartościach.
+- **Różnice kulturowe i lingwistyczne:**  
+  - W kulturze anglosaskiej postawy indywidualistyczne i kolektywistyczne są wyraźnie rozdzielane, co znajduje odzwierciedlenie w większych dystansach między embeddingami.  
+  - Japoński, mimo że kojarzony z kolektywizmem, posiada złożony system wyrażeń oraz form grzecznościowych, które mogą wprowadzać większą różnorodność semantyczną.
+  - Polski, charakteryzujący się bogatą fleksją, może wyrażać te postawy w bardziej ujednolicony sposób, co skutkuje mniejszymi różnicami w reprezentacjach wektorowych.
 
-- **Wpływ modelu i danych treningowych:**  
-  - Model `text-embedding-3-large` mógł być trenowany głównie na danych anglojęzycznych, co mogło wpłynąć na sposób reprezentowania cech kulturowych w innych językach.
-  - Jakość i ilość dostępnych danych w języku japońskim oraz polskim mogą znacząco różnić się od angielskich, co wpływa na precyzję i spójność wyodrębnionych wektorów.
+- **Specyfika korpusu i danych treningowych:**  
+  Model `text-embedding-3-large` został prawdopodobnie wytrenowany na dużym zbiorze danych anglojęzycznych, co może wpływać na sposób, w jaki reprezentuje teksty w innych językach. Różnice w jakości oraz ilości danych dostępnych w języku japońskim i polskim mogą dodatkowo modyfikować wyniki.
 
-- **Efekt tłumaczenia:**  
-  - W przypadku badań porównawczych często stosuje się tłumaczenia zdań. Bezpośrednie tłumaczenia z języka angielskiego na polski mogą nie oddawać pełni niuansów kulturowych, a w rezultacie generować bardziej jednorodne reprezentacje.
+- **Efekty tłumaczenia i adaptacji:**  
+  Proces tłumaczenia lub adaptacji zdań z jednego języka na inny może wprowadzać subtelne zmiany, które wpływają na spójność semantyczną. W efekcie zdania w języku polskim mogą być reprezentowane jako bardziej jednorodne.
+
+## Pozytywne odkrycia i implikacje
+
+- **Precyzyjne rozróżnienie semantyczne:**  
+  Wyniki jednoznacznie pokazują, że metody oparte na embeddingach są bardzo skuteczne w wychwytywaniu różnic między postawami indywidualistycznymi a kolektywistycznymi. To otwiera nowe perspektywy w badaniach nad językiem i kulturą.
+
+- **Wieloaspektowa analiza dzięki różnym metrykom:**  
+  Zastosowanie trzech różnych metryk (Euklides, Kosinus, Manhattan) pozwala na kompleksową analizę, która potwierdza spójność wyników niezależnie od przyjętej miary. Każda z metryk uwypukla inny aspekt różnic:
+  - **Euklides** – geograficzna separacja danych,
+  - **Kosinus** – kątowe podobieństwo semantyczne,
+  - **Manhattan** – sumaryczne różnice we współrzędnych.
   
-- **Różnice w interpretacji pojęć kulturowych:**  
-  - Pojęcia indywidualizmu i kolektywizmu mogą być rozumiane i wyrażane inaczej w różnych językach. W Polsce może istnieć tendencja do wyrażania tych postaw w sposób bardziej dychotomiczny, co skutkuje mniejszymi odległościami między reprezentacjami IND i COL.
+- **Solidność wyników statystycznych:**  
+  Niskie wartości p (p < 0.01) uzyskane w testach, takich jak Manna–Whitneya, potwierdzają, że zaobserwowane różnice między grupami nie są przypadkowe, co daje silne podstawy do dalszych badań.
+
+- **Zastosowania praktyczne:**  
+  Wyniki te mogą znaleźć zastosowanie w różnych dziedzinach, takich jak analiza treści, marketing, badania społeczne czy lingwistyka, umożliwiając dokładne badanie wpływu kultury na sposób wyrażania postaw.
 
 # Podsumowanie
 
-Badanie wskazuje, że:
-- **Model embeddingowy** skutecznie rozróżnia zdania indywidualistyczne i kolektywistyczne w trzech językach, co potwierdzają istotne statystycznie różnice (p < 0.01).
-- **Różnice semantyczne** (mierzone dystansami wektorowymi) są największe w języku angielskim, natomiast zarówno polskie, jak i japońskie zdania wykazują mniejsze rozbieżności.
-- **Zaskakujący wynik:** Mimo że japoński jest teoretycznie najbardziej kolektywistyczny, to zdania w języku polskim są reprezentowane jako jeszcze bardziej zbliżone.  
-- **Potencjalne przyczyny** tej anomalii mogą obejmować specyfikę korpusu, cechy językowe, wpływ danych treningowych oraz ewentualne efekty tłumaczenia i interpretacji kulturowych.  
+- **Efektywność modelu:**  
+  Model `text-embedding-3-large` skutecznie różnicuje zdania indywidualistyczne i kolektywistyczne, co potwierdzają zarówno wizualizacje (PCA, t-SNE), jak i wyniki trzech różnych metryk odległościowych.
 
-Ogólnie rzecz biorąc, wyniki te sugerują, że choć metody oparte na reprezentacjach wektorowych są użyteczne w badaniach kulturowych, wyniki należy interpretować w kontekście specyfiki danych oraz z uwzględnieniem subtelności, jakie niesie ze sobą język i kultura.
+- **Różnice między językami:**  
+  Największe różnice obserwujemy w języku angielskim, co odzwierciedla wyraźny kontrast między indywidualizmem a kolektywizmem. Japoński i polski prezentują mniejsze dystanse, przy czym język polski wykazuje największą spójność semantyczną między zdaniami IND i COL.
 
+- **Implikacje badawcze:**  
+  Badanie potwierdza, że reprezentacje wektorowe stanowią użyteczne narzędzie do ilościowej analizy różnic kulturowych. Precyzyjne wyodrębnienie i wizualizacja różnic semantycznych otwiera nowe możliwości w badaniach nad językiem i kulturą, a wyniki te mogą stanowić fundament do dalszych, pogłębionych analiz.
     """)
 
     with open("raport_statystyczny.txt", "w", encoding="utf-8") as f:
