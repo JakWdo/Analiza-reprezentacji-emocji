@@ -10,7 +10,7 @@ import streamlit as st  # Funkcje Streamlit pozostają, gdyż są wykorzystywane
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from dotenv import load_dotenv
-from umap import UM
+from umap import UMAP
 # Statystyka
 from scipy.stats import mannwhitneyu, ttest_ind, shapiro, kstest
 from sklearn.linear_model import LogisticRegression
