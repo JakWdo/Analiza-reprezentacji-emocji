@@ -44,36 +44,57 @@ W tekstach pisanych można dostrzec delikatne różnice w sposobie wyrażania po
 
 ## **2. Reprezentacje wektorowe języka (embeddingi)**
 
-W przetwarzaniu języka naturalnego (NLP) komputery muszą w jakiś sposób „zrozumieć” tekst, choć początkowo jest on dla nich jedynie zbiorem znaków.  
-Właśnie dlatego powstała koncepcja **embeddingów** – można je traktować jako **matematyczny opis** zdania w postaci ciągu liczb (wektora).  
-Na przykład zdanie „Lubię pracować zespołowo” da się przekształcić w zestaw liczb w **przestrzeni wysokowymiarowej**.
+W przetwarzaniu języka naturalnego (NLP) komputer musi "zrozumieć" tekst, który dla maszyny jest początkowo jedynie ciągiem znaków. Aby umożliwić komputerom analizę, interpretację i porównywanie tekstów, stosuje się metodę, która nazywana jest **embeddingiem**. Embedding to sposób reprezentacji zdania jako matematycznego opisu – wektora liczb. Każde zdanie, np. „Lubię pracować zespołowo”, zostaje przekształcone w ciąg liczb, które umieszczone są w **przestrzeni wysokowymiarowej**.
 
-**Model `text-embedding-3-large` od OpenAI** (tak jak inne modele, np. `text-embedding-ada-002`, BERT, RoBERTa) został „nauczony” na ogromnych zasobach tekstu, by **podobne** zdania miały **zbliżone** wektory, a **odmienne** znaczeniowo zdania – **odległe** od siebie w tej przestrzeni.
+**Model `text-embedding-3-large` od OpenAI** (podobnie jak inne modele, np. `text-embedding-ada-002`, BERT czy RoBERTa) został wytrenowany na bardzo dużym zbiorze tekstów. Jego celem jest, aby zdania o podobnym znaczeniu miały wektory, które znajdują się blisko siebie, podczas gdy zdania znaczeniowo odmienne – były oddalone. W praktyce oznacza to, że przestrzeń wektorowa staje się odzwierciedleniem semantycznych relacji między zdaniami.
 
 ### **2.1. Co oznacza 3072 wymiary?**
 
-Każde zdanie (np. „Kocham samodzielność”) jest tu reprezentowane przez **3072 liczby**. Można o nich myśleć jako o 3072 **ukrytych „cechach”**, na podstawie których model ocenia podobieństwo zdań.  
-- Część z tych cech może oddawać ton emocjonalny,  
-- Inne – formalność lub rejestr językowy,  
-- Jeszcze inne – kontekst kulturowy czy specyficzne słownictwo.  
+W modelu `text-embedding-3-large` każde zdanie jest reprezentowane przez **3072 liczby**. Możemy traktować te liczby jako ukryte „cechy” języka, które model wyodrębnił podczas treningu. Każdy wymiar może odpowiadać:
+- Na przykład za ton emocjonalny zdania,
+- Za formalność lub rejestr językowy,
+- Za aspekty kulturowe czy specyficzne słownictwo.
 
-Przedstawienie tego w 2D jest trudne, dlatego stosujemy **PCA** lub **t-SNE**, aby „spłaszczyć” przestrzeń do mniejszej liczby wymiarów i **zobaczyć** położenie zdań na wykresie.  
-- Im bliżej siebie dwa wektory, tym bardziej **podobne** zdania (w rozumieniu modelu).
+Z uwagi na bardzo wysoką liczbę wymiarów trudno jest bezpośrednio wizualizować takie dane. Dlatego stosuje się metody redukcji wymiarowości, takie jak **PCA** (Principal Component Analysis) czy **t-SNE** (t-Distributed Stochastic Neighbor Embedding). Pozwalają one „spłaszczyć” przestrzeń 3072-wymiarową do 2D lub 3D, co umożliwia nam wizualne porównanie położeń wektorów. W ten sposób, jeśli dwa wektory (czyli reprezentacje dwóch zdań) są blisko siebie w przestrzeni, uznajemy, że zdania te są semantycznie podobne.
 
 ---
 
 ## **3. Cel badania i hipotezy**
 
-Celem tego projektu jest **próba wykazania, że istnieją faktyczne różnice kulturowe** (np. między indywidualizmem a kolektywizmem) oraz ich obraz w języku, przy użyciu **matematycznych i algorytmicznych metod**. Chcemy sprawdzić, **czy** i **jak** model `text-embedding-3-large` odzwierciedla te różnice w różnych językach.
+Celem tego projektu jest sprawdzenie, czy **istnieją rzeczywiste różnice kulturowe** w sposobie wyrażania postaw indywidualistycznych i kolektywistycznych, oraz czy te różnice są widoczne w reprezentacjach wektorowych generowanych przez model `text-embedding-3-large`. Badanie skupia się na trzech językach: angielskim, polskim i japońskim.
 
-### **Zidentyfikować różnice**
-Czy model tak samo odróżnia zdania indywidualistyczne i kolektywistyczne we wszystkich językach (angielski, polski, japoński)?
+### **Hipotezy badawcze**
 
-### **Porównać dystanse**
-Czy np. w polskim rozbieżności między IND a COL (mierzone odległością wektorową) są **mniejsze** niż w angielskim, co sugerowałoby, że polski mniej różnicuje te dwa sposoby wyrażania się?
+1. **Różnicowanie kategorii w różnych językach**  
+   **Hipoteza H₁:** Model embeddingowy odróżnia zdania indywidualistyczne (IND) od kolektywistycznych (COL) w każdym języku.  
+   Statystycznie, oznacza to, że rozkłady odległości (np. miara kosinusowa lub euklidesowa) pomiędzy embeddingami zdań IND i COL będą istotnie różne w ramach danego języka.
 
-### **Statystyczna istotność**
-Jeśli widać, że w polskim dystanse są mniejsze – czy to przypadek? Wykorzystujemy testy statystyczne (np. Manna–Whitneya) i sprawdzamy, czy p < 0.01. Jeśli tak, to oznacza, że różnica raczej nie jest dziełem przypadku.
+2. **Porównanie dystansów między kategoriami w zależności od języka**  
+   **Hipoteza H₂:** W języku polskim (i ewentualnie japońskim) różnice między zdaniami IND i COL (mierzone odległościami wektorowymi) są mniejsze niż w języku angielskim.  
+   Statystycznie, oznacza to, że mediana odległości między wektorami zdań IND a COL w polskim (lub japońskim) będzie niższa niż w angielskim, co można przetestować używając testu Manna–Whitneya (alternatywa dla t-testu, gdy rozkłady nie są normalne) przy poziomie istotności p < 0.01.
+
+3. **Statystyczna istotność obserwowanych różnic**  
+   **Hipoteza H₃:** Zaobserwowane różnice w dystansach między kategoriami nie są przypadkowe.  
+   W tym celu stosujemy testy normalności (np. Shapiro-Wilka oraz test Kolmogorova-Smirnova), a następnie testy porównawcze (t-test lub test Manna–Whitneya) dla różnych metryk odległości (Euklides, Kosinus, Manhattan). Wynik p < 0.01 wskazuje, że różnice są statystycznie istotne.
+
+### **Sposób testowania hipotez**
+
+- **Obliczanie odległości:** Dla każdej pary zdań (np. między zdaniami IND i COL w danym języku) obliczamy odległości przy użyciu wybranych metryk (np. kosinusowej – 1 − cosinus, euklidesowej czy Manhattan).
+  
+- **Analiza rozkładu:** Sprawdzamy, czy rozkłady obliczonych odległości są zgodne z rozkładem normalnym przy użyciu testów Shapiro-Wilka i Kolmogorova-Smirnova. Jeśli rozkład nie jest normalny, stosujemy test nieparametryczny, taki jak test Manna–Whitneya.
+
+- **Porównanie median:** Porównujemy mediany odległości między embeddingami zdań IND i COL dla języka angielskiego, polskiego oraz japońskiego. Hipoteza H₂ przewiduje, że mediana dla języka polskiego (oraz potencjalnie japońskiego) będzie mniejsza niż dla języka angielskiego.
+
+- **Test istotności:** Jeśli wynik testu (np. test Manna–Whitneya) dla porównania mediana_angielski vs. mediana_polski (lub japoński) daje p < 0.01, można odrzucić hipotezę zerową, że różnice są przypadkowe, i przyjąć, że różnice te są statystycznie istotne.
+
+### **Wnioski teoretyczne**
+
+W kontekście teoretycznym założenie, że model embeddingowy potrafi uchwycić subtelne różnice kulturowe, opiera się na następującej idei:  
+- **Semantyczna reprezentacja:** Jeśli model został dobrze wytrenowany, to zdania o podobnym znaczeniu (np. wyrażające indywidualizm) powinny być reprezentowane przez wektory bliskie sobie w przestrzeni wektorowej.  
+- **Różnice kulturowe:** W praktyce sposób, w jaki dana kultura wyraża indywidualizm lub kolektywizm, może się różnić – np. język angielski może silniej rozróżniać te kategorie, podczas gdy język polski lub japoński może wykazywać mniejsze różnice.  
+- **Testy statystyczne:** Użycie testów statystycznych pozwala na ilościową weryfikację tej różnicy. Jeśli badania wykażą, że odległości między embeddingami zdań IND i COL w języku polskim są mniejsze i różnica ta jest istotna statystycznie, możemy wywnioskować, że model oddaje te subtelne różnice kulturowe.
+
+Podsumowując, projekt opiera się na hipotezach mówiących o różnicach w sposobie reprezentacji semantycznej zdań w zależności od języka, a ich weryfikacja odbywa się przez porównanie rozkładów odległości w przestrzeni embeddingowej oraz zastosowanie odpowiednich testów statystycznych (przy założeniu poziomu istotności p < 0.01). Taki podejście pozwala nie tylko na wizualną eksplorację danych, ale również na ilościową analizę różnic, co stanowi solidne narzędzie do badań nad kulturą i językiem.
 
 ---
 
@@ -414,15 +435,12 @@ def generate_interactive_umap_3d(all_emb, all_lbl):
 def dist_euclidean(a, b):
     return norm(a - b)
 
-
 def dist_cosine(a, b):
     c = np.dot(a, b) / (norm(a) * norm(b))
     return 1.0 - c
 
-
 def dist_manhattan(a, b):
     return np.sum(np.abs(a - b))
-
 
 def all_pairwise(emb_list_a, emb_list_b, dist_func):
     out = []
@@ -430,7 +448,6 @@ def all_pairwise(emb_list_a, emb_list_b, dist_func):
         for y in emb_list_b:
             out.append(dist_func(x, y))
     return out
-
 
 def test_normality(data):
     stat_s, p_s = shapiro(data)
@@ -443,55 +460,105 @@ def test_normality(data):
         stat_k, p_k = kstest(z, 'norm')
     return p_s, p_k
 
-
 def generate_statistical_report():
     report = ""
     metrics = [("Euklides", dist_euclidean),
                ("Kosinus (1 - cos)", dist_cosine),
                ("Manhattan", dist_manhattan)]
+    
     for metric_name, metric_func in metrics:
+        report += f"\n=== Metryka: {metric_name} ===\n"
+        
+        # TESTY H1: RÓŻNICOWANIE KATEGORII W RAMACH JEDNEGO JĘZYKA
+        # Obliczamy dystanse między zdaniami IND a COL (inter-kategoria)
+        # oraz dystanse wewnątrz tej samej kategorii (intra-kategoria) dla każdego języka.
+        def intra_category_dist(embeddings):
+            dists = all_pairwise(embeddings, embeddings, metric_func)
+            # Usuwamy dystanse zerowe (self-pary)
+            return [d for d in dists if d > 1e-12]
+        
+        intra_pol_ind = intra_category_dist(pol_ind_embeddings)
+        intra_pol_col = intra_category_dist(pol_col_embeddings)
+        intra_eng_ind = intra_category_dist(eng_ind_embeddings)
+        intra_eng_col = intra_category_dist(eng_col_embeddings)
+        intra_jap_ind = intra_category_dist(jap_ind_embeddings)
+        intra_jap_col = intra_category_dist(jap_col_embeddings)
+        
+        # Łączymy dystanse wewnątrz jednej kategorii dla danego języka
+        intra_pol = intra_pol_ind + intra_pol_col
+        intra_eng = intra_eng_ind + intra_eng_col
+        intra_jap = intra_jap_ind + intra_jap_col
+        
+        # Obliczamy dystanse między zdaniami IND i COL (inter-kategoria)
         dist_pol = all_pairwise(pol_ind_embeddings, pol_col_embeddings, metric_func)
         dist_eng = all_pairwise(eng_ind_embeddings, eng_col_embeddings, metric_func)
         dist_jap = all_pairwise(jap_ind_embeddings, jap_col_embeddings, metric_func)
+        
+        # Testujemy, czy dystanse inter-kategorii są wyższe niż dystanse intra-kategorii dla każdego języka
+        from scipy.stats import mannwhitneyu
+        stat_h1_pol, p_h1_pol = mannwhitneyu(dist_pol, intra_pol, alternative='greater')
+        stat_h1_eng, p_h1_eng = mannwhitneyu(dist_eng, intra_eng, alternative='greater')
+        stat_h1_jap, p_h1_jap = mannwhitneyu(dist_jap, intra_jap, alternative='greater')
+        
+        report += f"\n[H1] Test różnicowania kategorii w ramach jednego języka (intra vs. inter):\n"
+        report += f"  - Polski: p={p_h1_pol:.4f} (oczekiwane p < 0.01 dla potwierdzenia, że inter > intra)\n"
+        report += f"  - Angielski: p={p_h1_eng:.4f} (oczekiwane p < 0.01 dla potwierdzenia, że inter > intra)\n"
+        report += f"  - Japoński: p={p_h1_jap:.4f} (oczekiwane p < 0.01 dla potwierdzenia, że inter > intra)\n"
+        if p_h1_pol < 0.01:
+            report += "  [H1] Polski: Model wyraźnie różnicuje zdania IND od COL.\n"
+        else:
+            report += "  [H1] Polski: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
+        if p_h1_eng < 0.01:
+            report += "  [H1] Angielski: Model wyraźnie różnicuje zdania IND od COL.\n"
+        else:
+            report += "  [H1] Angielski: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
+        if p_h1_jap < 0.01:
+            report += "  [H1] Japoński: Model wyraźnie różnicuje zdania IND od COL.\n"
+        else:
+            report += "  [H1] Japoński: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
+        report += "--- KONIEC TESTU (H1: intra vs. inter) ---\n"
+        
+        # TESTY H2/H3: PORÓWNANIE MIĘDZY JĘZYKAMI
+        # Testujemy rozkłady dystansów między IND i COL dla poszczególnych języków
         p_s_pol, p_k_pol = test_normality(dist_pol)
         p_s_eng, p_k_eng = test_normality(dist_eng)
         p_s_jap, p_k_jap = test_normality(dist_jap)
         normal_pol = (p_s_pol > 0.05 and p_k_pol > 0.05)
         normal_eng = (p_s_eng > 0.05 and p_k_eng > 0.05)
         normal_jap = (p_s_jap > 0.05 and p_k_jap > 0.05)
-        report += f"\n=== Metryka: {metric_name} ===\n"
-        report += f" Shapiro (Pol) p={p_s_pol:.4f}, K-S (Pol) p={p_k_pol:.4f}\n"
-        report += f" Shapiro (Eng) p={p_s_eng:.4f}, K-S (Eng) p={p_k_eng:.4f}\n"
-        report += f" Shapiro (Jap) p={p_s_jap:.4f}, K-S (Jap) p={p_k_jap:.4f}\n"
+        report += f"\n[H2/H3] Shapiro (Pol) p={p_s_pol:.4f}, K-S (Pol) p={p_k_pol:.4f}\n"
+        report += f"[H2/H3] Shapiro (Eng) p={p_s_eng:.4f}, K-S (Eng) p={p_k_eng:.4f}\n"
+        report += f"[H2/H3] Shapiro (Jap) p={p_s_jap:.4f}, K-S (Jap) p={p_k_jap:.4f}\n"
         if normal_pol and normal_eng and normal_jap:
             from scipy.stats import ttest_ind
             stat_t_eng, p_t_eng = ttest_ind(dist_pol, dist_eng, equal_var=False)
             p_one_eng = p_t_eng / 2.0
             stat_t_jap, p_t_jap = ttest_ind(dist_jap, dist_eng, equal_var=False)
             p_one_jap = p_t_jap / 2.0
-            report += f" T-test Eng (dwustronny): p(dwu)={p_t_eng:.4f} => p(jednostronne)={p_one_eng:.4f}\n"
-            report += f" T-test Jap (dwustronny): p(dwu)={p_t_jap:.4f} => p(jednostronne)={p_one_jap:.4f}\n"
+            report += f" [H2/H3] T-test Eng (dwustronny): p(dwu)={p_t_eng:.4f} => p(jednostronne)={p_one_eng:.4f}\n"
+            report += f" [H2/H3] T-test Jap (dwustronny): p(dwu)={p_t_jap:.4f} => p(jednostronne)={p_one_jap:.4f}\n"
         else:
             from scipy.stats import mannwhitneyu
             stat_m_eng, p_m_eng = mannwhitneyu(dist_pol, dist_eng, alternative='two-sided')
             p_one_eng = p_m_eng / 2.0
             stat_m_jap, p_m_jap = mannwhitneyu(dist_jap, dist_eng, alternative='two-sided')
             p_one_jap = p_m_jap / 2.0
-            report += f" Mann–Whitney Eng (dwustronny): p(dwu)={p_m_eng:.4f} => p(jednostronne)={p_one_eng:.4f}\n"
-            report += f" Mann–Whitney Jap (dwustronny): p(dwu)={p_m_jap:.4f} => p(jednostronne)={p_one_jap:.4f}\n"
+            report += f" [H2/H3] Mann–Whitney Eng (dwustronny): p(dwu)={p_m_eng:.4f} => p(jednostronne)={p_one_eng:.4f}\n"
+            report += f" [H2/H3] Mann–Whitney Jap (dwustronny): p(dwu)={p_m_jap:.4f} => p(jednostronne)={p_one_jap:.4f}\n"
         med_pol = np.median(dist_pol)
         med_eng = np.median(dist_eng)
         med_jap = np.median(dist_jap)
-        report += f" median(Pol)={med_pol:.4f}, median(Eng)={med_eng:.4f}, median(Jap)={med_jap:.4f}\n"
+        report += f" [H2/H3] median(Pol)={med_pol:.4f}, median(Eng)={med_eng:.4f}, median(Jap)={med_jap:.4f}\n"
         if p_one_eng < 0.01 and med_pol < med_eng:
-            report += " Wynik Pol: Polskie zdania IND i COL są statystycznie bliżej siebie niż angielskie.\n"
+            report += " [H2/H3] Wynik Pol: Polskie zdania IND i COL są statystycznie bliżej siebie niż angielskie.\n"
         else:
-            report += " Wynik Pol: Brak istotnej różnicy między polskimi a angielskimi zdaniami.\n"
+            report += " [H2/H3] Wynik Pol: Brak istotnej różnicy między polskimi a angielskimi zdaniami.\n"
         if p_one_jap < 0.01 and med_jap < med_eng:
-            report += " Wynik Jap: Japońskie zdania IND i COL są statystycznie bliżej siebie niż angielskie.\n"
+            report += " [H2/H3] Wynik Jap: Japońskie zdania IND i COL są statystycznie bliżej siebie niż angielskie.\n"
         else:
-            report += " Wynik Jap: Brak istotnej różnicy między japońskimi a angielskimi zdaniami.\n"
-        report += "--- KONIEC TESTU ---\n"
+            report += " [H2/H3] Wynik Jap: Brak istotnej różnicy między japońskimi a angielskimi zdaniami.\n"
+        report += "--- KONIEC TESTU (H2/H3: porównanie między językami) ---\n"
+        
     return report
 
 ###############################################
@@ -515,9 +582,8 @@ def klasyfikuj_tekst(txt):
     wyniki = {}
     for key, cent in centroidy.items():
         wyniki[key] = cos_sim(vec, cent)
-    # Wyniki sortujemy malejąco według podobieństwa
+    # Sortujemy wyniki malejąco według podobieństwa
     return sorted(wyniki.items(), key=lambda x: x[1], reverse=True)
-
 
 ###############################################
 # KLASYFIKACJA TEKSTU (UCZENIE MASZYNOWE) – ULEPSZONA WERSJA
@@ -540,7 +606,6 @@ def train_ml_classifier(embeddings, labels):
     print(classification_report(y, best_model.predict(X)))
     return best_model
 
-
 def ml_klasyfikuj_tekst(txt, clf):
     vec = get_embedding(txt, model=EMBEDDING_MODEL)
     vec /= norm(vec)
@@ -548,10 +613,9 @@ def ml_klasyfikuj_tekst(txt, clf):
     proba = clf.predict_proba([vec])[0]
     # Tworzymy słownik z prawdopodobieństwami – klasy pobieramy z atrybutu modelu
     prob_dict = {label: prob for label, prob in zip(clf.classes_, proba)}
-    # Sortujemy słownik według wartości malejąco
+    # Sortujemy słownik malejąco
     prob_dict = dict(sorted(prob_dict.items(), key=lambda x: x[1], reverse=True))
     return pred, prob_dict
-
 
 def get_ml_classifier(all_embeddings, all_labels, model_path="ml_classifier.pkl"):
     if os.path.exists(model_path):
@@ -580,7 +644,7 @@ if __name__ == "__main__":
                   ["JAP_IND"] * len(jap_ind_embeddings) +
                   ["JAP_COL"] * len(jap_col_embeddings))
 
-    # Wyświetlamy informacje o dostępnych wykresach – funkcje interaktywne są przeznaczone do wykorzystania w Streamlit
+    # Informacja o dostępnych funkcjach wizualizacji
     print("Funkcje generujące wykresy interaktywne (PCA, t-SNE, UMAP 2D/3D) są dostępne przy imporcie modułu do aplikacji Streamlit.")
 
     # 1) Generowanie raportu statystycznego i zapis do pliku
