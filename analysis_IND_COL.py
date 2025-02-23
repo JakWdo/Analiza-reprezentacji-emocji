@@ -28,50 +28,98 @@ EMBEDDING_MODEL = "text-embedding-3-large"  # Model generuje wektory 3072D
 CACHE_FILE = "embeddings_cache_3_large.pkl"
 
 INTEGRATED_REPORT = '''
-# Jak komputer rozumie tekst?
+# **Teoria i kontekst badania**
 
-## 1.1. Jak komputer widzi zdania?
-Kiedy my czytamy tekst, od razu rozumiemy jego sens dzięki naszym doświadczeniom i wiedzy. 
-Komputer nie ma takich zdolności – dla niego tekst to tylko zbiór liter. 
-Żeby umożliwić mu analizę, zamieniamy każde zdanie na zestaw liczb, czyli **wektor**.
+## 1. **Podstawy lingwistyki kulturowej: indywidualizm vs. kolektywizm**
 
-W tym badaniu każde zdanie zamieniane jest na **wektor o 3072 liczbach**. 
-To tak, jakby każde zdanie było punktem w ogromnej przestrzeni liczącej 3072 wymiary. 
-Dzięki temu można porównywać zdania pod względem podobieństwa ich znaczenia.
+W psychologii i socjologii popularnym zagadnieniem jest różnica między kulturami **indywidualistycznymi** i **kolektywistycznymi**:
 
-### Dlaczego akurat 3072 liczby?
-Ta liczba pochodzi z konfiguracji modelu, który generuje reprezentację zdań. 
-Każda liczba w wektorze odpowiada pewnej cesze zdania – może wskazywać na jego emocjonalny ton, 
-kontekst użycia albo zależności między słowami. 
-To tak, jakby każde zdanie miało unikalny "odcisk palca" opisujący jego sens.
+- **Kultura indywidualistyczna** (przykład: wiele krajów zachodnich, w tym Stany Zjednoczone) kładzie silny nacisk na autonomię jednostki, samodzielność i osobiste osiągnięcia.  
+- **Kultura kolektywistyczna** (przykład: wiele krajów wschodnich, np. Japonia) podkreśla znaczenie grupy, współpracy, harmonii społecznej oraz lojalności wobec wspólnoty.
 
-### Co daje taka reprezentacja?
-Jeśli dwa zdania mają podobne znaczenie, ich wektory będą podobne. 
-Możemy więc mierzyć, jak bardzo różnią się znaczeniowo, sprawdzając dystans między nimi.
+Choć istnieją różne poziomy tej dychotomii i każde społeczeństwo może mieć mieszankę obu podejść, w języku często ujawniają się subtelne **różnice w sformułowaniach**. Przykładowo, indywidualistyczne zdania (np. „Jestem niezależny”) uwydatniają podmiot i jego odrębną tożsamość, podczas gdy kolektywistyczne (np. „Wspólnie pokonujemy wyzwania”) wskazują na przynależność do grupy, współzależność i wspólny cel.
 
-# Model tworzący wektory: text-embedding-3-large
+---
 
-## 2.1. Jak działa model?
-Model **text-embedding-3-large** od OpenAI to zaawansowany system sztucznej inteligencji, 
-który uczył się na milionach zdań w wielu językach.
-Jego zadaniem jest zamiana dowolnego tekstu na liczby w taki sposób, 
-żeby odzwierciedlały jego znaczenie.
+## 2. **Reprezentacje wektorowe języka (embeddings)**
 
-### Jak model się uczył?
-Model analizował ogromne ilości tekstów, ucząc się zależności między słowami. 
-Dzięki temu rozpoznaje podobieństwa i różnice między zdaniami.
+W przetwarzaniu języka naturalnego (NLP) zdania można zamienić na wysokowymiarowe **wektory** (tzw. embeddingi), które przechowują informację o ich znaczeniu.  
+Model **`text-embedding-3-large`** od OpenAI (podobnie jak wiele innych modeli, np. `text-embedding-ada-002` czy modele w stylu BERT, RoBERTa itp.) został nauczony na ogromnych korpusach tekstów tak, aby **podobne semantycznie zdania** miały wektory **bliskie** w przestrzeni 3072 wymiarów, a zdania o różnych znaczeniach – wektory **odległe**.
 
-### Czy język ma znaczenie?
-Teoretycznie model powinien generować podobne liczby dla zdań o tym samym znaczeniu, 
-nawet jeśli są napisane w różnych językach. 
-W praktyce jednak może się okazać, że pewne języki niosą inne ukryte niuanse, 
-które wpływają na sposób, w jaki model je reprezentuje.
+### 2.1. **Co oznacza 3072 wymiary?**
 
-# Cel badania
+Każdy wymiar może być rozumiany jako pewna **ukryta cecha** językowa, która pozwala modelowi odróżniać różne typy treści. W praktyce trudno jest opisać każdy wymiar w kategoriach intuicyjnych (np. emocjonalny ton, rejestr formalny, kontekst kulturowy), ale wiadomo, że **im bliżej** są dwa wektory w tej przestrzeni, tym **bardziej podobne** znaczenia reprezentują.
 
-## 3.1. Co chcemy sprawdzić?
-Chcemy zbadać, jak model przedstawia zdania wyrażające **indywidualizm** (np. „Jestem niezależny”) 
-i **kolektywizm** (np. „Działamy razem”).
+---
+
+## 3. **Cel badania i hipotezy**
+
+1. **Zidentyfikować różnice**: czy ten sam model odzwierciedla różnice między zdaniami indywidualistycznymi i kolektywistycznymi **równie silnie** we wszystkich językach (angielski, polski, japoński)?  
+2. **Porównać dystanse**: czy w języku polskim te dwa rodzaje zdań (IND i COL) są wektorowo bliżej siebie niż np. w języku angielskim (co mogłoby sugerować, że w polskich zdaniach te kategorie mniej się różnią pod względem „semantyki” wykrytej przez model)?  
+3. **Statystyczna istotność**: czy różnice między językami (np. polski vs. angielski) są przypadkowe, czy można je uznać za statystycznie potwierdzone (p < 0.01)?
+
+---
+
+## 4. **Analiza w aplikacji**
+
+### 4.1. **Zbiór danych i podział**
+
+- Mamy zdania w **trzech językach**: angielski, polski i japoński.  
+- Każdy język podzielony jest na dwa rodzaje: **IND** (Individualistic) i **COL** (Collectivistic).  
+- Dla każdego zdania generujemy embedding 3072D, co daje **6 zestawów**:
+  - `ENG_IND`, `ENG_COL`  
+  - `POL_IND`, `POL_COL`  
+  - `JAP_IND`, `JAP_COL`
+
+### 4.2. **Wizualizacje (PCA i t-SNE)**
+
+- **PCA (Principal Component Analysis)** redukuje wymiary do 2D lub 3D, szukając głównych składowych, które wyjaśniają największą wariancję w danych.  
+- **t-SNE (t-Distributed Stochastic Neighbor Embedding)** to metoda nieliniowa, skupiająca się na zachowaniu lokalnego sąsiedztwa wektorów, często dająca wyraźne klastry w niskowymiarowej projekcji.
+
+W aplikacji możesz zobaczyć, czy zdania IND i COL w każdym języku **grupują się** w osobne obszary, czy może częściowo się **nakładają**.
+
+### 4.3. **Klasyfikacja nowego tekstu**
+
+#### **Metoda centroidów**
+1. Dla każdej kategorii (np. `ENG_IND`) liczymy średni wektor (centroid).  
+2. Nowe zdanie zamieniamy na embedding i obliczamy **podobieństwo kosinusowe** z każdym centroidem.  
+3. Kategoria z najwyższym podobieństwem – to przewidywana etykieta.
+
+#### **Klasyfikator ML (Regresja Logistyczna)**
+1. Trenujemy model na **wszystkich embeddingach** (wszystkie kategorie jednocześnie).  
+2. Na wejściu nowy embedding → **model** zwraca etykietę + rozkład prawdopodobieństwa.
+
+### 4.4. **Raport statystyczny**
+
+- **Miary odległości**: Euklides, Kosinus (1 – cos), Manhattan.  
+- **Test normalności**: sprawdzamy, czy rozkład odległości jest normalny.  
+- **Test Manna-Whitneya** (lub t-Studenta, jeśli rozkład jest ~ normalny) do porównania m.in. *Polski vs. Angielski* i *Japoński vs. Angielski*.
+
+**Interpretacja**:
+- Niższa **mediana odległości** oznacza, że zdania IND i COL w danym języku są **bliżej** w przestrzeni wektorowej (model mniej rozróżnia te kategorie).  
+- Wyższa **p-wartość** (p-value) oznacza, że różnice mogą być przypadkowe; niska (p < 0.01) → różnice są statystycznie istotne.
+
+---
+
+## 5. **Interpretacja wyników w kontekście kulturowym**
+
+Jeśli okaże się (jak często w tym badaniu), że:
+
+- **Polskie zdania IND i COL są bliżej siebie niż w języku angielskim**, to możemy spekulować, że polski w ramach obecnego korpusu i reprezentacji modelu **mniej różnicuje** indywidualizm i kolektywizm. To może wynikać z:
+  - Cech językowych (np. fleksja, konstrukcje składniowe),  
+  - Wpływu kulturowego (Polska ma cechy zarówno indywidualistyczne, jak i kolektywistyczne),  
+  - Skali treningowej modelu (być może w korpusie polskim występowało relatywnie mniej zdań skrajnie indywidualistycznych lub kolektywistycznych).
+
+- **W języku japońskim** możemy zaobserwować wyniki pośrednie lub odbiegające od typowego wyobrażenia o skrajnym kolektywizmie Japonii. Być może model anglo-centryczny (trening na dużych angielskich zasobach) nie zawsze oddaje w pełni charakter japońskiej kultury, lub zdania w korpusie są na tyle różnorodne, że różnice się zacierają.
+
+---
+
+## 6. **Implikacje praktyczne**
+
+- **Zrozumienie biasów**: jeśli model mniej wyraźnie rozróżnia indywidualizm i kolektywizm w danym języku, może to wpływać na aplikacje takie jak automatyczne tłumaczenie, analiza sentymentu czy chatboty wielojęzyczne.  
+- **Rozszerzenie badań**: można dodać więcej języków (np. hiszpański, chiński) czy więcej kategorii kulturowych (np. zdania high vs. low context).  
+- **Wnioski dla lingwistyki i psychologii**: różnice i podobieństwa w embeddingach mogą pomóc w analizie **uniwersalności** (lub jej braku) modeli językowych, a tym samym w badaniach nad przekładalnością pojęć psychologicznych i kulturowych między językami.
+
 '''
 
 
