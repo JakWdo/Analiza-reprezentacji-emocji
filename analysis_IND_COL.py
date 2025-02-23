@@ -10,7 +10,6 @@ import streamlit as st  # Funkcje Streamlit pozostają, gdyż są wykorzystywane
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from dotenv import load_dotenv
-from umap import UMAP
 # Statystyka
 from scipy.stats import mannwhitneyu, ttest_ind, shapiro, kstest
 from sklearn.linear_model import LogisticRegression
@@ -365,66 +364,6 @@ def generate_interactive_tsne_3d(all_emb, all_lbl):
                         color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] 
                                               for cl in df["Cluster"].unique()},
                         title="Interaktywna t-SNE 3D (text-embedding-3-large)",
-                        labels={"Dim1": "Dim1", "Dim2": "Dim2", "Dim3": "Dim3"})
-    fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
-    return fig
-
-###############################################
-# NOWE WIZUALIZACJE Z UMAP
-###############################################
-def generate_interactive_umap_2d(all_emb, all_lbl):
-    umap_2d = UMAP(n_components=2, random_state=42)
-    red_umap = umap_2d.fit_transform(all_emb)
-    df = pd.DataFrame({
-        "UMAP1": red_umap[:, 0],
-        "UMAP2": red_umap[:, 1],
-        "Cluster": all_lbl
-    })
-    color_map = {
-        "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
-        "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
-        "JAP": {"IND": "#ff9896", "COL": "#d62728"}
-    }
-    df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
-    selected_clusters = st.multiselect("Wybierz klastry (UMAP 2D)",
-                                       options=df["Cluster"].unique().tolist(),
-                                       default=df["Cluster"].unique().tolist())
-    filtered_df = df[df["Cluster"].isin(selected_clusters)]
-    fig = px.scatter(filtered_df, x="UMAP1", y="UMAP2", color="Cluster",
-                     color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in
-                                         df["Cluster"].unique()},
-                     title="Interaktywna UMAP 2D (text-embedding-3-large)")
-    fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
-    return fig
-
-
-def generate_interactive_umap_3d(all_emb, all_lbl):
-    umap_3d = UMAP(n_components=3, random_state=42)
-    red_umap = umap_3d.fit_transform(all_emb)
-    df = pd.DataFrame({
-        "Dim1": red_umap[:, 0],
-        "Dim2": red_umap[:, 1],
-        "Dim3": red_umap[:, 2],
-        "Cluster": all_lbl
-    })
-    color_map = {
-        "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
-        "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
-        "JAP": {"IND": "#ff9896", "COL": "#d62728"}
-    }
-    try:
-        selected_clusters = st.multiselect("Wybierz klastry (UMAP 3D)",
-                                           options=df["Cluster"].unique().tolist(),
-                                           default=df["Cluster"].unique().tolist())
-    except Exception:
-        selected_clusters = df["Cluster"].unique().tolist()
-    filtered_df = df[df["Cluster"].isin(selected_clusters)]
-    fig = px.scatter_3d(filtered_df,
-                        x="Dim1", y="Dim2", z="Dim3",
-                        color="Cluster",
-                        color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]]
-                                              for cl in df["Cluster"].unique()},
-                        title="Interaktywna UMAP 3D (text-embedding-3-large)",
                         labels={"Dim1": "Dim1", "Dim2": "Dim2", "Dim3": "Dim3"})
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
     return fig
