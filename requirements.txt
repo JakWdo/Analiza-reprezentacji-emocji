@@ -10,3 +10,4 @@ jinja2
 plotly
 python-dotenv
 umap-learn
+xgboost
