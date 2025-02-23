@@ -30,6 +30,17 @@ CACHE_FILE = "embeddings_cache_3_large.pkl"
 INTEGRATED_REPORT = '''
 # **Teoria i kontekst badania**
 
+## 1. **Podstawy lingwistyki kulturowej: indywidualizm vs. kolektywizm**
+
+W psychologii i socjologii często podkreśla się różnice między kulturami **indywidualistycznymi** i **kolektywistycznymi**:
+
+- **Kultura indywidualistyczna** (przykład: wiele krajów zachodnich, w tym Stany Zjednoczone) kładzie nacisk na autonomię jednostki, niezależność i osobiste osiągnięcia.  
+- **Kultura kolektywistyczna** (przykład: kraje wschodnie, np. Japonia) podkreśla znaczenie grupy, wspólnego działania i harmonii społecznej.
+
+W tekstach pisanych można dostrzec delikatne różnice w sposobie wyrażania postaw. Przykładowo, zdania indywidualistyczne (np. „Jestem niezależny”) często koncentrują się na pierwszej osobie i jej autonomii, natomiast kolektywistyczne („Wspólnie pokonujemy wyzwania”) wskazują na współdziałanie i wzajemną zależność.
+
+---
+
 ## **2. Reprezentacje wektorowe języka (embeddingi)**
 
 W przetwarzaniu języka naturalnego (NLP) komputery muszą w jakiś sposób „zrozumieć” tekst, choć początkowo jest on dla nich jedynie zbiorem znaków.  
