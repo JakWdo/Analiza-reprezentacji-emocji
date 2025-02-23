@@ -74,8 +74,7 @@ def run_streamlit_app():
     - *私たちの強さは団結にあります。*
     """)
 
-    # 4. Łączenie embeddingów w jeden zbiór oraz etykiet
-all_emb = np.concatenate([
+    all_emb = np.concatenate([
         eng_ind_embeddings, eng_col_embeddings,
         pol_ind_embeddings, pol_col_embeddings,
         jap_ind_embeddings, jap_col_embeddings
