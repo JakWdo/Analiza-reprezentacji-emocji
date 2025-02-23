@@ -1,6 +1,3 @@
-######################################
-# app.py
-######################################
 import streamlit as st
 import pandas as pd
 import os
@@ -18,10 +15,10 @@ from analysis_IND_COL import (
     EMBEDDING_MODEL,
     train_ml_classifier, ml_klasyfikuj_tekst, get_ml_classifier,
     generate_statistical_report,
+    generate_interactive_distribution_charts,  # nowa funkcja
     INTEGRATED_REPORT
 )
 
-# Ustawienia układu strony Streamlit (wyśrodkowany widok)
 st.set_page_config(
     page_title="Analiza reprezentacji wektorowych emocji",
     layout="centered"
@@ -78,7 +75,7 @@ def run_streamlit_app():
     """)
 
     # 4. Łączenie embeddingów w jeden zbiór oraz etykiet
-    all_emb = np.concatenate([
+all_emb = np.concatenate([
         eng_ind_embeddings, eng_col_embeddings,
         pol_ind_embeddings, pol_col_embeddings,
         jap_ind_embeddings, jap_col_embeddings
@@ -92,7 +89,6 @@ def run_streamlit_app():
         ["JAP_COL"] * len(jap_col_embeddings)
     )
 
-    # 5. Wizualizacje 2D (PCA, t-SNE)
     st.subheader("Interaktywne wizualizacje 2D")
     st.write("""
     **PCA** – metoda liniowa, przedstawia dane w 2D na podstawie głównych kierunków wariancji.
@@ -106,7 +102,6 @@ def run_streamlit_app():
     st.plotly_chart(fig_pca_2d, use_container_width=True)
     st.plotly_chart(fig_tsne_2d, use_container_width=True)
 
-    # 6. Wizualizacje 3D (PCA, t-SNE)
     st.subheader("Interaktywne wizualizacje 3D")
     st.write("""
     Poniżej znajdują się interaktywne wykresy 3D, które pozwalają lepiej zbadać strukturę danych.
@@ -117,7 +112,6 @@ def run_streamlit_app():
     st.plotly_chart(fig_pca_3d, use_container_width=True)
     st.plotly_chart(fig_tsne_3d, use_container_width=True)
 
-    # 7. Klasyfikacja metodą centroidów
     st.subheader("Klasyfikacja nowego tekstu (metoda centroidów)")
     st.write("""
     Metoda centroidów polega na porównaniu embeddingu nowego tekstu z uśrednionymi wektorami (centroidami) każdej kategorii.
@@ -129,7 +123,6 @@ def run_streamlit_app():
         for cat, val in results:
             st.write(f"- {cat}: {val:.4f}")
 
-    # 8. Klasyfikacja przy użyciu modelu ML (Regresja Logistyczna)
     st.subheader("Klasyfikacja nowego tekstu (uczenie maszynowe)")
     st.write("""
     Regresja logistyczna trenuje model na wszystkich embeddingach, aby automatycznie rozpoznawać kategorię nowego tekstu.
@@ -143,7 +136,6 @@ def run_streamlit_app():
         prob_df["Prawdopodobieństwo (%)"] = prob_df["Prawdopodobieństwo"] * 100
         st.table(prob_df[["Etykieta", "Prawdopodobieństwo (%)"]])
 
-    # 9. Raport statystyczny
     st.subheader("Raport statystyczny")
     st.write("""
     Poniżej znajdują się wyniki testów statystycznych sprawdzających istotność różnic między językami oraz
@@ -151,8 +143,17 @@ def run_streamlit_app():
     """)
     report_text = generate_statistical_report()
     st.text_area("Raport statystyczny", report_text, height=300)
+    
+    st.subheader("Wykresy rozkładu dystansów")
+    st.write("Wybierz metrykę oraz język, aby zobaczyć interaktywny wykres rozkładu dystansów między zdaniami IND i COL.")
+    metric_options = ["Euklides", "Kosinus", "Manhattan"]
+    language_options = ["ENG", "POL", "JAP"]
+    selected_metric = st.selectbox("Wybierz metrykę", metric_options)
+    selected_language = st.selectbox("Wybierz język", language_options)
+    distribution_figures = generate_interactive_distribution_charts()
+    fig_distribution = distribution_figures[selected_metric][selected_language]
+    st.plotly_chart(fig_distribution, use_container_width=True)
 
-    # 10. Wnioski i interpretacja
     st.subheader("Wnioski")
     st.markdown("""
 **Główne spostrzeżenia**:
