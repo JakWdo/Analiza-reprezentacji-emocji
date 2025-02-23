@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import os
 import numpy as np
 from analysis_IND_COL import (
     klasyfikuj_tekst,
@@ -15,7 +14,7 @@ from analysis_IND_COL import (
     EMBEDDING_MODEL,
     train_ml_classifier, ml_klasyfikuj_tekst, get_ml_classifier,
     generate_statistical_report,
-    generate_interactive_distribution_charts,  # nowa funkcja
+    generate_interactive_distribution_charts,
     INTEGRATED_REPORT
 )
 
@@ -24,28 +23,11 @@ st.set_page_config(
     layout="centered"
 )
 
+
 def run_streamlit_app():
-    """
-    Główna funkcja uruchamiająca aplikację w Streamlit.
-    Zawiera:
-      1) Raport teoretyczny wyjaśniający kontekst i używane metody (INTEGRATED_REPORT).
-      2) Przykładowe zdania z trzech języków: angielski, polski, japoński.
-      3) Wizualizacje 2D i 3D (PCA, t-SNE) pozwalające zrozumieć, jak zdania o różnych cechach
-         wyglądają w przestrzeni wektorowej. **Uwaga:** Aby filtrować klastry, kliknij na legendzie wykresu.
-      4) Klasyfikację nowego tekstu:
-         - Metoda centroidów (porównanie z uśrednionym wektorem każdej kategorii).
-         - Model ML (regresja logistyczna), który "uczy się" rozpoznawać kategorie.
-      5) Raport statystyczny oraz wnioski.
-      6) Zapis raportu do pliku.
-    """
-
-    # 1. Tytuł aplikacji
     st.title("Analiza reprezentacji wektorowych emocji: Indywidualizm vs. Kolektywizm w trzech językach")
-
-    # 2. Raport teoretyczny
     st.markdown(INTEGRATED_REPORT)
 
-    # 3. Przykładowe zdania użyte do tworzenia embeddingów
     st.markdown("""
     ## Przykłady zdań użytych do tworzenia embeddingów
 
@@ -74,33 +56,35 @@ def run_streamlit_app():
     - *私たちの強さは団結にあります。*
     """)
 
+    # Łączenie wszystkich embeddingów i etykiet w jedną listę/array
     all_emb = np.concatenate([
         eng_ind_embeddings, eng_col_embeddings,
         pol_ind_embeddings, pol_col_embeddings,
         jap_ind_embeddings, jap_col_embeddings
     ], axis=0)
     all_lbl = (
-        ["ENG_IND"] * len(eng_ind_embeddings) +
-        ["ENG_COL"] * len(eng_col_embeddings) +
-        ["POL_IND"] * len(pol_ind_embeddings) +
-        ["POL_COL"] * len(pol_col_embeddings) +
-        ["JAP_IND"] * len(jap_ind_embeddings) +
-        ["JAP_COL"] * len(jap_col_embeddings)
+            ["ENG_IND"] * len(eng_ind_embeddings) +
+            ["ENG_COL"] * len(eng_col_embeddings) +
+            ["POL_IND"] * len(pol_ind_embeddings) +
+            ["POL_COL"] * len(pol_col_embeddings) +
+            ["JAP_IND"] * len(jap_ind_embeddings) +
+            ["JAP_COL"] * len(jap_col_embeddings)
     )
 
+    # --- Wizualizacje 2D (PCA i t-SNE) ---
     st.subheader("Interaktywne wizualizacje 2D")
-    st.write("""
-    **PCA** – metoda liniowa, przedstawia dane w 2D na podstawie głównych kierunków wariancji.
-    
-    **t-SNE** – metoda nieliniowa, zachowuje lokalne podobieństwa oryginalnych wektorów.
-    
-    **Uwaga:** Aby filtrować klastry, kliknij na legendzie wykresu.
-    """)
-    fig_pca_2d = generate_interactive_pca_2d(all_emb, all_lbl)
-    fig_tsne_2d = generate_interactive_tsne_2d(all_emb, all_lbl)
-    st.plotly_chart(fig_pca_2d, use_container_width=True)
-    st.plotly_chart(fig_tsne_2d, use_container_width=True)
+    st.write("Poniżej przedstawiono dwa wykresy 2D: PCA oraz t-SNE.")
 
+    fig_2d_pca = generate_interactive_pca_2d(all_emb, all_lbl)
+    fig_2d_tsne = generate_interactive_tsne_2d(all_emb, all_lbl)
+
+    st.write("**Wizualizacja PCA (2D)**")
+    st.plotly_chart(fig_2d_pca, use_container_width=True)
+
+    st.write("**Wizualizacja t-SNE (2D)**")
+    st.plotly_chart(fig_2d_tsne, use_container_width=True)
+
+    # --- Wizualizacje 3D (PCA i t-SNE) ---
     st.subheader("Interaktywne wizualizacje 3D")
     st.write("""
     Poniżej znajdują się interaktywne wykresy 3D, które pozwalają lepiej zbadać strukturę danych.
@@ -111,10 +95,10 @@ def run_streamlit_app():
     st.plotly_chart(fig_pca_3d, use_container_width=True)
     st.plotly_chart(fig_tsne_3d, use_container_width=True)
 
+    # --- Klasyfikacja nowego tekstu (metoda centroidów) ---
     st.subheader("Klasyfikacja nowego tekstu (metoda centroidów)")
-    st.write("""
-    Metoda centroidów polega na porównaniu embeddingu nowego tekstu z uśrednionymi wektorami (centroidami) każdej kategorii.
-    """)
+    st.write(
+        "Metoda centroidów polega na porównaniu embeddingu nowego tekstu z uśrednionymi wektorami każdej kategorii.")
     user_text = st.text_area("Wpisz tekst:", value="I believe in working together for the greater good.")
     if st.button("Klasyfikuj (centroidy)"):
         results = klasyfikuj_tekst(user_text)
@@ -122,10 +106,10 @@ def run_streamlit_app():
         for cat, val in results:
             st.write(f"- {cat}: {val:.4f}")
 
+    # --- Klasyfikacja nowego tekstu (uczenie maszynowe) ---
     st.subheader("Klasyfikacja nowego tekstu (uczenie maszynowe)")
-    st.write("""
-    Regresja logistyczna trenuje model na wszystkich embeddingach, aby automatycznie rozpoznawać kategorię nowego tekstu.
-    """)
+    st.write(
+        "Regresja logistyczna trenuje model na wszystkich embeddingach, aby automatycznie rozpoznawać kategorię nowego tekstu.")
     if st.button("Trenuj/Wczytaj klasyfikator ML i przetestuj"):
         clf = get_ml_classifier(all_emb, all_lbl)
         pred_label, prob_dict = ml_klasyfikuj_tekst(user_text, clf)
@@ -135,16 +119,19 @@ def run_streamlit_app():
         prob_df["Prawdopodobieństwo (%)"] = prob_df["Prawdopodobieństwo"] * 100
         st.table(prob_df[["Etykieta", "Prawdopodobieństwo (%)"]])
 
+    # --- Raport statystyczny ---
     st.subheader("Raport statystyczny")
-    st.write("""
-    Poniżej znajdują się wyniki testów statystycznych sprawdzających istotność różnic między językami oraz
-    wewnątrz jednego języka (hipoteza H₁: różnicowanie kategorii IND vs. COL).
-    """)
+    st.write(
+        "Poniżej znajdują się wyniki testów statystycznych sprawdzających istotność różnic między językami oraz wewnątrz jednego języka (hipoteza H₁: różnicowanie kategorii IND vs. COL)."
+    )
     report_text = generate_statistical_report()
     st.text_area("Raport statystyczny", report_text, height=300)
-    
+
+    # --- Wykresy rozkładu dystansów ---
     st.subheader("Wykresy rozkładu dystansów")
-    st.write("Wybierz metrykę oraz język, aby zobaczyć interaktywny wykres rozkładu dystansów między zdaniami IND i COL.")
+    st.write(
+        "Wybierz metrykę oraz język, aby zobaczyć interaktywny wykres rozkładu dystansów między zdaniami IND i COL."
+    )
     metric_options = ["Euklides", "Kosinus", "Manhattan"]
     language_options = ["ENG", "POL", "JAP"]
     selected_metric = st.selectbox("Wybierz metrykę", metric_options)
@@ -156,90 +143,76 @@ def run_streamlit_app():
     st.markdown("""
 # Wnioski
 
-1. **Skuteczne rozróżnienie kategorii (H₁):**  
-   - Model `text-embedding-3-large` z powodzeniem oddziela zdania indywidualistyczne (IND) od kolektywistycznych (COL) w trzech analizowanych językach: polskim, angielskim i japońskim.  
-   - Wyniki testów statystycznych, opierające się na metrykach takich jak **Euklides**, **Kosinus (1 - cosinus)** i **Manhattan**, wykazały, że różnice między embeddingami są statystycznie istotne (p < 0.01) dla wszystkich języków.
+1. **Skuteczne odróżnienie kategorii (H₁)**  
+   Z przeprowadzonych analiz wynika, że model text-embedding-3-large potrafi w wyraźny sposób odróżnić zdania o zabarwieniu indywidualistycznym (IND) od tych o charakterze kolektywistycznym (COL). Co więcej, dzieje się to w trzech różnych językach – polskim, angielskim i japońskim.  
+   Wysoka trafność rozróżniania potwierdzona została przez testy statystyczne wykorzystujące kilka miar odległości (Euklides, Kosinus oraz Manhattan). Ich rezultaty (p < 0.01) wskazują, że istnieje istotna różnica pomiędzy tymi kategoriami we wszystkich trzech językach.  
 
-2. **Odkrycia dotyczące różnic między językami (H₂/H₃):**  
-   - **Język angielski:**  
-     - *Euklides:* median = 1.2480  
-     - *Kosinus:* median = 0.7788  
-     - *Manhattan:* median = 53.7099  
-     
-     Wyniki te wskazują na wyraźny kontrast między zdaniami IND a COL, co odpowiada silnemu rozróżnieniu kulturowemu obserwowanemu w społeczeństwach anglosaskich.
-     
-   - **Język japoński:**  
-     - *Euklides:* median = 1.1835  
-     - *Kosinus:* median = 0.7004  
-     - *Manhattan:* median = 50.8755  
-     
-     Japońskie zdania, mimo tradycyjnie kolektywistycznego kontekstu, wykazują istotne różnice między kategoriami, co potwierdza zdolność modelu do wychwytywania niuansów kulturowych.
-     
-   - **Język polski:**  
-     - *Euklides:* median = 1.0858  
-     - *Kosinus:* median = 0.5894  
-     - *Manhattan:* median = 46.7398  
-     
-     W języku polskim zdania IND i COL są reprezentowane jako najbardziej zbliżone, co wskazuje na większą spójność semantyczną między tymi kategoriami.
+2. **Zróżnicowanie między językami (H₂/H₃)**  
+   - **Język angielski**  
+     W języku angielskim obserwujemy stosunkowo duże wartości mediany dla wszystkich miar (m.in. Euklides ~1.2480, Kosinus ~0.7788), co sugeruje mocne rozdzielenie zdań indywidualistycznych od kolektywistycznych. Taki wynik może odzwierciedlać wyraźne różnice kulturowe obecne w społeczeństwach anglosaskich.  
+
+   - **Język japoński**  
+     W kontekście języka japońskiego wartości mediany są nieco mniejsze (Euklides ~1.1835, Kosinus ~0.7004), ale nadal pokazują czytelny podział między zdaniami IND a COL. Jest to interesujące o tyle, że język japoński silnie osadzony jest w tradycji kolektywistycznej. Mimo tego, model wychwytuje subtelne różnice w zależności od postawy indywidualistycznej lub kolektywistycznej.  
+
+   - **Język polski**  
+     Polski odznacza się tutaj jeszcze mniejszymi różnicami (Euklides ~1.0858, Kosinus ~0.5894), co może wskazywać na większe podobieństwo pomiędzy zdaniami IND i COL. Niemniej jednak, różnice te wciąż pozostają istotne statystycznie, co świadczy o tym, że model skutecznie rozpoznaje rozmaite niuanse językowe także w tym obszarze.
 
 # Dyskusja
 
+## Matematyczno-algorytmiczne podejście do badania emocji kulturowych
+Opisana metoda bazuje na wektorowych reprezentacjach tekstu (tzw. embeddingach), które można traktować jako punkty w wielowymiarowej przestrzeni. Takie rozwiązanie umożliwia:
+- **Precyzyjne porównanie** różnych wypowiedzi lub zdań na podstawie ich „podobieństwa” geometrycznego bądź kierunkowego.  
+- **Standaryzację wyników** w postaci liczb, co pozwala na obiektywną analizę i statystyczną ocenę różnic.  
+- **Elastyczność** – w razie potrzeby łatwo rozbudować analizę o kolejne języki lub zastosować inne metody obliczeniowe.
+
+Wykorzystanie embeddingów to podejście dalekie od typowo subiektywnych ocen eksperckich, dzięki czemu istnieje możliwość uzyskania bardziej spójnych, powtarzalnych i skalowalnych wyników. Z perspektywy interdyscyplinarnej stanowi to obiecujące narzędzie do badania zjawisk kulturowych i językowych w sposób możliwie wolny od uprzedzeń, wynikających z indywidualnych interpretacji.
+
 ## Szczegółowa analiza metryk
 
-- **Metryka Euklidesowa:**  
-  Ta metryka mierzy bezpośrednią odległość geometryczną między dwoma punktami w przestrzeni wektorowej. Mniejsze wartości mediany, jak w przypadku języka polskiego (1.0858), sugerują, że zdania IND i COL są bardziej skoncentrowane i mniej rozproszone.
+- **Euklides**  
+  Metryka ta ujmuje dystans jako „rzeczywistą” odległość geometryczną w wielowymiarowej przestrzeni. Niższa mediana (np. 1.0858 dla polskiego) oznacza, że zdania IND i COL są bliżej siebie, zaś wyższa (jak w przypadku angielskiego, 1.2480) wskazuje na wyraźniejsze rozdzielenie tych kategorii.  
 
-- **Metryka Kosinusowa (1 - cosinus):**  
-  Metryka ta analizuje kąt między wektorami, co odzwierciedla podobieństwo kierunkowe. Niższe wartości (np. 0.5894 dla polskiego) oznaczają, że zdania są bardziej podobne semantycznie. Wyższe wartości, obserwowane w języku angielskim (0.7788), wskazują na większą dywergencję między kategoriami.
+- **Kosinus (1 - cosinus)**  
+  Ten wskaźnik skupia się na kącie pomiędzy wektorami. Jeśli dwie reprezentacje mają zbliżony kierunek, wartość metryki będzie niższa (jak w polskim, ~0.5894). Wyższe wyniki, jak dla języka angielskiego (0.7788), potwierdzają większe różnice w interpretacji zdań przez model.  
 
-- **Metryka Manhattan:**  
-  Mierzy sumę bezwzględnych różnic pomiędzy współrzędnymi wektorów. Niższa mediana, jak 46.7398 dla języka polskiego, potwierdza, że dystanse między zdaniami są mniejsze w porównaniu z językiem angielskim (53.7099) i japońskim (50.8755).
+- **Manhattan**  
+  W przeciwieństwie do Euklidesa, metryka ta sumuje różnice w każdej współrzędnej (tzw. taksówkowa odległość). Zbliżone wartości w polskim (46.7398) pokazują, że różnice między zdaniami nie są tak duże jak w języku angielskim (53.7099) czy japońskim (50.8755).
 
-## Potencjalne przyczyny obserwowanych wyników
+## Czynniki wpływające na wyniki
 
-- **Różnice kulturowe i lingwistyczne:**  
-  - W kulturze anglosaskiej postawy indywidualistyczne i kolektywistyczne są wyraźnie rozdzielane, co znajduje odzwierciedlenie w większych dystansach między embeddingami.  
-  - Japoński kojarzony z kolektywizmem, posiada złożony system wyrażeń oraz form grzecznościowych, które mogą wprowadzać większą różnorodność semantyczną.
-  - Polski, charakteryzujący się bogatą fleksją, może wyrażać te postawy w bardziej ujednolicony sposób, co skutkuje mniejszymi różnicami w reprezentacjach wektorowych.
+- **Kontekst kulturowy i cechy języka**  
+  Każdy z badanych języków wyraża postawy indywidualistyczne i kolektywistyczne w nieco inny sposób. Angielski może bardziej jednoznacznie rozgraniczać te dwa nurty niż polski, którego konstrukcja językowa z bogatą fleksją bywa mniej kategoryczna.  
+- **Wpływ tłumaczeń i data setów treningowych**  
+  Model text-embedding-3-large został w dużej mierze wytrenowany na materiałach anglojęzycznych, co może przekładać się na lepszą (lub inaczej ukierunkowaną) detekcję różnic w języku angielskim niż w pozostałych.  
+- **Semantyczna jednorodność zdań**  
+  W wypadku polskich zdań, podobieństwo słownictwa i konstrukcji gramatycznych może skutkować mniejszym dystansem w przestrzeni embeddingów, nawet jeśli przekaz emocjonalny odbiega od siebie.
 
-- **Specyfika korpusu i danych treningowych:**  
-  Model `text-embedding-3-large` został prawdopodobnie wytrenowany na dużym zbiorze danych anglojęzycznych, co może wpływać na sposób, w jaki reprezentuje teksty w innych językach. Różnice w jakości oraz ilości danych dostępnych w języku japońskim i polskim mogą dodatkowo modyfikować wyniki.
+# Pozytywne aspekty i implikacje
 
-- **Efekty tłumaczenia i adaptacji:**  
-  Proces tłumaczenia lub adaptacji zdań z jednego języka na inny może wprowadzać subtelne zmiany, które wpływają na spójność semantyczną. W efekcie zdania w języku polskim mogą być reprezentowane jako bardziej jednorodne.
-
-## Pozytywne odkrycia i implikacje
-
-- **Precyzyjne rozróżnienie semantyczne:**  
-  Wyniki jednoznacznie pokazują, że metody oparte na embeddingach są bardzo skuteczne w wychwytywaniu różnic między postawami indywidualistycznymi a kolektywistycznymi. To otwiera nowe perspektywy w badaniach nad językiem i kulturą.
-
-- **Wieloaspektowa analiza dzięki różnym metrykom:**  
-  Zastosowanie trzech różnych metryk (Euklides, Kosinus, Manhattan) pozwala na kompleksową analizę, która potwierdza spójność wyników niezależnie od przyjętej miary. Każda z metryk uwypukla inny aspekt różnic:
-  - **Euklides** – geograficzna separacja danych,
-  - **Kosinus** – kątowe podobieństwo semantyczne,
-  - **Manhattan** – sumaryczne różnice we współrzędnych.
-  
-- **Solidność wyników statystycznych:**  
-  Niskie wartości p (p < 0.01) uzyskane w testach, takich jak Manna–Whitneya, potwierdzają, że zaobserwowane różnice między grupami nie są przypadkowe, co daje silne podstawy do dalszych badań.
-
-- **Zastosowania praktyczne:**  
-  Wyniki te mogą znaleźć zastosowanie w różnych dziedzinach, takich jak analiza treści, marketing, badania społeczne czy lingwistyka, umożliwiając dokładne badanie wpływu kultury na sposób wyrażania postaw.
+- **Uniwersalny charakter analizy**  
+  Wykorzystanie metod embeddingowych daje nadzieję na standaryzację i ujednolicenie badań nad językami o odmiennych strukturach gramatycznych i różnym podłożu kulturowym.  
+- **Możliwość wielopoziomowej eksploracji**  
+  Zastosowanie takich technik pozwala badaczom na porównywanie wyników za pomocą rozmaitych metryk (Euklides, Kosinus, Manhattan), co pomaga uchwycić różne aspekty podobieństwa między zdaniami.  
+- **Stabilność statystyczna**  
+  Bardzo niskie wartości p (p < 0.01) wskazują, że obserwowane różnice nie są przypadkowe. Dzięki temu wyniki są pewniejsze, a dalsze rozszerzenia badania mogą być prowadzone na mocnym fundamencie metodologicznym.
 
 # Podsumowanie
 
-- **Efektywność modelu:**  
-  Model `text-embedding-3-large` skutecznie różnicuje zdania indywidualistyczne i kolektywistyczne, co potwierdzają zarówno wizualizacje (PCA, t-SNE), jak i wyniki trzech różnych metryk odległościowych.
+- **Efektywność modelu**  
+  Model text-embedding-3-large wyraźnie różnicuje zdania o charakterze indywidualistycznym i kolektywistycznym. Uzyskane wizualizacje (PCA, t-SNE) oraz wyniki kluczowych metryk potwierdzają, że takie matematyczno-algorytmiczne podejście skutecznie wychwytuje i odwzorowuje różnice w przekazie emocjonalnym.  
 
-- **Różnice między językami:**  
-  Największe różnice obserwujemy w języku angielskim, co odzwierciedla wyraźny kontrast między indywidualizmem a kolektywizmem. Japoński i polski prezentują mniejsze dystanse, przy czym język polski wykazuje największą spójność semantyczną między zdaniami IND i COL.
+- **Różnice między językami**  
+  Najmocniej odseparowane kategorie zaobserwowano w języku angielskim, co może wynikać z dominującego charakteru kultury indywidualistycznej w regionach anglosaskich. W japońskim i polskim, choć różnice również są widoczne, to jednak o nieco mniejszej skali, co może odzwierciedlać bardziej skomplikowany lub mniej jednoznaczny sposób wyrażania tych postaw.  
 
-- **Implikacje badawcze:**  
-  Badanie potwierdza, że reprezentacje wektorowe stanowią użyteczne narzędzie do ilościowej analizy różnic kulturowych. Precyzyjne wyodrębnienie i wizualizacja różnic semantycznych otwiera nowe możliwości w badaniach nad językiem i kulturą, a wyniki te mogą stanowić fundament do dalszych, pogłębionych analiz.
+- **Znaczenie naukowe i praktyczne**  
+  Opisana metoda pozwala na rzetelną, ilościową analizę postaw wyrażanych w różnych językach. Daje to narzędzia do nowatorskich badań w dziedzinach takich jak socjologia, lingwistyka, psychologia kulturowa czy komunikacja międzykulturowa. Ponadto otwiera drogę do dalszych pogłębionych badań, które mogłyby obejmować dodatkowe języki bądź rozszerzone zasoby tekstów – wszystko w oparciu o powtarzalne, obiektywne metody obliczeniowe.
     """)
 
+    # Zapis raportu do pliku
     with open("raport_statystyczny.txt", "w", encoding="utf-8") as f:
         f.write(report_text)
     st.success("Raport statystyczny został zapisany w pliku 'raport_statystyczny.txt'.")
+
 
 if __name__ == "__main__":
     run_streamlit_app()

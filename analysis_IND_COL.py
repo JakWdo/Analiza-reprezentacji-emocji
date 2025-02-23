@@ -7,14 +7,13 @@ import pandas as pd
 import json
 import matplotlib.pyplot as plt
 import plotly.express as px
-import streamlit as st 
+import streamlit as st
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from dotenv import load_dotenv
 # Statystyka
 from scipy.stats import mannwhitneyu, ttest_ind, shapiro, kstest
 from sklearn.linear_model import LogisticRegression
-from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV, train_test_split
@@ -85,7 +84,7 @@ Celem tego projektu jest sprawdzenie, czy **istnieją rzeczywiste różnice kult
 ### **Sposób testowania hipotez**
 
 - **Obliczanie odległości:** Dla każdej pary zdań (między zdaniami IND i COL w danym języku, czyli każde zdanie IND jest połączone z każdym zdaniem COl. Daje to nam 100x100 kombinacji) obliczamy odległości przy użyciu wybranych metryk (np. kosinusowej – 1 − cosinus, euklidesowej czy Manhattan).
-  
+
 - **Analiza rozkładu:** Sprawdzamy, czy rozkłady obliczonych odległości są zgodne z rozkładem normalnym przy użyciu testów Shapiro-Wilka i Kolmogorova-Smirnova. Jeśli rozkład nie jest normalny, stosujemy test nieparametryczny, taki jak test Manna–Whitneya.
 
 - **Porównanie median:** Porównujemy mediany odległości między embeddingami zdań IND i COL dla języka angielskiego, polskiego oraz japońskiego. Hipoteza H₂ przewiduje, że mediana dla języka polskiego oraz japońskiego będzie mniejsza niż dla języka angielskiego.
@@ -213,6 +212,7 @@ def get_embeddings_for_list(txt_list, cache_file=CACHE_FILE):
             pickle.dump(cache, f)
     return np.array(out)
 
+
 ###############################################
 # POBRANIE EMBEDDINGÓW I OBLICZENIE CENTROIDÓW
 ###############################################
@@ -250,8 +250,31 @@ centroid_jap_ind = compute_centroid(jap_ind_embeddings)
 centroid_jap_col = compute_centroid(jap_col_embeddings)
 
 ###############################################
-# REDUKCJA WYMIAROWOŚCI I INTERAKTYWNE WIZUALIZACJE (PCA, t-SNE)
+# REDUKCJA WYMIAROWOŚCI I INTERAKTYWNE WIZUALIZACJE (PCA, t-SNE, UMAP)
 ###############################################
+from scipy.spatial.distance import cdist
+
+
+def all_pairwise(emb_list_a, emb_list_b, dist_func):
+    # Mapowanie znanych funkcji dystansu na nazwy metryk używanych przez cdist
+    metric = None
+    if dist_func == dist_euclidean:
+        metric = 'euclidean'
+    elif dist_func == dist_cosine:
+        metric = 'cosine'
+    elif dist_func == dist_manhattan:
+        metric = 'cityblock'
+    if metric is not None:
+        return cdist(np.array(emb_list_a), np.array(emb_list_b), metric=metric).flatten().tolist()
+    else:
+        out = []
+        for x in emb_list_a:
+            for y in emb_list_b:
+                out.append(dist_func(x, y))
+        return out
+
+
+@st.cache_data
 def generate_interactive_pca_2d(all_emb, all_lbl):
     pca = PCA(n_components=2, random_state=42)
     red_pca = pca.fit_transform(all_emb)
@@ -260,14 +283,12 @@ def generate_interactive_pca_2d(all_emb, all_lbl):
         "PC2": red_pca[:, 1],
         "Cluster": all_lbl
     })
-    # Definicja kolorów: dla każdego języka używamy odcieni danego koloru
     color_map = {
         "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
         "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
         "JAP": {"IND": "#ff9896", "COL": "#d62728"}
     }
     df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
-    # Tworzymy wykres z pełnym zbiorem danych.
     fig = px.scatter(
         df, x="PC1", y="PC2", color="Cluster",
         color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in df["Cluster"].unique()},
@@ -277,6 +298,7 @@ def generate_interactive_pca_2d(all_emb, all_lbl):
     return fig
 
 
+@st.cache_data
 def generate_interactive_tsne_2d(all_emb, all_lbl):
     tsne = TSNE(n_components=2, perplexity=30, random_state=42)
     red_tsne = tsne.fit_transform(all_emb)
@@ -291,7 +313,6 @@ def generate_interactive_tsne_2d(all_emb, all_lbl):
         "JAP": {"IND": "#ff9896", "COL": "#d62728"}
     }
     df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
-    # Tworzymy wykres z pełnym zbiorem danych.
     fig = px.scatter(
         df, x="Dim1", y="Dim2", color="Cluster",
         color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in df["Cluster"].unique()},
@@ -301,6 +322,7 @@ def generate_interactive_tsne_2d(all_emb, all_lbl):
     return fig
 
 
+@st.cache_data
 def generate_interactive_pca_3d(all_emb, all_lbl):
     pca_3d = PCA(n_components=3, random_state=42)
     red_pca_3d = pca_3d.fit_transform(all_emb)
@@ -316,7 +338,6 @@ def generate_interactive_pca_3d(all_emb, all_lbl):
         "JAP": {"IND": "#ff9896", "COL": "#d62728"}
     }
     df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
-    # Tworzymy interaktywny wykres 3D z pełnym zbiorem danych.
     fig = px.scatter_3d(
         df, x="PC1", y="PC2", z="PC3", color="Cluster",
         color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in df["Cluster"].unique()},
@@ -327,6 +348,7 @@ def generate_interactive_pca_3d(all_emb, all_lbl):
     return fig
 
 
+@st.cache_data
 def generate_interactive_tsne_3d(all_emb, all_lbl):
     tsne_3d = TSNE(n_components=3, perplexity=30, random_state=42)
     red_tsne_3d = tsne_3d.fit_transform(all_emb)
@@ -342,12 +364,38 @@ def generate_interactive_tsne_3d(all_emb, all_lbl):
         "JAP": {"IND": "#ff9896", "COL": "#d62728"}
     }
     df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
-    # Tworzymy interaktywny wykres 3D z pełnym zbiorem danych.
     fig = px.scatter_3d(
         df, x="Dim1", y="Dim2", z="Dim3", color="Cluster",
         color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in df["Cluster"].unique()},
         title="Interaktywna t-SNE 3D (text-embedding-3-large)",
         labels={"Dim1": "Dim1", "Dim2": "Dim2", "Dim3": "Dim3"}
+    )
+    fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
+    return fig
+
+
+# Opcjonalnie: UMAP 2D dla szybszej redukcji wymiarowości
+@st.cache_data
+def generate_interactive_umap_2d(all_emb, all_lbl):
+    if umap is None:
+        raise ImportError("Aby użyć UMAP, zainstaluj pakiet umap-learn.")
+    reducer = umap.UMAP(n_components=2, random_state=42)
+    red_umap = reducer.fit_transform(all_emb)
+    df = pd.DataFrame({
+        "UMAP1": red_umap[:, 0],
+        "UMAP2": red_umap[:, 1],
+        "Cluster": all_lbl
+    })
+    color_map = {
+        "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
+        "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
+        "JAP": {"IND": "#ff9896", "COL": "#d62728"}
+    }
+    df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
+    fig = px.scatter(
+        df, x="UMAP1", y="UMAP2", color="Cluster",
+        color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in df["Cluster"].unique()},
+        title="Interaktywna UMAP 2D (text-embedding-3-large)"
     )
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
     return fig
@@ -367,22 +415,19 @@ def plot_distribution(data1, data2, label1, label2, title, filename):
     plt.savefig(filename)
     plt.close()
 
+
 def dist_euclidean(a, b):
     return norm(a - b)
+
 
 def dist_cosine(a, b):
     c = np.dot(a, b) / (norm(a) * norm(b))
     return 1.0 - c
 
+
 def dist_manhattan(a, b):
     return np.sum(np.abs(a - b))
 
-def all_pairwise(emb_list_a, emb_list_b, dist_func):
-    out = []
-    for x in emb_list_a:
-        for y in emb_list_b:
-            out.append(dist_func(x, y))
-    return out
 
 def test_normality(data):
     stat_s, p_s = shapiro(data)
@@ -395,99 +440,70 @@ def test_normality(data):
         stat_k, p_k = kstest(z, 'norm')
     return p_s, p_k
 
+
 def generate_statistical_report():
     report = ""
     metrics = [("Euklides", dist_euclidean),
                ("Kosinus (1 - cos)", dist_cosine),
                ("Manhattan", dist_manhattan)]
-    
+
     for metric_name, metric_func in metrics:
         report += f"\n=== Metryka: {metric_name} ===\n"
-        
+
         def intra_category_dist(embeddings):
             dists = all_pairwise(embeddings, embeddings, metric_func)
-            # odfiltrowujemy dystanse (0 lub bardzo małe), powstające przy porównaniu identycznych wektorów
             return [d for d in dists if d > 1e-12]
 
-        # INTRA: dystanse w obrębie danej kategorii (IND lub COL), a następnie łączone
-        intra_pol_ind = intra_category_dist(pol_ind_embeddings)
-        intra_pol_col = intra_category_dist(pol_col_embeddings)
-        intra_pol = intra_pol_ind + intra_pol_col
+        intra_pol = intra_category_dist(pol_ind_embeddings) + intra_category_dist(pol_col_embeddings)
+        intra_eng = intra_category_dist(eng_ind_embeddings) + intra_category_dist(eng_col_embeddings)
+        intra_jap = intra_category_dist(jap_ind_embeddings) + intra_category_dist(jap_col_embeddings)
 
-        intra_eng_ind = intra_category_dist(eng_ind_embeddings)
-        intra_eng_col = intra_category_dist(eng_col_embeddings)
-        intra_eng = intra_eng_ind + intra_eng_col
-
-        intra_jap_ind = intra_category_dist(jap_ind_embeddings)
-        intra_jap_col = intra_category_dist(jap_col_embeddings)
-        intra_jap = intra_jap_ind + intra_jap_col
-
-        # INTER: dystanse między różnymi podkategoriami w ramach tego samego języka (IND vs. COL)
         dist_pol = all_pairwise(pol_ind_embeddings, pol_col_embeddings, metric_func)
         dist_eng = all_pairwise(eng_ind_embeddings, eng_col_embeddings, metric_func)
         dist_jap = all_pairwise(jap_ind_embeddings, jap_col_embeddings, metric_func)
 
-        # Rysujemy histogramy do wizualnej oceny
         plot_distribution(intra_pol, dist_pol,
                           "Intra POL", "Inter POL",
                           f"Dystrybucja (Polski) [{metric_name}]",
-                          f"dist_pol_{metric_name.replace(' ','_')}.png")
+                          f"dist_pol_{metric_name.replace(' ', '_')}.png")
         plot_distribution(intra_eng, dist_eng,
                           "Intra ENG", "Inter ENG",
                           f"Dystrybucja (Angielski) [{metric_name}]",
-                          f"dist_eng_{metric_name.replace(' ','_')}.png")
+                          f"dist_eng_{metric_name.replace(' ', '_')}.png")
         plot_distribution(intra_jap, dist_jap,
                           "Intra JAP", "Inter JAP",
                           f"Dystrybucja (Japoński) [{metric_name}]",
-                          f"dist_jap_{metric_name.replace(' ','_')}.png")
+                          f"dist_jap_{metric_name.replace(' ', '_')}.png")
 
-        # =====================================================================
-        # == BADANIE H1: Czy inter > intra? (różnicowanie kategorii w jednym języku)
-        # =====================================================================
         report += "\n[H1] Porównanie INTRA vs. INTER w ramach jednego języka.\n"
         report += ("Hipoteza: odległości inter (IND vs. COL) są większe niż intra (w obrębie IND lub COL). "
                    "Inaczej mówiąc, model rozróżnia te podkategorie.\n\n")
 
-        # Sprawdźmy normalność rozkładów inter i intra dla danego języka
         def compare_intra_inter(intra_distances, inter_distances, lang_code):
-            """
-            Zwraca (stat, pval, test_name) i buduje fragment raportu z testu.
-            """
-
-            # Najpierw test normalności obu rozkładów
             p_s_intra, p_k_intra = test_normality(intra_distances)
             p_s_inter, p_k_inter = test_normality(inter_distances)
-
             normal_intra = (p_s_intra > 0.05 and p_k_intra > 0.05)
             normal_inter = (p_s_inter > 0.05 and p_k_inter > 0.05)
-
-            # Raport o normalności
             txt = (f"  -> Normalność {lang_code} (intra): Shapiro p={p_s_intra:.4f}, K-S p={p_k_intra:.4f}, "
                    f"czy normalny? {normal_intra}\n")
             txt += (f"  -> Normalność {lang_code} (inter): Shapiro p={p_s_inter:.4f}, K-S p={p_k_inter:.4f}, "
                     f"czy normalny? {normal_inter}\n")
-
-            # Jeśli oba rozkłady normalne, używamy testu t-Studenta (jednostronnego).
-            # Jeżeli przynajmniej jeden nie jest normalny -> Mann-Whitney (jednostronny).
             if normal_intra and normal_inter:
-                # Test t-Studenta (jednostronny). Najpierw liczymy dwustronny, potem p/2
                 stat_t, p_t = ttest_ind(inter_distances, intra_distances, equal_var=False)
-                p_one_sided = p_t / 2.0  # jednostronny
-                txt += (f"  -> Test t-Studenta (dwustronny) stat={stat_t:.4f}, p={p_t:.4f} => p(jednostronne)={p_one_sided:.4f}\n")
+                p_one_sided = p_t / 2.0
+                txt += (
+                    f"  -> Test t-Studenta (dwustronny) stat={stat_t:.4f}, p={p_t:.4f} => p(jednostronne)={p_one_sided:.4f}\n")
                 stat_val = stat_t
                 p_val = p_one_sided
                 test_used = "t-test (jednostronny)"
             else:
-                # Test Manna-Whitneya (jednostronny)
                 stat_m, p_m = mannwhitneyu(inter_distances, intra_distances, alternative='greater')
                 txt += (f"  -> Test Manna-Whitneya (jednostronny) stat={stat_m:.4f}, p={p_m:.4f}\n")
                 stat_val = stat_m
                 p_val = p_m
                 test_used = "Mann-Whitney (jednostronny)"
-
             return stat_val, p_val, test_used, txt
 
-        # Polski
         stat_h1_pol, p_h1_pol, test_name_pol, pol_txt = compare_intra_inter(intra_pol, dist_pol, "POL")
         report += pol_txt
         if p_h1_pol < 0.01:
@@ -495,7 +511,6 @@ def generate_statistical_report():
         else:
             report += "  [H1] Polski: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
 
-        # Angielski
         stat_h1_eng, p_h1_eng, test_name_eng, eng_txt = compare_intra_inter(intra_eng, dist_eng, "ENG")
         report += eng_txt
         if p_h1_eng < 0.01:
@@ -503,7 +518,6 @@ def generate_statistical_report():
         else:
             report += "  [H1] Angielski: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
 
-        # Japoński
         stat_h1_jap, p_h1_jap, test_name_jap, jap_txt = compare_intra_inter(intra_jap, dist_jap, "JAP")
         report += jap_txt
         if p_h1_jap < 0.01:
@@ -512,7 +526,7 @@ def generate_statistical_report():
             report += "  [H1] Japoński: Brak statystycznie istotnego rozróżnienia między IND a COL.\n"
 
         report += "--- KONIEC TESTU (H1: intra vs. inter) ---\n"
-        
+
         p_s_pol, p_k_pol = test_normality(dist_pol)
         p_s_eng, p_k_eng = test_normality(dist_eng)
         p_s_jap, p_k_jap = test_normality(dist_jap)
@@ -522,7 +536,7 @@ def generate_statistical_report():
         report += f"\n[H2/H3] Shapiro (Pol) p={p_s_pol:.4f}, K-S (Pol) p={p_k_pol:.4f}\n"
         report += f"[H2/H3] Shapiro (Eng) p={p_s_eng:.4f}, K-S (Eng) p={p_k_eng:.4f}\n"
         report += f"[H2/H3] Shapiro (Jap) p={p_s_jap:.4f}, K-S (Jap) p={p_k_jap:.4f}\n"
-        
+
         plt.figure()
         plt.hist(dist_pol, bins=30, alpha=0.7, label="Polish")
         plt.hist(dist_eng, bins=30, alpha=0.7, label="English")
@@ -531,9 +545,9 @@ def generate_statistical_report():
         plt.xlabel("Dystans")
         plt.ylabel("Liczba przypadków")
         plt.legend()
-        plt.savefig(f"dist_all_{metric_name.replace(' ','_')}.png")
+        plt.savefig(f"dist_all_{metric_name.replace(' ', '_')}.png")
         plt.close()
-        
+
         if normal_pol and normal_eng and normal_jap:
             stat_t_eng, p_t_eng = ttest_ind(dist_pol, dist_eng, equal_var=False)
             p_one_eng = p_t_eng / 2.0
@@ -561,8 +575,9 @@ def generate_statistical_report():
         else:
             report += " [H2/H3] Wynik Jap: Brak istotnej różnicy między japońskimi a angielskimi zdaniami.\n"
         report += "--- KONIEC TESTU (H2/H3: porównanie między językami) ---\n"
-        
+
     return report
+
 
 ###############################################
 # KLASYFIKACJA TEKSTU (METODA CENTROIDÓW)
@@ -587,8 +602,9 @@ def klasyfikuj_tekst(txt):
         wyniki[key] = cos_sim(vec, cent)
     return sorted(wyniki.items(), key=lambda x: x[1], reverse=True)
 
+
 ###############################################
-# KLASYFIKACJA TEKSTU (UCZENIE MASZYNOWE) – ULEPSZONA WERSJA
+# KLASYFIKACJA TEKSTU (UCZENIE MASZYNOWE)
 ###############################################
 def train_ml_classifier(embeddings, labels):
     X = np.array(embeddings)
@@ -603,10 +619,10 @@ def train_ml_classifier(embeddings, labels):
     }
     grid = GridSearchCV(pipe, param_grid, cv=5, scoring='accuracy', n_jobs=-1)
     grid.fit(X, y)
-    best_model = grid.best_estimator_
     print("Raport klasyfikacji (cały zbiór):")
-    print(classification_report(y, best_model.predict(X)))
-    return best_model
+    print(classification_report(y, grid.best_estimator_.predict(X)))
+    return grid.best_estimator_
+
 
 def ml_klasyfikuj_tekst(txt, clf):
     vec = get_embedding(txt, model=EMBEDDING_MODEL)
@@ -616,6 +632,7 @@ def ml_klasyfikuj_tekst(txt, clf):
     prob_dict = {label: prob for label, prob in zip(clf.classes_, proba)}
     prob_dict = dict(sorted(prob_dict.items(), key=lambda x: x[1], reverse=True))
     return pred, prob_dict
+
 
 def get_ml_classifier(all_embeddings, all_labels, model_path="ml_classifier.pkl"):
     if os.path.exists(model_path):
@@ -628,10 +645,13 @@ def get_ml_classifier(all_embeddings, all_labels, model_path="ml_classifier.pkl"
             pickle.dump(clf, f)
         print("Wytrenowano i zapisano nowy model ML.")
     return clf
+
+
 ###############################################
 # DODATKOWE FUNKCJE: INTERAKTYWNE WYKRESY ROZKŁADU
 ###############################################
 import plotly.graph_objects as go
+
 
 def generate_distribution_chart(data1, data2, label1, label2, title):
     fig = go.Figure()
@@ -640,6 +660,8 @@ def generate_distribution_chart(data1, data2, label1, label2, title):
     fig.update_layout(title=title, xaxis_title="Dystans", yaxis_title="Gęstość", barmode="overlay")
     return fig
 
+
+@st.cache_data
 def generate_interactive_distribution_charts():
     metrics = [("Euklides", dist_euclidean),
                ("Kosinus", dist_cosine),
@@ -649,6 +671,7 @@ def generate_interactive_distribution_charts():
         def intra_category_dist(embeddings):
             dists = all_pairwise(embeddings, embeddings, metric_func)
             return [d for d in dists if d > 1e-12]
+
         intra_pol = intra_category_dist(pol_ind_embeddings) + intra_category_dist(pol_col_embeddings)
         intra_eng = intra_category_dist(eng_ind_embeddings) + intra_category_dist(eng_col_embeddings)
         intra_jap = intra_category_dist(jap_ind_embeddings) + intra_category_dist(jap_col_embeddings)
@@ -656,11 +679,15 @@ def generate_interactive_distribution_charts():
         dist_eng = all_pairwise(eng_ind_embeddings, eng_col_embeddings, metric_func)
         dist_jap = all_pairwise(jap_ind_embeddings, jap_col_embeddings, metric_func)
 
-        fig_pol = generate_distribution_chart(intra_pol, dist_pol, "Intra POL", "Inter POL", f"Dystrybucja dystansów (Polski) - {metric_name}")
-        fig_eng = generate_distribution_chart(intra_eng, dist_eng, "Intra ENG", "Inter ENG", f"Dystrybucja dystansów (Angielski) - {metric_name}")
-        fig_jap = generate_distribution_chart(intra_jap, dist_jap, "Intra JAP", "Inter JAP", f"Dystrybucja dystansów (Japoński) - {metric_name}")
+        fig_pol = generate_distribution_chart(intra_pol, dist_pol, "Intra POL", "Inter POL",
+                                              f"Dystrybucja dystansów (Polski) - {metric_name}")
+        fig_eng = generate_distribution_chart(intra_eng, dist_eng, "Intra ENG", "Inter ENG",
+                                              f"Dystrybucja dystansów (Angielski) - {metric_name}")
+        fig_jap = generate_distribution_chart(intra_jap, dist_jap, "Intra JAP", "Inter JAP",
+                                              f"Dystrybucja dystansów (Japoński) - {metric_name}")
         figures[metric_name] = {"POL": fig_pol, "ENG": fig_eng, "JAP": fig_jap}
     return figures
+
 
 ###############################################
 # BLOK GŁÓWNY – NIE URUCHAMIAMY INTERFEJSU STREAMLIT
@@ -676,7 +703,8 @@ if __name__ == "__main__":
                   ["JAP_IND"] * len(jap_ind_embeddings) +
                   ["JAP_COL"] * len(jap_col_embeddings))
 
-    print("Funkcje generujące wykresy interaktywne (PCA, t-SNE, UMAP 2D/3D) są dostępne przy imporcie modułu do aplikacji Streamlit.")
+    print(
+        "Funkcje generujące wykresy interaktywne (PCA, t-SNE, UMAP 2D/3D) są dostępne przy imporcie modułu do aplikacji Streamlit.")
     report_text = generate_statistical_report()
     with open("raport_statystyczny.txt", "w", encoding="utf-8") as f:
         f.write(report_text)
