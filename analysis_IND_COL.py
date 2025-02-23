@@ -82,11 +82,11 @@ Celem tego projektu jest sprawdzenie, czy **istnieją rzeczywiste różnice kult
 
 ### **Sposób testowania hipotez**
 
-- **Obliczanie odległości:** Dla każdej pary zdań (np. między zdaniami IND i COL w danym języku) obliczamy odległości przy użyciu wybranych metryk (np. kosinusowej – 1 − cosinus, euklidesowej czy Manhattan).
+- **Obliczanie odległości:** Dla każdej pary zdań (między zdaniami IND i COL w danym języku, czyli każde zdanie IND jest połączone z każdym zdaniem COl. Daje to nam 100x100 kombinacji) obliczamy odległości przy użyciu wybranych metryk (np. kosinusowej – 1 − cosinus, euklidesowej czy Manhattan).
   
 - **Analiza rozkładu:** Sprawdzamy, czy rozkłady obliczonych odległości są zgodne z rozkładem normalnym przy użyciu testów Shapiro-Wilka i Kolmogorova-Smirnova. Jeśli rozkład nie jest normalny, stosujemy test nieparametryczny, taki jak test Manna–Whitneya.
 
-- **Porównanie median:** Porównujemy mediany odległości między embeddingami zdań IND i COL dla języka angielskiego, polskiego oraz japońskiego. Hipoteza H₂ przewiduje, że mediana dla języka polskiego (oraz potencjalnie japońskiego) będzie mniejsza niż dla języka angielskiego.
+- **Porównanie median:** Porównujemy mediany odległości między embeddingami zdań IND i COL dla języka angielskiego, polskiego oraz japońskiego. Hipoteza H₂ przewiduje, że mediana dla języka polskiego oraz japońskiego będzie mniejsza niż dla języka angielskiego.
 
 - **Test istotności:** Jeśli wynik testu (np. test Manna–Whitneya) dla porównania mediana_angielski vs. mediana_polski (lub japoński) daje p < 0.01, można odrzucić hipotezę zerową, że różnice są przypadkowe, i przyjąć, że różnice te są statystycznie istotne.
 
@@ -106,7 +106,7 @@ Podsumowując, projekt opiera się na hipotezach mówiących o różnicach w spo
 ### **4.1. Zbiór danych i podział**
 
 Zgromadziliśmy zdania w trzech językach: **angielskim**, **polskim** i **japońskim**.  
-W każdym języku wyróżniono dwie grupy zdań:
+W każdym języku wyróżniono dwie grupy zdań, każda po 100 zdań:
 
 - **IND (Individualistic)** – przykłady: „Działam samodzielnie”, „Jestem niezależny”.  
 - **COL (Collectivistic)** – przykłady: „Zespół jest siłą”, „Wspólnie się wspieramy”.
@@ -135,19 +135,34 @@ W aplikacji możemy sprawdzić, czy np. zdania indywidualistyczne i kolektywisty
 
 ---
 
-### **4.3. Klasyfikacja nowego tekstu**
+### **4.3. Klasyfikacja nowego tekstu (dodatkowa funkcja)**
 
 #### **Metoda centroidów**
-1. Każda kategoria (np. `ENG_IND`) ma swój **centroid**, czyli uśredniony wektor wszystkich zdań treningowych z tej kategorii.  
-2. Nowy tekst również przekształcamy na embedding (3072D).  
-3. Mierzymy **podobieństwo** (najczęściej kosinusowe) z centroidami.  
-4. Kategoria z najwyższym podobieństwem to przewidywana klasa (np. `POL_IND`).
+1. Każda kategoria (np. `ENG_IND`) ma swój **centroid** – czyli średnią wartość wszystkich zdań przypisanych do tej kategorii. Można to sobie wyobrazić jako "punkt środkowy" grupy zdań w przestrzeni liczb.  
+2. Nowy tekst zamieniamy na wektor (ciąg **3072 liczb**) – jest to matematyczna reprezentacja znaczenia tego zdania.  
+3. Sprawdzamy, do której kategorii tekst pasuje najlepiej, mierząc **podobieństwo** między jego wektorem a centroidami.  
+   - Używamy do tego **miary kosinusowej** – sprawdza ona kąt między wektorami.  
+   - Jeśli kąt między dwoma wektorami jest mały, oznacza to, że zdania są bardzo podobne.  
+   - Jeśli kąt jest duży, teksty są różne.  
+   - Można to porównać do porównywania kierunków dwóch strzałek – im bardziej są do siebie równoległe, tym bardziej pasują.  
+4. Tekst przypisujemy do kategorii, której centroid jest **najbliżej** (czyli ma najmniejszy kąt względem wektora zdania).  
+5. Dzięki tej metodzie możemy również analizować, jak dobrze nowy tekst pasuje do zbioru:  
+   - Jeśli wektor jest blisko centroidu, to tekst dobrze wpisuje się w daną kategorię.  
+   - Jeśli jest daleko, może być niejednoznaczny lub pasować do kilku kategorii jednocześnie.  
 
 #### **Klasyfikator ML (Regresja Logistyczna)**
-1. Trenujemy model na **całym zbiorze** embeddingów i etykiet (ENG_IND, POL_COL itp.).  
-2. Po wygenerowaniu embeddingu nowego zdania model automatycznie przewiduje klasę (np. `ENG_COL`) i podaje też **prawdopodobieństwa** przynależności do pozostałych kategorii.  
-
-Model ML może wychwycić subtelniejsze różnice, ponieważ „patrzy” na rozkład wszystkich zdań, a nie tylko na średni wektor kategorii.
+1. Zamiast liczyć średnią wartość kategorii (jak w metodzie centroidów), uczymy model analizować **cały zbiór** wektorów przypisanych do poszczególnych kategorii (`ENG_IND`, `POL_COL` itd.).  
+2. Po przekształceniu nowego zdania na wektor (3072 liczby), model przewiduje, do której kategorii należy.  
+3. Oprócz samej klasy zwraca także **prawdopodobieństwa**, czyli ocenę pewności swojej decyzji.  
+   - Przykładowo:  
+     - `ENG_IND`: 85%  
+     - `POL_COL`: 10%  
+     - `ENG_COL`: 5%  
+   - To oznacza, że model jest w 85% pewien, że zdanie należy do kategorii `ENG_IND`.  
+4. Model ML jest dokładniejszy od metody centroidów, ponieważ:  
+   - Nie tylko sprawdza średnią wartość kategorii, ale analizuje **pełny rozkład wszystkich zdań**.  
+   - Potrafi dostrzec **bardziej subtelne różnice**, np. wykryć, że dwa podobne zdania mogą jednak należeć do różnych kategorii ze względu na niuanse językowe.  
+   - Może też wykrywać **mniej typowe przypadki**, które nie są blisko żadnego centroidu, ale mimo to pasują do konkretnej kategorii.  
 
 ---
 
