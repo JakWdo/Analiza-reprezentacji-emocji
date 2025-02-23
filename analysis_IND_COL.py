@@ -10,6 +10,7 @@ import streamlit as st  # Funkcje Streamlit pozostają, gdyż są wykorzystywane
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from dotenv import load_dotenv
+from umap import UM
 # Statystyka
 from scipy.stats import mannwhitneyu, ttest_ind, shapiro, kstest
 from sklearn.linear_model import LogisticRegression
@@ -192,7 +193,6 @@ def get_embeddings_for_list(txt_list, cache_file=CACHE_FILE):
             pickle.dump(cache, f)
     return np.array(out)
 
-
 ###############################################
 # POBRANIE EMBEDDINGÓW I OBLICZENIE CENTROIDÓW
 ###############################################
@@ -229,7 +229,6 @@ centroid_pol_col = compute_centroid(pol_col_embeddings)
 centroid_jap_ind = compute_centroid(jap_ind_embeddings)
 centroid_jap_col = compute_centroid(jap_col_embeddings)
 
-
 ###############################################
 # REDUKCJA WYMIAROWOŚCI I INTERAKTYWNE WIZUALIZACJE (PCA, t-SNE)
 ###############################################
@@ -248,7 +247,6 @@ def generate_interactive_pca_2d(all_emb, all_lbl):
         "JAP": {"IND": "#ff9896", "COL": "#d62728"}
     }
     df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
-    # Filtrowanie klastrów – funkcja ta jest przeznaczona do użycia w Streamlit
     selected_clusters = st.multiselect("Wybierz klastry (PCA 2D)",
                                        options=df["Cluster"].unique().tolist(),
                                        default=df["Cluster"].unique().tolist())
@@ -296,7 +294,6 @@ def generate_interactive_pca_3d(all_emb, all_lbl):
         "PC3": red_pca_3d[:, 2],
         "Cluster": all_lbl
     })
-    # Używamy tego samego color_map co w funkcji 2D
     color_map = {
         "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
         "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
@@ -329,7 +326,6 @@ def generate_interactive_tsne_3d(all_emb, all_lbl):
         "Dim3": red_tsne_3d[:, 2],
         "Cluster": all_lbl
     })
-    # Używamy tego samego color_map co w funkcjach 2D
     color_map = {
         "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
         "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
@@ -352,7 +348,65 @@ def generate_interactive_tsne_3d(all_emb, all_lbl):
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
     return fig
 
+###############################################
+# NOWE WIZUALIZACJE Z UMAP
+###############################################
+def generate_interactive_umap_2d(all_emb, all_lbl):
+    umap_2d = UMAP(n_components=2, random_state=42)
+    red_umap = umap_2d.fit_transform(all_emb)
+    df = pd.DataFrame({
+        "UMAP1": red_umap[:, 0],
+        "UMAP2": red_umap[:, 1],
+        "Cluster": all_lbl
+    })
+    color_map = {
+        "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
+        "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
+        "JAP": {"IND": "#ff9896", "COL": "#d62728"}
+    }
+    df["Color"] = df["Cluster"].apply(lambda x: color_map[x.split("_")[0]][x.split("_")[1]])
+    selected_clusters = st.multiselect("Wybierz klastry (UMAP 2D)",
+                                       options=df["Cluster"].unique().tolist(),
+                                       default=df["Cluster"].unique().tolist())
+    filtered_df = df[df["Cluster"].isin(selected_clusters)]
+    fig = px.scatter(filtered_df, x="UMAP1", y="UMAP2", color="Cluster",
+                     color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]] for cl in
+                                         df["Cluster"].unique()},
+                     title="Interaktywna UMAP 2D (text-embedding-3-large)")
+    fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
+    return fig
 
+
+def generate_interactive_umap_3d(all_emb, all_lbl):
+    umap_3d = UMAP(n_components=3, random_state=42)
+    red_umap = umap_3d.fit_transform(all_emb)
+    df = pd.DataFrame({
+        "Dim1": red_umap[:, 0],
+        "Dim2": red_umap[:, 1],
+        "Dim3": red_umap[:, 2],
+        "Cluster": all_lbl
+    })
+    color_map = {
+        "ENG": {"IND": "#aec7e8", "COL": "#1f77b4"},
+        "POL": {"IND": "#98df8a", "COL": "#2ca02c"},
+        "JAP": {"IND": "#ff9896", "COL": "#d62728"}
+    }
+    try:
+        selected_clusters = st.multiselect("Wybierz klastry (UMAP 3D)",
+                                           options=df["Cluster"].unique().tolist(),
+                                           default=df["Cluster"].unique().tolist())
+    except Exception:
+        selected_clusters = df["Cluster"].unique().tolist()
+    filtered_df = df[df["Cluster"].isin(selected_clusters)]
+    fig = px.scatter_3d(filtered_df,
+                        x="Dim1", y="Dim2", z="Dim3",
+                        color="Cluster",
+                        color_discrete_map={cl: color_map[cl.split("_")[0]][cl.split("_")[1]]
+                                              for cl in df["Cluster"].unique()},
+                        title="Interaktywna UMAP 3D (text-embedding-3-large)",
+                        labels={"Dim1": "Dim1", "Dim2": "Dim2", "Dim3": "Dim3"})
+    fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
+    return fig
 
 ###############################################
 # METRYKI ODLEGŁOŚCI I TESTY STATYSTYCZNE
@@ -440,7 +494,6 @@ def generate_statistical_report():
         report += "--- KONIEC TESTU ---\n"
     return report
 
-
 ###############################################
 # KLASYFIKACJA TEKSTU (METODA CENTROIDÓW)
 ###############################################
@@ -512,7 +565,6 @@ def get_ml_classifier(all_embeddings, all_labels, model_path="ml_classifier.pkl"
         print("Wytrenowano i zapisano nowy model ML.")
     return clf
 
-
 ###############################################
 # BLOK GŁÓWNY – NIE URUCHAMIAMY INTERFEJSU STREAMLIT
 ###############################################
@@ -529,7 +581,7 @@ if __name__ == "__main__":
                   ["JAP_COL"] * len(jap_col_embeddings))
 
     # Wyświetlamy informacje o dostępnych wykresach – funkcje interaktywne są przeznaczone do wykorzystania w Streamlit
-    print("Funkcje generujące wykresy interaktywne (2D i 3D) są dostępne przy imporcie modułu do aplikacji Streamlit.")
+    print("Funkcje generujące wykresy interaktywne (PCA, t-SNE, UMAP 2D/3D) są dostępne przy imporcie modułu do aplikacji Streamlit.")
 
     # 1) Generowanie raportu statystycznego i zapis do pliku
     report_text = generate_statistical_report()
