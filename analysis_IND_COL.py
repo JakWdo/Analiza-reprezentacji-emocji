@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 # Statystyka
 from scipy.stats import mannwhitneyu, ttest_ind, shapiro, kstest
 from sklearn.linear_model import LogisticRegression
+from xgboost import XGBClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV, train_test_split
@@ -558,26 +559,45 @@ def klasyfikuj_tekst(txt):
 def train_ml_classifier(embeddings, labels):
     X = np.array(embeddings)
     y = np.array(labels)
+    
+    # Podział danych na zbiór treningowy i testowy
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # Opcjonalna redukcja wymiarowości - PCA (dostosuj n_components do swoich danych)
+    pca = PCA(n_components=50)
+    X_train_pca = pca.fit_transform(X_train)
+    X_test_pca = pca.transform(X_test)
+    
+    # Pipeline z użyciem StandardScaler i klasyfikatora XGBoost
     pipe = Pipeline([
         ('scaler', StandardScaler()),
-        ('clf', LogisticRegression(max_iter=1000))
+        ('clf', XGBClassifier(use_label_encoder=False, eval_metric='mlogloss'))
     ])
+    
+    # Dobór hiperparametrów dla XGBClassifier
     param_grid = {
-        'clf__C': [0.01, 0.1, 1, 10, 100],
-        'clf__penalty': ['l2']
+        'clf__n_estimators': [50, 100, 200],
+        'clf__max_depth': [3, 5, 7],
+        'clf__learning_rate': [0.01, 0.1, 0.2]
     }
     grid = GridSearchCV(pipe, param_grid, cv=5, scoring='accuracy', n_jobs=-1)
-    grid.fit(X, y)
+    grid.fit(X_train_pca, y_train)
     best_model = grid.best_estimator_
-    print("Raport klasyfikacji (cały zbiór):")
-    print(classification_report(y, best_model.predict(X)))
-    return best_model
+    
+    print("Raport klasyfikacji (zbiór testowy):")
+    print(classification_report(y_test, best_model.predict(X_test_pca)))
+    
+    # Zwracamy wytrenowany model oraz obiekt PCA do przetwarzania nowych danych
+    return best_model, pca
 
-def ml_klasyfikuj_tekst(txt, clf):
+def ml_klasyfikuj_tekst(txt, clf, pca):
+    # Pobranie embeddingu tekstu
     vec = get_embedding(txt, model=EMBEDDING_MODEL)
     vec /= norm(vec)
-    pred = clf.predict([vec])[0]
-    proba = clf.predict_proba([vec])[0]
+    # Zastosowanie PCA do nowego wektora
+    vec_pca = pca.transform([vec])
+    pred = clf.predict(vec_pca)[0]
+    proba = clf.predict_proba(vec_pca)[0]
     prob_dict = {label: prob for label, prob in zip(clf.classes_, proba)}
     prob_dict = dict(sorted(prob_dict.items(), key=lambda x: x[1], reverse=True))
     return pred, prob_dict
@@ -585,15 +605,14 @@ def ml_klasyfikuj_tekst(txt, clf):
 def get_ml_classifier(all_embeddings, all_labels, model_path="ml_classifier.pkl"):
     if os.path.exists(model_path):
         with open(model_path, "rb") as f:
-            clf = pickle.load(f)
+            clf, pca = pickle.load(f)
         print("Wczytano zapisany model ML.")
     else:
-        clf = train_ml_classifier(all_embeddings, all_labels)
+        clf, pca = train_ml_classifier(all_embeddings, all_labels)
         with open(model_path, "wb") as f:
-            pickle.dump(clf, f)
+            pickle.dump((clf, pca), f)
         print("Wytrenowano i zapisano nowy model ML.")
-    return clf
-
+    return clf, pca
 ###############################################
 # DODATKOWE FUNKCJE: INTERAKTYWNE WYKRESY ROZKŁADU
 ###############################################
