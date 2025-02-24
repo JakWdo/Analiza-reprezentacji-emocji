@@ -74,8 +74,8 @@ Celem tego projektu jest sprawdzenie, czy **istnieją rzeczywiste różnice kult
    Statystycznie, oznacza to, że rozkłady odległości (np. miara kosinusowa lub euklidesowa) pomiędzy embeddingami zdań IND i COL będą istotnie różne w ramach danego języka.
 
 2. **Porównanie dystansów między kategoriami w zależności od języka**  
-   **Hipoteza H₂:** W języku polskim (i ewentualnie japońskim) różnice między zdaniami IND i COL (mierzone odległościami wektorowymi) są mniejsze niż w języku angielskim.  
-   Statystycznie, oznacza to, że mediana odległości między wektorami zdań IND a COL w polskim (lub japońskim) będzie niższa niż w angielskim, co można przetestować używając testu Manna–Whitneya (alternatywa dla t-testu, gdy rozkłady nie są normalne) przy poziomie istotności p < 0.01.
+   **Hipoteza H₂:** W języku polskim i japońskim różnice między zdaniami IND i COL (mierzone odległościami wektorowymi) są mniejsze niż w języku angielskim.  
+   Statystycznie, oznacza to, że mediana odległości między wektorami zdań IND a COL w polskim i japońskim będzie niższa niż w angielskim, co można przetestować używając testu Manna–Whitneya (alternatywa dla t-testu, gdy rozkłady nie są normalne) przy poziomie istotności p < 0.01.
 
 3. **Statystyczna istotność obserwowanych różnic**  
    **Hipoteza H₃:** Zaobserwowane różnice w dystansach między kategoriami nie są przypadkowe.  
