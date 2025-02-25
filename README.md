@@ -4,13 +4,10 @@ Repozytorium **Analiza reprezentacji emocji** to aplikacja napisana w Pythonie, 
 
 ## Opis projektu
 
-Aplikacja korzysta z modelu OpenAI `text-embedding-3-large`, który przekształca tekst na wektory o wymiarze 3072. Na podstawie tych reprezentacji aplikacja:
-- Generuje interaktywne wizualizacje 2D i 3D (PCA i t-SNE), pozwalające na analizę relacji między zdaniami.
-- Umożliwia klasyfikację nowego tekstu przy użyciu dwóch metod:
-  - **Metoda centroidów:** Nowy tekst jest zamieniany na wektor, a następnie porównywany z centroidami wcześniej obliczonych grup (np. indywidualistyczne vs. kolektywistyczne w każdym języku). Ranking kosinusowego podobieństwa pokazuje, do której grupy tekst jest najbliższy.
-  - **Klasyfikacja ML:** Wytrenowany model (regresja logistyczna) przypisuje nowy tekst do jednej z kategorii, generując jednocześnie rozkład prawdopodobieństwa. Model jest cache’owany (zapisywany do pliku), aby nie trenować go przy każdym uruchomieniu.
+Ten projekt badawczy analizuje, w jaki sposób różnice kulturowe pomiędzy społeczeństwami indywidualistycznymi i kolektywistycznymi są odzwierciedlone w reprezentacjach wektorowych (embeddingach) zdań w trzech różnych językach: angielskim, polskim i japońskim.
+Wykorzystując model `text-embedding-3-large` od **OpenAI**, badanie to dostarcza ilościowych dowodów na to, że kulturowo uwarunkowane koncepcje indywidualizmu i kolektywizmu są odmiennie reprezentowane w przestrzeni semantycznej różnych języków.
 
-Dodatkowo, aplikacja generuje raport statystyczny, w którym obliczane są dystanse między embeddingami za pomocą trzech metryk: euklidesowej, kosinusowej (1 - cos) i Manhattan. Wyniki testów statystycznych (np. test Shapiro-Wilka, test Kolmogorova-Smirnova, testy t-test/Mann–Whitney) pozwalają ocenić, czy różnice między grupami (np. między językiem polskim a angielskim) są istotne.
+**Aplikacja**: https://jakwdo-col-vs-ind.streamlit.app/
 
 ## Jak to działa?
 
@@ -35,4 +32,5 @@ Dodatkowo, aplikacja generuje raport statystyczny, w którym obliczane są dysta
    Dla każdej z metryk (Euklides, Kosinus, Manhattan) aplikacja:
    - Oblicza dystanse między embeddingami zdań indywidualistycznych i kolektywistycznych.
    - Przeprowadza testy normalności (Shapiro-Wilka, Kolmogorova-Smirnova) oraz testy istotności (t-test lub nieparametryczny Mann–Whitney).
+   - Korekcję Bonferroniego dla wielokrotnych testów
    - Raport podsumowuje mediany dystansów oraz wnioski o istotności różnic między językami.
