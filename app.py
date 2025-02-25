@@ -1028,56 +1028,77 @@ Wyniki otwierają liczne możliwości dla przyszłych badań:
 
 Przeprowadzone badanie stanowi istotny krok w kierunku ilościowego, opartego na danych podejścia do badania relacji między językiem, kulturą i reprezentacjami embeddingowymi. Wykazuję, że modele embeddingowe nie tylko przechwytują podobieństwa semantyczne, ale również odzwierciedlają głębsze, kulturowo uwarunkowane struktury konceptualne. Potwierdza to potencjał embeddingów jako narzędzia w badaniach międzykulturowych oraz podkreśla potrzebę kulturowo świadomego podejścia w rozwoju systemów sztucznej inteligencji.
 
-### **3.5. Bibliografia**
-Bengio, Y., Ducharme, R., Vincent, P., & Jauvin, C. (2003). A neural probabilistic language model. Journal of Machine Learning Research, 3(Feb), 1137-1155.
-Blodgett, S. L., Barocas, S., Daumé III, H., & Wallach, H. (2020). Language (technology) is power: A critical survey of "bias" in NLP. Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics, 5454-5476.
-Bommasani, R., Hudson, D. A., Adeli, E., Altman, R., Arora, S., von Arx, S., ... & Liang, P. (2021). On the opportunities and risks of foundation models. arXiv preprint arXiv:2108.07258.
-Boski, P. (2006). Humanism-materialism: Centuries-long Polish cultural origins and 20 years of research in cultural psychology. In U. Kim, K.-S. Yang, & K.-K. Hwang (Eds.), Indigenous and cultural psychology: Understanding people in context (pp. 373–402). Springer.
-Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., ... & Amodei, D. (2020). Language models are few-shot learners. Advances in Neural Information Processing Systems, 33, 1877-1901.
-Cao, X., Sugiyama, M., Gan, C., & Shen, Y. (2023). Understanding and improving robustness of vision transformers through patch-based negative augmentation. arXiv preprint arXiv:2110.07858.
-Chomsky, N. (1957). Syntactic structures. Mouton.
-Conneau, A., Rinott, R., Lample, G., Williams, A., Bowman, S. R., Schwenk, H., & Stoyanov, V. (2018). XNLI: Evaluating cross-lingual sentence representations. Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, 2475-2485.
-D'Andrade, R. G. (1995). The development of cognitive anthropology. Cambridge University Press.
-Darwin, C. (1872). The expression of the emotions in man and animals. John Murray.
-Devlin, J., Chang, M. W., Lee, K., & Toutanova, K. (2019). BERT: Pre-training of deep bidirectional transformers for language understanding. Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, 4171-4186.
-Dunn, O. J. (1961). Multiple comparisons among means. Journal of the American Statistical Association, 56(293), 52-64.
-Ekman, P. (1992). An argument for basic emotions. Cognition & Emotion, 6(3-4), 169-200.
-Ethayarajh, K. (2019). How contextual are contextualized word representations? Comparing the geometry of BERT, ELMo, and GPT-2 embeddings. Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing, 55-65.
-Freud, S. (1915). The unconscious. Standard Edition, 14(1957), 159-215.
-Geertz, C. (1973). The interpretation of cultures. Basic Books.
-Gross, J. J., & Barrett, L. F. (2011). Emotion generation and emotion regulation: One or two depends on your point of view. Emotion Review, 3(1), 8-16.
-Havaldar, S., Corso, A., & Zhao, D. (2023). Vantage point similarity in embedding space reveals cross-cultural universal and relative emotion semantics in facial expressions. Proceedings of the National Academy of Sciences, 120(26), e2218772120.
-Hershcovich, D., Frank, A., Lent, H., & Zhu, H. (2022). Challenges and strategies in cross-cultural NLP. Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics, 6997-7013.
-Hofstede, G. (2001). Culture's consequences: Comparing values, behaviors, institutions and organizations across nations. Sage Publications.
-Hofstede, G., Hofstede, G. J., & Minkov, M. (2010). Cultures and organizations: Software of the mind (3rd ed.). McGraw-Hill.
-Jones, E., Oliphant, T., Peterson, P., & others. (2001). SciPy: Open source scientific tools for Python. Retrieved from http://www.scipy.org/
-Kashima, E. S., & Kashima, Y. (1998). Culture and language: The case of cultural dimensions and personal pronoun use. Journal of Cross-Cultural Psychology, 29(3), 461-486.
-Kitayama, S., & Park, H. (2007). Cultural shaping of self, emotion, and well-being: How does it work? Social and Personality Psychology Compass, 1(1), 202-222.
-Lazarus, R. S. (1991). Emotion and adaptation. Oxford University Press.
-Lucy, J. A. (1997). Linguistic relativity. Annual Review of Anthropology, 26(1), 291-312.
-Markus, H. R., & Kitayama, S. (1991). Culture and the self: Implications for cognition, emotion, and motivation. Psychological Review, 98(2), 224-253.
-Mesquita, B. (1997). The cultural construction of emotions. Psychological Inquiry, 8(4), 258-269.
-Mesquita, B. (2001). Emotions in collectivist and individualist contexts. Journal of Personality and Social Psychology, 80(1), 68-74.
-Mesquita, B. (2003). Emotions as dynamic cultural phenomena. In R. J. Davidson, K. R. Scherer, & H. H. Goldsmith (Eds.), Handbook of affective sciences (pp. 871-890). Oxford University Press.
-Mesquita, B., & Leu, J. (2007). The cultural psychology of emotion. In S. Kitayama & D. Cohen (Eds.), Handbook of cultural psychology (pp. 734-759). Guilford Press.
-Mikolov, T., Sutskever, I., Chen, K., Corrado, G. S., & Dean, J. (2013). Distributed representations of words and phrases and their compositionality. Advances in Neural Information Processing Systems, 26.
-Nisbett, R. E., Peng, K., Choi, I., & Norenzayan, A. (2001). Culture and systems of thought: Holistic versus analytic cognition. Psychological Review, 108(2), 291-310.
-Panksepp, J. (2004). Affective neuroscience: The foundations of human and animal emotions. Oxford University Press.
-Pavlenko, A. (2008). Emotion and emotion-laden words in the bilingual lexicon. Bilingualism: Language and Cognition, 11(2), 147-164.
-Pennington, J., Socher, R., & Manning, C. D. (2014). GloVe: Global vectors for word representation. Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing, 1532-1543.
-Radford, A., Narasimhan, K., Salimans, T., & Sutskever, I. (2018). Improving language understanding by generative pre-training. OpenAI.
-Rumelhart, D. E., & McClelland, J. L. (1986). Parallel distributed processing: Explorations in the microstructure of cognition. MIT Press.
-Scherer, K. R. (2009). The dynamic architecture of emotion: Evidence for the component process model. Cognition and Emotion, 23(7), 1307-1351.
-Shore, B. (1996). Culture in mind: Cognition, culture, and the problem of meaning. Oxford University Press.
-Slobin, D. I. (1996). From "thought and language" to "thinking for speaking". In J. J. Gumperz & S. C. Levinson (Eds.), Rethinking linguistic relativity (pp. 70-96). Cambridge University Press.
-Triandis, H. C. (1989). The self and social behavior in differing cultural contexts. Psychological Review, 96(3), 506-520.
-Triandis, H. C. (1995). Individualism & collectivism. Westview Press.
-Tsai, J. L. (2007). Ideal affect: Cultural causes and behavioral consequences. Perspectives on Psychological Science, 2(3), 242-259.
-Van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE. Journal of Machine Learning Research, 9(Nov), 2579-2605.
-Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., ... & Polosukhin, I. (2017). Attention is all you need. Advances in Neural Information Processing Systems, 30.
-Wierzbicka, A. (1999). Emotions across languages and cultures: Diversity and universals. Cambridge University Press.
-Wierzbicka, A. (2006). English: Meaning and culture. Oxford University Press.
-Wierzbicka, A. (2009). Language, experience, and translation: Towards a new science of the mind. Lexington Books.
+# ### 3.5. Bibliografia
+# - Bengio, Y., Ducharme, R., Vincent, P., & Jauvin, C. (2003). A neural probabilistic language model. 
+#   Journal of Machine Learning Research, 3(Feb), 1137-1155.
+# - Blodgett, S. L., Barocas, S., Daumé III, H., & Wallach, H. (2020). Language (technology) is power: 
+#   A critical survey of "bias" in NLP. Proceedings of the 58th Annual Meeting of the Association for 
+#   Computational Linguistics, 5454-5476.
+# - Bommasani, R., Hudson, D. A., Adeli, E., Altman, R., Arora, S., von Arx, S., ... & Liang, P. (2021). 
+#   On the opportunities and risks of foundation models. arXiv preprint arXiv:2108.07258.
+# - Boski, P. (2006). Humanism-materialism: Centuries-long Polish cultural origins and 20 years of 
+#   research in cultural psychology. In U. Kim, K.-S. Yang, & K.-K. Hwang (Eds.), Indigenous and 
+#   cultural psychology: Understanding people in context (pp. 373–402). Springer.
+# - Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., ... & Amodei, D. (2020). 
+#   Language models are few-shot learners. Advances in Neural Information Processing Systems, 33, 1877-1901.
+# - Cao, X., Sugiyama, M., Gan, C., & Shen, Y. (2023). Understanding and improving robustness of vision 
+#   transformers through patch-based negative augmentation. arXiv preprint arXiv:2110.07858.
+# - Chomsky, N. (1957). Syntactic structures. Mouton.
+# - Conneau, A., Rinott, R., Lample, G., Williams, A., Bowman, S. R., Schwenk, H., & Stoyanov, V. (2018). 
+#   XNLI: Evaluating cross-lingual sentence representations. Proceedings of the 2018 Conference on 
+#   Empirical Methods in Natural Language Processing, 2475-2485.
+# - D'Andrade, R. G. (1995). The development of cognitive anthropology. Cambridge University Press.
+# - Darwin, C. (1872). The expression of the emotions in man and animals. John Murray.
+# - Devlin, J., Chang, M. W., Lee, K., & Toutanova, K. (2019). BERT: Pre-training of deep bidirectional 
+#   transformers for language understanding. Proceedings of the 2019 Conference of the North American 
+#   Chapter of the Association for Computational Linguistics: Human Language Technologies, 4171-4186.
+# - Dunn, O. J. (1961). Multiple comparisons among means. Journal of the American Statistical Association, 
+#   56(293), 52-64.
+# - Ekman, P. (1992). An argument for basic emotions. Cognition & Emotion, 6(3-4), 169-200.
+# - Ethayarajh, K. (2019). How contextual are contextualized word representations? Comparing the geometry 
+#   of BERT, ELMo, and GPT-2 embeddings. Proceedings of the 2019 Conference on Empirical Methods in 
+#   Natural Language Processing, 55-65.
+# - Freud, S. (1915). The unconscious. Standard Edition, 14(1957), 159-215.
+# - Geertz, C. (1973). The interpretation of cultures. Basic Books.
+# - Gross, J. J., & Barrett, L. F. (2011). Emotion generation and emotion regulation: One or two depends 
+#   on your point of view. Emotion Review, 3(1), 8-16.
+# - Havaldar, S., Corso, A., & Zhao, D. (2023). Vantage point similarity in embedding space reveals 
+#   cross-cultural universal and relative emotion semantics in facial expressions. Proceedings of the 
+#   National Academy of Sciences, 120(26), e2218772120.
+# - Hofstede, G. (2001). Culture's consequences: Comparing values, behaviors, institutions and 
+#   organizations across nations. Sage Publications.
+# - Hofstede, G., Hofstede, G. J., & Minkov, M. (2010). Cultures and organizations: Software of the mind 
+#   (3rd ed.). McGraw-Hill.
+# - Jones, E., Oliphant, T., Peterson, P., & others. (2001). SciPy: Open source scientific tools for Python. 
+#   Retrieved from http://www.scipy.org/
+# - Kashima, E. S., & Kashima, Y. (1998). Culture and language: The case of cultural dimensions and 
+#   personal pronoun use. Journal of Cross-Cultural Psychology, 29(3), 461-486.
+# - Kitayama, S., & Park, H. (2007). Cultural shaping of self, emotion, and well-being: How does it work? 
+#   Social and Personality Psychology Compass, 1(1), 202-222.
+# - Lazarus, R. S. (1991). Emotion and adaptation. Oxford University Press.
+# - Lucy, J. A. (1997). Linguistic relativity. Annual Review of Anthropology, 26(1), 291-312.
+# - Markus, H. R., & Kitayama, S. (1991). Culture and the self: Implications for cognition, emotion, and 
+#   motivation. Psychological Review, 98(2), 224-253.
+# - Mesquita, B. (1997). The cultural construction of emotions. Psychological Inquiry, 8(4), 258-269.
+# - Mesquita, B. (2001). Emotions in collectivist and individualist contexts. Journal of Personality and 
+#   Social Psychology, 80(1), 68-74.
+# - Mesquita, B. (2003). Emotions as dynamic cultural phenomena. In R. J. Davidson, K. R. Scherer, & H. H. 
+#   Goldsmith (Eds.), Handbook of affective sciences (pp. 871-890). Oxford University Press.
+# - Mesquita, B., & Leu, J. (2007). The cultural psychology of emotion. In S. Kitayama & D. Cohen (Eds.), 
+#   Handbook of cultural psychology (pp. 734-759). Guilford Press.
+# - Mikolov, T., Sutskever, I., Chen, K., Corrado, G. S., & Dean, J. (2013). Distributed representations of 
+#   words and phrases and their compositionality. Advances in Neural Information Processing Systems, 26.
+# - Nisbett, R. E., Peng, K., Choi, I., & Norenzayan, A. (2001). Culture and systems of thought: Holistic 
+#   versus analytic cognition. Psychological Review, 108(2), 291-310.
+# - Panksepp, J. (2004). Affective neuroscience: The foundations of human and animal emotions. Oxford 
+#   University Press.
+# - Pennington, J., Socher, R., & Manning, C. D. (2014). GloVe: Global vectors for word representation. 
+#   Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing, 1532-1543.
+# - Wierzbicka, A. (1999). Emotions across languages and cultures: Diversity and universals. Cambridge 
+#   University Press.
+# - Wierzbicka, A. (2006). English: Meaning and culture. Oxford University Press.
+# - Wierzbicka, A. (2009). Language, experience, and translation: Towards a new science of the mind. 
+#   Lexington Books.
         """)
     
     # Stopka
