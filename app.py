@@ -1028,7 +1028,6 @@ Wyniki otwierają liczne możliwości dla przyszłych badań:
 
 Przeprowadzone badanie stanowi istotny krok w kierunku ilościowego, opartego na danych podejścia do badania relacji między językiem, kulturą i reprezentacjami embeddingowymi. Wykazuję, że modele embeddingowe nie tylko przechwytują podobieństwa semantyczne, ale również odzwierciedlają głębsze, kulturowo uwarunkowane struktury konceptualne. Potwierdza to potencjał embeddingów jako narzędzia w badaniach międzykulturowych oraz podkreśla potrzebę kulturowo świadomego podejścia w rozwoju systemów sztucznej inteligencji.
 
-# ### 3.5. Bibliografia
 ### **3.5. Bibliografia**
 
 1. Bengio, Y., Ducharme, R., Vincent, P., & Jauvin, C. (2003). A neural probabilistic language model. Journal of Machine Learning Research, 3(Feb), 1137-1155.
