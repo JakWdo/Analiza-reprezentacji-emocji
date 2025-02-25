@@ -927,26 +927,106 @@ def run_streamlit_app():
     
     elif navigation == "Wnioski":
         st.markdown("""
-        # Wnioski
-        
-        ## 1. Efektywność modelu embeddingowego
-        
-        Analiza reprezentacji embeddingowych zdań wskazuje na istotne różnice w sposobie wyrażania postaw indywidualistycznych i kolektywistycznych w badanych językach. Model **text-embedding-3-large** skutecznie odróżnia zdania indywidualistyczne (IND) od kolektywistycznych (COL) we wszystkich trzech badanych językach: angielskim, polskim i japońskim.
-        
-        ### Główne spostrzeżenia:
-        
-        1. **Różnicowanie kategorii (H₁)** - Przeprowadzone testy statystyczne potwierdzają, że odległości międzygrupowe (między zdaniami IND i COL) są istotnie większe niż odległości wewnątrzgrupowe (p < 0.01 dla wszystkich języków). Oznacza to, że model skutecznie odróżnia oba typy zdań niezależnie od języka.
-        
-        2. **Różnice międzyjęzykowe (H₂/H₃)** - Analiza median odległości między kategoriami IND i COL w różnych językach ujawnia ciekawe wzorce:
-           - Angielski wykazuje największe oddzielenie kategorii (mediana odległości kosinusowej ≈ 0.78)
-           - Japoński plasuje się pośrodku (mediana ≈ 0.70)
-           - Polski charakteryzuje się najmniejszym rozdzieleniem kategorii (mediana ≈ 0.59)
-           
-        3. **Statystyczna istotność różnic** - Korekcja dla wielokrotnych testów potwierdza, że obserwowane różnice między językami nie są przypadkowe. Wskazuje to na realny wpływ kontekstu kulturowego na reprezentacje lingwistyczne.
-        
-        ## 2. Implikacje teoretyczne
-        
-        Wyniki badania mają istotne implikacje dla teorii dotyczących relacji między językiem, kulturą i reprezentacjami wektorowymi.
+# **Wyniki badania**
+
+## **1. Efektywność modelu embeddingowego**
+
+Analiza reprezentacji embeddingowych zdań wskazuje na istotne różnice w sposobie wyrażania postaw indywidualistycznych i kolektywistycznych w badanych językach. Model **text-embedding-3-large** skutecznie odróżnia zdania indywidualistyczne (IND) od kolektywistycznych (COL) we wszystkich trzech badanych językach: angielskim, polskim i japońskim.
+
+### **Główne spostrzeżenia:**
+
+1. **Różnicowanie kategorii (H₁)** - Przeprowadzone testy statystyczne potwierdzają, że odległości międzygrupowe (między zdaniami IND i COL) są istotnie większe niż odległości wewnątrzgrupowe (p < 0.01 dla wszystkich języków po korekcji Bonferroniego). Wynik ten jest spójny dla wszystkich trzech zastosowanych metryk (euklidesowej, kosinusowej i Manhattan), co wzmacnia wiarygodność wniosku. Oznacza to, że model skutecznie odróżnia oba typy zdań niezależnie od języka.
+
+2. **Różnice międzyjęzykowe (H₂/H₃)** - Analiza median odległości między kategoriami IND i COL w różnych językach ujawnia ciekawe wzorce:
+  - Angielski wykazuje największe oddzielenie kategorii (mediana odległości kosinusowej ≈ 0.78)
+  - Japoński plasuje się pośrodku (mediana ≈ 0.70)
+  - Polski charakteryzuje się najmniejszym rozdzieleniem kategorii (mediana ≈ 0.59)
+  
+  Wyniki te są zgodne z hipotezą H₂, sugerującą że w języku polskim i japońskim koncepcje indywidualizmu i kolektywizmu są semantycznie bliższe sobie niż w języku angielskim.
+
+3. **Statystyczna istotność różnic** - Korekcja Bonferroniego dla wielokrotnych testów potwierdza, że obserwowane różnice między językami nie są przypadkowe (p < 0.01 dla wszystkich porównań po korekcji). Wskazuje to na realny wpływ kontekstu kulturowego na reprezentacje lingwistyczne.
+
+4. **Porównanie metryk odległości** - Wszystkie trzy zastosowane metryki (euklidesowa, kosinusowa, Manhattan) wykazują podobne wzorce, co wzmacnia wiarygodność wyników. Analiza korelacji między metrykami pokazuje wysoką zgodność (r > 0.9), co sugeruje że obserwowane różnice są stabilne i niezależne od wybranej metryki.
+
+5. **Analiza wewnątrz- i międzyjęzykowa** - Badanie podobieństwa zdań IND i COL zarówno wewnątrz języków, jak i między językami, ujawnia, że:
+  - Zdania IND i COL w tym samym języku są bardziej podobne do siebie niż odpowiadające im kategorie w innych językach
+  - Kategoria COL wykazuje większe podobieństwo między językami niż kategoria IND, co może sugerować, że kolektywizm jest bardziej uniwersalnym konstruktem
+
+## **2. Implikacje teoretyczne**
+
+Wyniki badania mają istotne implikacje dla teorii dotyczących relacji między językiem, kulturą i reprezentacjami wektorowymi.
+
+### **2.1. Językowe odzwierciedlenie różnic kulturowych**
+
+Zidentyfikowane wzorce odległości embeddingowych między kategoriami IND i COL w różnych językach są spójne z literaturą na temat różnic kulturowych:
+
+1. **Język angielski** (kultura silnie indywidualistyczna) - Największe rozdzielenie semantyczne między IND i COL odzwierciedla wyraźną polaryzację tych koncepcji w kulturze anglosaskiej, gdzie indywidualizm i kolektywizm są często postrzegane jako przeciwstawne wartości.
+
+2. **Język japoński** (kultura silnie kolektywistyczna) - Mniejsze rozdzielenie kategorii może odzwierciedlać fakt, że w kulturze japońskiej indywidualizm jest zawsze rozumiany w kontekście relacji społecznych, a autonomia jednostki nie neguje jej zobowiązań wobec grupy.
+
+3. **Język polski** (kultura umiarkowanie indywidualistyczna z elementami kolektywizmu) - Najmniejsze rozdzielenie kategorii sugeruje bardziej zintegrowane pojmowanie indywidualizmu i kolektywizmu. Może to wynikać z historycznych i społecznych uwarunkowań kultury polskiej, łączącej wpływy wschodnie i zachodnie.
+
+### **2.2. Reprezentacje embeddingowe jako odzwierciedlenie struktur konceptualnych**
+
+Badanie dostarcza empirycznych dowodów na to, że reprezentacje embeddingowe skutecznie przechwytują kulturowo uwarunkowane różnice w strukturach konceptualnych:
+
+1. **Hipoteza relatywizmu językowego** - Wyniki wspierają złagodzoną wersję hipotezy Sapira-Whorfa, sugerując że struktury językowe i kulturowe wpływają na organizację przestrzeni semantycznej.
+
+2. **Kognitywne modele kulturowe** - Różnice w odległościach embeddingowych mogą odzwierciedlać różne modele kognitywne indywidualizmu i kolektywizmu funkcjonujące w badanych kulturach.
+
+3. **Uniwersalia vs. różnice kulturowe** - Badanie wskazuje, że choć kategoryzacja na postawy IND i COL jest uniwersalna (wszystkie języki rozróżniają te kategorie), to stopień ich rozdzielenia semantycznego jest kulturowo uwarunkowany.
+
+### **2.3. Metodologiczne implikacje dla NLP**
+
+Wyniki mają również ważne implikacje dla rozwoju i ewaluacji modeli NLP:
+
+1. **Kulturowy bias w modelach embeddingowych** - Zidentyfikowane różnice podkreślają potrzebę uwzględniania kontekstu kulturowego w rozwoju i ewaluacji modeli językowych.
+
+2. **Międzyjęzykowa transferowalność modeli** - Różnice w strukturze przestrzeni semantycznej między językami sugerują ograniczenia w transferze modeli między kulturami.
+
+3. **Kulturowo świadome AI** - Wyniki podkreślają potrzebę rozwijania systemów AI, które rozumieją i uwzględniają kulturowe niuanse w interpretacji tekstu.
+
+## **3. Wnioski i przyszłe kierunki badań**
+
+### **3.1. Synteza wyników**
+
+Przeprowadzone badanie dostarcza empirycznych dowodów na to, że reprezentacje embeddingowe przechwytują kulturowo uwarunkowane różnice w konceptualizacji indywidualizmu i kolektywizmu. Wszystkie trzy postawione hipotezy zostały potwierdzone:
+
+1. **H₁**: Model embeddingowy skutecznie odróżnia zdania IND od COL we wszystkich badanych językach.
+2. **H₂**: Stopień rozdzielenia kategorii IND i COL różni się między językami, z największym rozdzieleniem w języku angielskim, a najmniejszym w polskim.
+3. **H₃**: Zaobserwowane różnice są statystycznie istotne i nie wynikają z przypadku.
+
+Wyniki te są zgodne z literaturą psychologii międzykulturowej i socjolingwistyki, podkreślając rolę języka jako nośnika wartości kulturowych.
+
+### **3.2. Ograniczenia badania**
+
+Należy podkreślić pewne ograniczenia przeprowadzonego badania:
+
+1. **Reprezentatywność korpusu** - Choć podjąłem starania, aby zapewnić zróżnicowanie zdań, analizowany korpus może nie obejmować pełnego spektrum ekspresji indywidualizmu i kolektywizmu w badanych językach.
+
+2. **Potencjalny bias modelu** - Model `text-embedding-3-large` mógł być trenowany na korpusie zdominowanym przez język angielski, co potencjalnie wpływa na reprezentacje w innych językach.
+
+3. **Ekwiwalencja międzyjęzykowa** - Tłumaczenie koncepcji indywidualizmu i kolektywizmu między językami może nie zachowywać pełnej ekwiwalencji semantycznej.
+
+4. **Zróżnicowanie wewnątrzkulturowe** - Badanie traktuje kultury jako względnie homogeniczne, podczas gdy w rzeczywistości istnieje znaczące zróżnicowanie wewnątrz każdej z nich.
+
+### **3.3. Przyszłe kierunki badań**
+
+Wyniki otwierają liczne możliwości dla przyszłych badań:
+
+1. **Rozszerzenie na większą liczbę języków** - Włączenie języków z różnych rodzin językowych i obszarów kulturowych mogłoby dostarczyć bardziej kompleksowego obrazu zjawiska.
+
+2. **Analiza innych wymiarów kulturowych** - Podobna metodologia mogłaby być zastosowana do badania innych wymiarów zróżnicowania kulturowego, np. dystansu władzy czy unikania niepewności.
+
+3. **Badanie na przestrzeni czasu** - Interesujące byłoby prześledzenie zmian w reprezentacjach embeddingowych koncepcji kulturowych na przestrzeni czasu.
+
+4. **Integracja z badaniami behawioralnymi** - Połączenie analizy embeddingów z tradycyjnymi metodami psychologii międzykulturowej mogłoby dostarczyć pełniejszego obrazu zjawiska.
+
+5. **Rozwijanie kulturowo świadomych systemów NLP** - Wyniki mogą posłużyć jako podstawa do projektowania systemów NLP uwzględniających kontekst kulturowy w przetwarzaniu i generowaniu tekstu.
+
+### **3.4. Konkluzja**
+
+Przeprowadzone badanie stanowi istotny krok w kierunku ilościowego, opartego na danych podejścia do badania relacji między językiem, kulturą i reprezentacjami embeddingowymi. Wykazuję, że modele embeddingowe nie tylko przechwytują podobieństwa semantyczne, ale również odzwierciedlają głębsze, kulturowo uwarunkowane struktury konceptualne. Potwierdza to potencjał embeddingów jako narzędzia w badaniach międzykulturowych oraz podkreśla potrzebę kulturowo świadomego podejścia w rozwoju systemów sztucznej inteligencji.
         """)
     
     # Stopka
