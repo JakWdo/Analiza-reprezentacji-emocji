@@ -490,6 +490,47 @@ def run_streamlit_app():
                 st.plotly_chart(fig_cloud, use_container_width=True)
             else:
                 st.error("Nie można wygenerować wizualizacji Point Cloud. Sprawdź, czy zainstalowano wymagane biblioteki.")
+        # Animacja różnic między językami
+        if st.button("Generuj animację przejść między językami"):
+            st.info("Generowanie animacji... To może potrwać kilka minut.")
+            
+            # Tworzymy ramki animacji (każda zawiera punkty z 2 języków)
+            frames = []
+            
+            # ENG -> POL
+            eng_pol_mask = [(label.startswith("ENG") or label.startswith("POL")) for label in all_labels]
+            eng_pol_emb = all_embeddings[eng_pol_mask]
+            eng_pol_lbl = all_labels[eng_pol_mask]
+            
+            # POL -> JAP
+            pol_jap_mask = [(label.startswith("POL") or label.startswith("JAP")) for label in all_labels]
+            pol_jap_emb = all_embeddings[pol_jap_mask]
+            pol_jap_lbl = all_labels[pol_jap_mask]
+            
+            # JAP -> ENG
+            jap_eng_mask = [(label.startswith("JAP") or label.startswith("ENG")) for label in all_labels]
+            jap_eng_emb = all_embeddings[jap_eng_mask]
+            jap_eng_lbl = all_labels[jap_eng_mask]
+            
+            # Generujemy PCA dla każdej pary języków
+            pca = PCA(n_components=3, random_state=42)
+            
+            # Generowanie wizualizacji dla każdej pary
+            fig_eng_pol = generate_plotly_3d_point_cloud(eng_pol_emb, eng_pol_lbl, method='pca')
+            fig_pol_jap = generate_plotly_3d_point_cloud(pol_jap_emb, pol_jap_lbl, method='pca')
+            fig_jap_eng = generate_plotly_3d_point_cloud(jap_eng_emb, jap_eng_lbl, method='pca')
+            
+            # Wyświetlenie każdej wizualizacji oddzielnie
+            st.subheader("Porównanie angielski - polski")
+            st.plotly_chart(fig_eng_pol, use_container_width=True)
+            
+            st.subheader("Porównanie polski - japoński")
+            st.plotly_chart(fig_pol_jap, use_container_width=True)
+            
+            st.subheader("Porównanie japoński - angielski")
+            st.plotly_chart(fig_jap_eng, use_container_width=True)
+            
+            st.success("Wizualizacje porównawcze wygenerowane pomyślnie!")
     
     elif navigation == "Analiza statystyczna":
         st.header("Analiza statystyczna")
