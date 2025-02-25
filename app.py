@@ -52,15 +52,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Funkcja pomocnicza do obliczania odległości (wcześniej powodowała błędy)
 def all_pairwise(emb_list_a, emb_list_b, metric='cosine'):
     """
     Funkcja do obliczania odległości między dwoma zbiorami embeddingów.
     """
     from scipy.spatial.distance import cdist
     
-    metric_map = {'euclidean': 'euclidean', 'cosine': 'cosine', 'manhattan': 'cityblock'}
-    scipy_metric = metric_map.get(metric, metric)
+    # Poprawione mapowanie metryk - uwzględnia również warianty pisane małymi literami
+    metric_map = {
+        'euclidean': 'euclidean', 
+        'euklides': 'euclidean',
+        'cosine': 'cosine', 
+        'kosinus': 'cosine',
+        'manhattan': 'cityblock',
+        'cityblock': 'cityblock'
+    }
+    
+    scipy_metric = metric_map.get(metric.lower(), metric)
     
     return cdist(np.array(emb_list_a), np.array(emb_list_b), metric=scipy_metric).flatten().tolist()
 
@@ -503,7 +511,7 @@ def run_streamlit_app():
         st.subheader("Wizualizacja rozkładów odległości")
         st.write("Wybierz metrykę oraz język, aby zobaczyć interaktywny wykres rozkładu odległości między zdaniami IND i COL.")
         
-        metric_options = ["Euklides", "Kosinus", "Manhattan"]
+        metric_options = ["Euclides", "Kosinus", "Manhattan"]
         language_options = ["ENG", "POL", "JAP"]
         
         col1, col2 = st.columns(2)
