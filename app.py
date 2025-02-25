@@ -58,17 +58,20 @@ def all_pairwise(emb_list_a, emb_list_b, metric='cosine'):
     """
     from scipy.spatial.distance import cdist
     
-    # Poprawione mapowanie metryk - uwzględnia również warianty pisane małymi literami
+    # Poprawione mapowanie metryk - ujednolicone nazwy i uwzględnione warianty pisowni
     metric_map = {
         'euclidean': 'euclidean', 
         'euklides': 'euclidean',
+        'euclides': 'euclidean',
         'cosine': 'cosine', 
         'kosinus': 'cosine',
         'manhattan': 'cityblock',
         'cityblock': 'cityblock'
     }
     
-    scipy_metric = metric_map.get(metric.lower(), metric)
+    # Konwersja do małych liter dla bezpieczeństwa
+    metric_lower = metric.lower() if isinstance(metric, str) else metric
+    scipy_metric = metric_map.get(metric_lower, metric)
     
     return cdist(np.array(emb_list_a), np.array(emb_list_b), metric=scipy_metric).flatten().tolist()
 
@@ -490,47 +493,54 @@ def run_streamlit_app():
                 st.plotly_chart(fig_cloud, use_container_width=True)
             else:
                 st.error("Nie można wygenerować wizualizacji Point Cloud. Sprawdź, czy zainstalowano wymagane biblioteki.")
-        # Animacja różnic między językami
-        if st.button("Generuj animację przejść między językami"):
-            st.info("Generowanie animacji... To może potrwać kilka minut.")
+    # Animacja różnic między językami
+    st.subheader("Animacja przejść między językami")
+    st.write("Poniżej znajduje się interaktywne porównanie reprezentacji zdań w różnych językach.")
+    
+    if st.button("Generuj porównania międzyjęzykowe"):
+        with st.spinner("Generowanie wizualizacji porównawczych... To może potrwać kilka minut."):
+            # Tworzymy maski dla różnych par języków
+            eng_pol_mask = np.array([(label.startswith("ENG") or label.startswith("POL")) for label in all_labels])
+            pol_jap_mask = np.array([(label.startswith("POL") or label.startswith("JAP")) for label in all_labels])
+            jap_eng_mask = np.array([(label.startswith("JAP") or label.startswith("ENG")) for label in all_labels])
             
-            # Tworzymy ramki animacji (każda zawiera punkty z 2 języków)
-            frames = []
-            
-            # ENG -> POL
-            eng_pol_mask = [(label.startswith("ENG") or label.startswith("POL")) for label in all_labels]
+            # Wyodrębnij dane dla każdej pary
             eng_pol_emb = all_embeddings[eng_pol_mask]
             eng_pol_lbl = all_labels[eng_pol_mask]
             
-            # POL -> JAP
-            pol_jap_mask = [(label.startswith("POL") or label.startswith("JAP")) for label in all_labels]
             pol_jap_emb = all_embeddings[pol_jap_mask]
             pol_jap_lbl = all_labels[pol_jap_mask]
             
-            # JAP -> ENG
-            jap_eng_mask = [(label.startswith("JAP") or label.startswith("ENG")) for label in all_labels]
             jap_eng_emb = all_embeddings[jap_eng_mask]
             jap_eng_lbl = all_labels[jap_eng_mask]
             
-            # Generujemy PCA dla każdej pary języków
-            pca = PCA(n_components=3, random_state=42)
-            
-            # Generowanie wizualizacji dla każdej pary
+            # Generowanie interaktywnych wizualizacji dla każdej pary
             fig_eng_pol = generate_plotly_3d_point_cloud(eng_pol_emb, eng_pol_lbl, method='pca')
             fig_pol_jap = generate_plotly_3d_point_cloud(pol_jap_emb, pol_jap_lbl, method='pca')
             fig_jap_eng = generate_plotly_3d_point_cloud(jap_eng_emb, jap_eng_lbl, method='pca')
             
-            # Wyświetlenie każdej wizualizacji oddzielnie
-            st.subheader("Porównanie angielski - polski")
-            st.plotly_chart(fig_eng_pol, use_container_width=True)
-            
-            st.subheader("Porównanie polski - japoński")
-            st.plotly_chart(fig_pol_jap, use_container_width=True)
-            
-            st.subheader("Porównanie japoński - angielski")
-            st.plotly_chart(fig_jap_eng, use_container_width=True)
-            
-            st.success("Wizualizacje porównawcze wygenerowane pomyślnie!")
+            if fig_eng_pol and fig_pol_jap and fig_jap_eng:
+                # Wyświetlenie każdej wizualizacji w osobnych zakładkach
+                tabs = st.tabs(["Angielski - Polski", "Polski - Japoński", "Japoński - Angielski"])
+                
+                with tabs[0]:
+                    st.subheader("Porównanie: angielski - polski")
+                    st.write("Porównanie reprezentacji zdań w języku angielskim i polskim.")
+                    st.plotly_chart(fig_eng_pol, use_container_width=True)
+                
+                with tabs[1]:
+                    st.subheader("Porównanie: polski - japoński")
+                    st.write("Porównanie reprezentacji zdań w języku polskim i japońskim.")
+                    st.plotly_chart(fig_pol_jap, use_container_width=True)
+                
+                with tabs[2]:
+                    st.subheader("Porównanie: japoński - angielski")
+                    st.write("Porównanie reprezentacji zdań w języku japońskim i angielskim.")
+                    st.plotly_chart(fig_jap_eng, use_container_width=True)
+                
+                st.success("Wizualizacje porównawcze wygenerowane pomyślnie!")
+            else:
+                st.error("Nie udało się wygenerować wszystkich wizualizacji. Sprawdź czy zainstalowane są wymagane biblioteki.")
     
     elif navigation == "Analiza statystyczna":
         st.header("Analiza statystyczna")
@@ -552,7 +562,7 @@ def run_streamlit_app():
         st.subheader("Wizualizacja rozkładów odległości")
         st.write("Wybierz metrykę oraz język, aby zobaczyć interaktywny wykres rozkładu odległości między zdaniami IND i COL.")
         
-        metric_options = ["Euclides", "Kosinus", "Manhattan"]
+        metric_options = ["Euklides", "Kosinus", "Manhattan"]
         language_options = ["ENG", "POL", "JAP"]
         
         col1, col2 = st.columns(2)
