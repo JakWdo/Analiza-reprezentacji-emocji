@@ -87,21 +87,21 @@ Hipoteza: odległości inter (IND vs. COL) są większe niż intra (w obrębie I
 --- KONIEC TESTU (H2/H3: porównanie między językami) ---
 
 === Korekcja Bonferroniego dla wielokrotnych testów ===
-[H1] P-wartości oryginalne: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
-[H1] P-wartości skorygowane: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
+[H1] P-val oryginalne: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
+[H1] P-val skorygowane: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
 [H1] Odrzucenie H0: True, True, True, True, True, True, True, True, True
 
-[H2/H3] P-wartości oryginalne: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
-[H2/H3] P-wartości skorygowane: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
+[H2/H3] P-val oryginalne: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
+[H2/H3] P-al skorygowane: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
 [H2/H3] Odrzucenie H0: True, True, True, True, True, True
 
 === PODSUMOWANIE ===
 
-Wyniki pokazują, że w każdym z testów porównawczych między kategoriami ("INTRA" vs. "INTER") model skutecznie rozróżnia zdania IND od COL w trzech językach (polski, angielski, japoński). P-wartości są ekstremalnie niskie (0.0000), co wskazuje na istotne różnice, mimo że testy wykazały brak normalności w danych. W przypadku porównań między językami (H2/H3), polskie i japońskie zdania IND i COL są statystycznie bliżej siebie niż w przypadku angielskiego, co sugeruje, że różnice między tymi zestawami zdań są mniejsze w tych dwóch językach. Po zastosowaniu korekcji Bonferroniego (na poprawę wielokrotnego testowania) p-wartości pozostają zerowe, co oznacza, że wyniki są nadal bardzo istotne, i hipoteza zerowa została odrzucona w każdym przypadku. for 15 seconds
+Wyniki pokazują, że w każdym z testów porównawczych między kategoriami ("INTRA" vs. "INTER") model skutecznie rozróżnia zdania IND od COL w trzech językach (polski, angielski, japoński). P są ekstremalnie niskie (0.0000), co wskazuje na istotne różnice, mimo że testy wykazały brak normalności w danych. W przypadku porównań między językami (H2/H3), polskie i japońskie zdania IND i COL są statystycznie bliżej siebie niż w przypadku angielskiego, co sugeruje, że różnice między tymi zestawami zdań są mniejsze w tych dwóch językach. Po zastosowaniu korekcji Bonferroniego (na poprawę wielokrotnego testowania) p pozostają zerowe, co oznacza, że wyniki są nadal bardzo istotne, i hipoteza zerowa została odrzucona w każdym przypadku.
 Podsumowując wyniki:
 
 Testy wewnątrz-językowe (H₁):
-Dla każdej metryki (Euklides, Kosinus, Manhattan) sprawdzono, czy odległość między zdaniami indywidualistycznymi (IND) a kolektywistycznymi (COL) (odległość INTER) jest większa niż różnice wewnątrz jednej kategorii (odległość INTRA). Wyniki (p-wartości = 0.0000) pokazują, że model wyraźnie rozróżnia te dwie grupy w każdym języku (polskim, angielskim i japońskim).
+Dla każdej metryki (Euklides, Kosinus, Manhattan) sprawdzono, czy odległość między zdaniami indywidualistycznymi (IND) a kolektywistycznymi (COL) (odległość INTER) jest większa niż różnice wewnątrz jednej kategorii (odległość INTRA). Wyniki (p = 0.0000) pokazują, że model wyraźnie rozróżnia te dwie grupy w każdym języku (polskim, angielskim i japońskim).
 
 Testy międzyjęzykowe (H₂/H₃):
 Porównano mediany odległości między IND i COL dla poszczególnych języków.
@@ -109,6 +109,6 @@ Porównano mediany odległości między IND i COL dla poszczególnych języków.
 W języku angielskim odległości są największe, co oznacza, że zdania IND i COL są najbardziej od siebie oddzielone.
 W języku polskim i japońskim te odległości są mniejsze, czyli kategorie te są semantycznie bliżej siebie.
 Korekcja Bonferroniego:
-Po zastosowaniu korekcji dla wielokrotnych testów wszystkie p-wartości pozostają zerowe, co potwierdza bardzo silną istotność statystyczną wyników.
+Po zastosowaniu korekcji dla wielokrotnych testów wszystkie p-val pozostają zerowe, co potwierdza bardzo silną istotność statystyczną wyników.
 
 W skrócie: Model embeddingowy wyraźnie rozróżnia zdania IND i COL, a to rozróżnienie jest najmocniejsze w języku angielskim, natomiast w języku polskim i japońskim te kategorie są bardziej zbliżone – wyniki są statystycznie bardzo istotne.
