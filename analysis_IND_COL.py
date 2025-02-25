@@ -305,47 +305,11 @@ def get_embeddings_for_list(txt_list, cache_file=CACHE_FILE, batch_size=50):
     return embeddings
 
 
-def augment_sentence_dataset(current_sentences, augmentation_factor=1):
-    """
-    Rozszerza zbiór zdań poprzez wprowadzenie semantycznych wariantów.
-    Ta funkcja może być zaimplementowana przy użyciu modelu generatywnego,
-    ale na razie zwracamy tylko oryginalne zdania (augmentation_factor=1).
-    
-    Parametry:
-    ----------
-    current_sentences : list
-        Lista oryginalnych zdań.
-    augmentation_factor : int, optional
-        Współczynnik augmentacji (ile wariantów ma być wygenerowanych).
-        
-    Zwraca:
-    -------
-    list
-        Rozszerzony zbiór zdań.
-    """
-    if augmentation_factor <= 1:
-        return current_sentences
-    
-    # W prawdziwej implementacji tutaj należałoby wygenerować warianty semantyczne
-    # np. używając modelu generatywnego jak GPT-4 czy GPT-3.5
-    augmented_sentences = []
-    for sentence in current_sentences:
-        augmented_sentences.append(sentence)  # Oryginalne zdanie
-        
-        # Generowanie wariantów (to jest uproszczona implementacja)
-        for i in range(augmentation_factor - 1):
-            # W praktycznej implementacji, tutaj byłby kod do generowania wariantów
-            variant = sentence  # Placeholder - w rzeczywistości byłby to wygenerowany wariant
-            augmented_sentences.append(variant)
-    
-    return augmented_sentences
-
-
 ###############################################
 # POBRANIE EMBEDDINGÓW I OBLICZENIE CENTROIDÓW
 ###############################################
 @timeit
-def load_sentences_and_embeddings(filepath="zdania.json", use_augmentation=False):
+def load_sentences_and_embeddings(filepath="zdania.json"):
     """
     Wczytuje zdania z pliku JSON i generuje dla nich embeddingi.
     
@@ -353,8 +317,6 @@ def load_sentences_and_embeddings(filepath="zdania.json", use_augmentation=False
     ----------
     filepath : str, optional
         Ścieżka do pliku JSON z zdaniami.
-    use_augmentation : bool, optional
-        Czy używać augmentacji danych.
         
     Zwraca:
     -------
@@ -363,12 +325,6 @@ def load_sentences_and_embeddings(filepath="zdania.json", use_augmentation=False
     """
     with open(filepath, "r", encoding="utf-8") as file:
         zdania = json.load(file)
-    
-    # Opcjonalnie: augmentacja danych
-    if use_augmentation:
-        for key in zdania.keys():
-            zdania[key] = augment_sentence_dataset(zdania[key], augmentation_factor=2)
-        logger.info("Zastosowano augmentację danych")
     
     english_individualistic = zdania["english_individualistic"]
     english_collectivistic = zdania["english_collectivistic"]
@@ -1577,6 +1533,10 @@ def perform_cross_validation(embeddings, labels, n_splits=5):
     """
     from sklearn.metrics import accuracy_score, precision_recall_fscore_support
     
+    # Konwersja do tablic NumPy, jeśli są potrzebne
+    embeddings = np.array(embeddings)
+    labels = np.array(labels)
+    
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
     cv_results = []
     
@@ -1585,8 +1545,14 @@ def perform_cross_validation(embeddings, labels, n_splits=5):
         X_train, X_test = embeddings[train_idx], embeddings[test_idx]
         y_train, y_test = labels[train_idx], labels[test_idx]
         
-        clf = train_ml_classifier(X_train, y_train)
-        y_pred = clf.predict(X_test)
+        # Używamy prostszej konfiguracji niż pełne trenowanie
+        pipe = Pipeline([
+            ('scaler', StandardScaler()),
+            ('clf', LogisticRegression(max_iter=1000, C=1.0, random_state=42))
+        ])
+        
+        pipe.fit(X_train, y_train)
+        y_pred = pipe.predict(X_test)
         
         accuracy = accuracy_score(y_test, y_pred)
         precision, recall, f1, _ = precision_recall_fscore_support(
@@ -1668,14 +1634,12 @@ def get_ml_classifier(all_embeddings, all_labels, model_path="ml_classifier.pkl"
 # GŁÓWNA FUNKCJA
 ###############################################
 @timeit
-def run_analysis(use_augmentation=False, force_retrain_classifier=False):
+def run_analysis(force_retrain_classifier=False):
     """
     Przeprowadza pełną analizę danych.
     
     Parametry:
     ----------
-    use_augmentation : bool, optional
-        Czy używać augmentacji danych.
     force_retrain_classifier : bool, optional
         Czy wymusić ponowne trenowanie klasyfikatora ML.
         
@@ -1685,7 +1649,7 @@ def run_analysis(use_augmentation=False, force_retrain_classifier=False):
         Wyniki analizy.
     """
     # Wczytaj zdania i embeddingi
-    zdania, embeddings = load_sentences_and_embeddings(use_augmentation=use_augmentation)
+    zdania, embeddings = load_sentences_and_embeddings()
     logger.info(f"Wczytano zdania i wygenerowano embeddingi dla {sum(len(e) for e in embeddings.values())} przykładów")
     
     # Oblicz centroidy
@@ -1699,7 +1663,7 @@ def run_analysis(use_augmentation=False, force_retrain_classifier=False):
         embeddings["jap_ind"], embeddings["jap_col"]
     ], axis=0)
     
-    all_labels = (
+    all_labels = np.array(
         ["ENG_IND"] * len(embeddings["eng_ind"]) +
         ["ENG_COL"] * len(embeddings["eng_col"]) +
         ["POL_IND"] * len(embeddings["pol_ind"]) +
@@ -1717,28 +1681,6 @@ def run_analysis(use_augmentation=False, force_retrain_classifier=False):
     # Trenuj klasyfikator ML
     clf = get_ml_classifier(all_embeddings, all_labels, force_retrain=force_retrain_classifier)
     
-    # Walidacja krzyżowa
-    cv_results = perform_cross_validation(all_embeddings, all_labels)
-    with open("cv_results.json", "w", encoding="utf-8") as f:
-        json.dump(cv_results, f)
-    logger.info("Zapisano wyniki walidacji krzyżowej w pliku 'cv_results.json'")
-    
-    # Analiza semantyczna
-    pca_analysis = interpret_pca_components(all_embeddings, all_labels)
-    with open("pca_analysis.json", "w", encoding="utf-8") as f:
-        json.dump({
-            'explained_variance': pca_analysis['explained_variance'].tolist(),
-            'cumulative_variance': pca_analysis['cumulative_variance'].tolist(),
-            'eigenvalues': pca_analysis['eigenvalues'].tolist(),
-            'category_analysis': {
-                cat: {
-                    'component_means': means.tolist(),
-                    'component_stds': stds.tolist()
-                } for cat, (means, stds) in pca_analysis['category_analysis'].items()
-            }
-        }, f)
-    logger.info("Zapisano analizę PCA w pliku 'pca_analysis.json'")
-    
     # Zwróć wyniki do dalszego użycia
     return {
         'zdania': zdania,
@@ -1747,9 +1689,7 @@ def run_analysis(use_augmentation=False, force_retrain_classifier=False):
         'all_embeddings': all_embeddings,
         'all_labels': all_labels,
         'classifier': clf,
-        'report': report_text,
-        'cv_results': cv_results,
-        'pca_analysis': pca_analysis
+        'report': report_text
     }
 
 
@@ -1760,7 +1700,7 @@ if __name__ == "__main__":
     logger.info("Rozpoczęcie analizy...")
     
     # Uruchom analizę
-    results = run_analysis(use_augmentation=False, force_retrain_classifier=False)
+    results = run_analysis(force_retrain_classifier=False)
     
     # Test klasyfikacji
     test_txt = "I believe in working together for the greater good."
