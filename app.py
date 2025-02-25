@@ -7,6 +7,7 @@ import sys
 import json
 import logging
 import plotly.graph_objects as go
+import plotly.express as px
 from PIL import Image
 from analysis_IND_COL import (
     # Pobranie zdań i embeddingów
@@ -29,9 +30,11 @@ from analysis_IND_COL import (
     generate_statistical_report,
     generate_interactive_distribution_charts,
     generate_metric_comparison_chart,
-    perform_cross_validation,
-    interpret_pca_components,
-    semantic_cluster_analysis,
+    
+    # Funkcje obliczeniowe
+    dist_cosine,
+    dist_euclidean,
+    dist_manhattan,
     
     # Stałe
     EMBEDDING_MODEL,
@@ -49,6 +52,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Funkcja pomocnicza do obliczania odległości (wcześniej powodowała błędy)
+def all_pairwise(emb_list_a, emb_list_b, metric='cosine'):
+    """
+    Funkcja do obliczania odległości między dwoma zbiorami embeddingów.
+    """
+    from scipy.spatial.distance import cdist
+    
+    metric_map = {'euclidean': 'euclidean', 'cosine': 'cosine', 'manhattan': 'cityblock'}
+    scipy_metric = metric_map.get(metric, metric)
+    
+    return cdist(np.array(emb_list_a), np.array(emb_list_b), metric=scipy_metric).flatten().tolist()
+
 # Konfiguracja Streamlit
 st.set_page_config(
     page_title="Analiza reprezentacji wektorowych emocji",
@@ -58,22 +73,17 @@ st.set_page_config(
 
 # Cache dla kosztownych obliczeniowo funkcji
 @st.cache_data(ttl=3600)
-def load_data(use_augmentation=False):
+def load_data():
     """
     Wczytuje dane i przygotowuje je do analizy.
     
-    Parametry:
-    ----------
-    use_augmentation : bool, optional
-        Czy używać augmentacji danych.
-        
     Zwraca:
     -------
     tuple
         (zdania, embeddingi, centroidy, wszystkie_embeddingi, wszystkie_etykiety)
     """
     start_time = time.time()
-    zdania, embeddings = load_sentences_and_embeddings(use_augmentation=use_augmentation)
+    zdania, embeddings = load_sentences_and_embeddings()
     centroids = compute_all_centroids(embeddings)
     
     all_embeddings = np.concatenate([
@@ -82,7 +92,7 @@ def load_data(use_augmentation=False):
         embeddings["jap_ind"], embeddings["jap_col"]
     ], axis=0)
     
-    all_labels = (
+    all_labels = np.array(
         ["ENG_IND"] * len(embeddings["eng_ind"]) +
         ["ENG_COL"] * len(embeddings["eng_col"]) +
         ["POL_IND"] * len(embeddings["pol_ind"]) +
@@ -117,6 +127,46 @@ def get_classifier(all_embeddings, all_labels, force_retrain=False):
     return get_ml_classifier(all_embeddings, all_labels, force_retrain=force_retrain)
 
 
+def perform_cross_validation_local(X, y, n_splits=5):
+    """
+    Przeprowadza walidację krzyżową na miejscu.
+    """
+    from sklearn.model_selection import StratifiedKFold
+    from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
+    
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
+    cv_results = []
+    
+    for i, (train_idx, test_idx) in enumerate(skf.split(X, y)):
+        X_train, X_test = X[train_idx], X[test_idx]
+        y_train, y_test = y[train_idx], y[test_idx]
+        
+        pipe = Pipeline([
+            ('scaler', StandardScaler()),
+            ('clf', LogisticRegression(max_iter=1000, C=1.0, random_state=42))
+        ])
+        
+        pipe.fit(X_train, y_train)
+        y_pred = pipe.predict(X_test)
+        
+        accuracy = accuracy_score(y_test, y_pred)
+        precision, recall, f1, _ = precision_recall_fscore_support(
+            y_test, y_pred, average='weighted')
+        
+        cv_results.append({
+            'fold': i+1,
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'f1': f1
+        })
+    
+    return cv_results
+
+
 @st.cache_data(ttl=3600)
 def get_cross_validation_results(all_embeddings, all_labels, n_splits=5):
     """
@@ -136,7 +186,8 @@ def get_cross_validation_results(all_embeddings, all_labels, n_splits=5):
     dict
         Wyniki walidacji krzyżowej.
     """
-    cv_results = perform_cross_validation(all_embeddings, all_labels, n_splits=n_splits)
+    # Używamy lokalnej implementacji zamiast odwoływać się do funkcji z modułu
+    cv_results = perform_cross_validation_local(all_embeddings, all_labels, n_splits=n_splits)
     cv_df = pd.DataFrame(cv_results)
     return {
         'results': cv_results,
@@ -150,6 +201,52 @@ def get_cross_validation_results(all_embeddings, all_labels, n_splits=5):
     }
 
 
+def cluster_analysis_local(embeddings, labels, n_clusters=6):
+    """
+    Przeprowadza analizę klastrów semantycznych.
+    """
+    from sklearn.cluster import KMeans
+    from collections import Counter
+    
+    # KMeans clustering
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+    kmeans_labels = kmeans.fit_predict(embeddings)
+    
+    # Mapowanie klastrów na klasy rzeczywiste
+    clusters = np.unique(kmeans_labels)
+    cluster_class_mapping = {}
+    
+    for cluster in clusters:
+        mask = kmeans_labels == cluster
+        class_counts = Counter([labels[i] for i, is_in_cluster in enumerate(mask) if is_in_cluster])
+        dominant_class = class_counts.most_common(1)[0][0]
+        cluster_class_mapping[cluster] = {
+            'dominant_class': dominant_class,
+            'class_distribution': dict(class_counts)
+        }
+    
+    # Obliczanie czystości klastrów
+    correct = 0
+    for i, (cluster, true_class) in enumerate(zip(kmeans_labels, labels)):
+        if cluster_class_mapping[cluster]['dominant_class'] == true_class:
+            correct += 1
+    
+    purity = correct / len(labels) if len(labels) > 0 else 0
+    
+    comparison = {
+        'cluster_class_mapping': cluster_class_mapping,
+        'purity': purity,
+        'correct_assignments': correct,
+        'total_samples': len(labels)
+    }
+    
+    return {
+        'labels': kmeans_labels,
+        'centroids': kmeans.cluster_centers_,
+        'comparison': comparison
+    }
+
+
 def run_streamlit_app():
     """
     Główna funkcja aplikacji Streamlit.
@@ -160,7 +257,6 @@ def run_streamlit_app():
     with st.sidebar:
         st.title("Opcje analizy")
         
-        use_augmentation = st.checkbox("Użyj augmentacji danych", value=False, help="Rozszerza zbiór danych poprzez wprowadzenie wariantów semantycznych")
         force_retrain = st.checkbox("Wymuś ponowne trenowanie klasyfikatora", value=False, help="Trenuje klasyfikator od nowa zamiast wczytywać zapisany")
         
         st.subheader("Parametry wizualizacji")
@@ -182,7 +278,7 @@ def run_streamlit_app():
         )
     
     # Wczytanie danych
-    zdania, embeddings, centroids, all_embeddings, all_labels = load_data(use_augmentation=use_augmentation)
+    zdania, embeddings, centroids, all_embeddings, all_labels = load_data()
     
     # Główny content w zależności od wybranej sekcji
     if navigation == "Wprowadzenie teoretyczne":
@@ -386,18 +482,6 @@ def run_streamlit_app():
                 st.plotly_chart(fig_cloud, use_container_width=True)
             else:
                 st.error("Nie można wygenerować wizualizacji Point Cloud. Sprawdź, czy zainstalowano wymagane biblioteki.")
-        
-        # Animacja różnic między językami
-        st.subheader("Animacja zmian między językami")
-        st.write("Poniżej znajduje się animacja pokazująca, jak różnią się reprezentacje zdań w różnych językach.")
-        
-        if os.path.exists("animation_pca.gif"):
-            st.image("animation_pca.gif", caption="Animacja przejść między reprezentacjami językowymi (PCA)")
-        else:
-            if st.button("Generuj animację"):
-                st.info("Generowanie animacji... To może potrwać kilka minut.")
-                # Tutaj można dodać kod generujący animację
-                st.success("Animacja wygenerowana.")
     
     elif navigation == "Analiza statystyczna":
         st.header("Analiza statystyczna")
@@ -441,17 +525,43 @@ def run_streamlit_app():
         # Przygotowanie danych do wykresu
         metrics_data = {}
         for metric_name in ["Euklides", "Kosinus", "Manhattan"]:
-            metrics_data[metric_name] = {
-                "POL": np.median(all_pairwise(embeddings["pol_ind"], embeddings["pol_col"], metric_name.lower())),
-                "ENG": np.median(all_pairwise(embeddings["eng_ind"], embeddings["eng_col"], metric_name.lower())),
-                "JAP": np.median(all_pairwise(embeddings["jap_ind"], embeddings["jap_col"], metric_name.lower()))
-            }
+            metrics_data[metric_name] = {}
+            for lang in ["POL", "ENG", "JAP"]:
+                if lang == "POL":
+                    distances = all_pairwise(embeddings["pol_ind"], embeddings["pol_col"], metric=metric_name.lower())
+                elif lang == "ENG":
+                    distances = all_pairwise(embeddings["eng_ind"], embeddings["eng_col"], metric=metric_name.lower())
+                elif lang == "JAP":
+                    distances = all_pairwise(embeddings["jap_ind"], embeddings["jap_col"], metric=metric_name.lower())
+                metrics_data[metric_name][lang] = np.median(distances)
         
-        fig_metrics = generate_metric_comparison_chart(
-            metrics_data, metrics=metric_options, lang_pairs=language_options,
-            title="Mediany odległości między kategoriami IND i COL według języka i metryki"
+        # Tworzenie wykresu porównawczego
+        fig_comparison = go.Figure()
+        bar_width = 0.2
+        positions = np.arange(len(language_options))
+        
+        for i, metric in enumerate(metric_options):
+            medians = [metrics_data[metric][lang] for lang in language_options]
+            fig_comparison.add_trace(go.Bar(
+                x=positions + (i - len(metric_options)/2 + 0.5) * bar_width,
+                y=medians,
+                width=bar_width,
+                name=metric
+            ))
+        
+        fig_comparison.update_layout(
+            title="Mediany odległości między kategoriami IND i COL według języka i metryki",
+            xaxis=dict(
+                title="Język",
+                ticktext=language_options,
+                tickvals=positions,
+            ),
+            yaxis=dict(title="Mediana odległości"),
+            legend_title="Metryka",
+            barmode='group'
         )
-        st.plotly_chart(fig_metrics, use_container_width=True)
+        
+        st.plotly_chart(fig_comparison, use_container_width=True)
         
         # Analiza korelacji
         st.subheader("Analiza korelacji między metrykami")
@@ -461,15 +571,23 @@ def run_streamlit_app():
         dist_data = {}
         for metric_name in ["Euklides", "Kosinus", "Manhattan"]:
             for lang in ["POL", "ENG", "JAP"]:
+                key = f"{lang}_{metric_name}"
                 if lang == "POL":
-                    dist_data[f"{lang}_{metric_name}"] = all_pairwise(embeddings["pol_ind"], embeddings["pol_col"], metric_name.lower())
+                    dist_data[key] = all_pairwise(embeddings["pol_ind"], embeddings["pol_col"], metric=metric_name.lower())
                 elif lang == "ENG":
-                    dist_data[f"{lang}_{metric_name}"] = all_pairwise(embeddings["eng_ind"], embeddings["eng_col"], metric_name.lower())
+                    dist_data[key] = all_pairwise(embeddings["eng_ind"], embeddings["eng_col"], metric=metric_name.lower())
                 elif lang == "JAP":
-                    dist_data[f"{lang}_{metric_name}"] = all_pairwise(embeddings["jap_ind"], embeddings["jap_col"], metric_name.lower())
+                    dist_data[key] = all_pairwise(embeddings["jap_ind"], embeddings["jap_col"], metric=metric_name.lower())
+        
+        # Ograniczanie liczby próbek dla macierzy korelacji (dla przyspieszenia)
+        for key in dist_data:
+            if len(dist_data[key]) > 5000:
+                np.random.seed(42)
+                indices = np.random.choice(len(dist_data[key]), size=5000, replace=False)
+                dist_data[key] = [dist_data[key][i] for i in indices]
         
         # Tworzenie DataFrame
-        dist_df = pd.DataFrame({k: v for k, v in dist_data.items()})
+        dist_df = pd.DataFrame({k: v[:5000] for k, v in dist_data.items()})
         
         # Obliczanie korelacji
         corr_matrix = dist_df.corr()
@@ -584,7 +702,7 @@ def run_streamlit_app():
         if st.button("Porównaj obie metody"):
             with st.spinner("Klasyfikowanie..."):
                 results_centroid = klasyfikuj_tekst(user_text, centroids)
-                top_centroid = results_centroid[0][0]
+                top_centroid = results_centroid[0][0].upper()  # Normalizacja do wielkich liter
                 
                 clf = get_classifier(all_embeddings, all_labels, force_retrain=force_retrain)
                 pred_label, prob_dict = ml_klasyfikuj_tekst(user_text, clf)
@@ -605,89 +723,13 @@ def run_streamlit_app():
         analysis_type = st.selectbox(
             "Wybierz typ analizy:",
             [
-                "Analiza komponentów głównych (PCA)",
                 "Walidacja krzyżowa klasyfikatora",
                 "Analiza klastrów semantycznych",
                 "Porównania międzyjęzykowe"
             ]
         )
         
-        if analysis_type == "Analiza komponentów głównych (PCA)":
-            st.subheader("Analiza komponentów głównych (PCA)")
-            
-            n_components = st.slider("Liczba komponentów do analizy", min_value=2, max_value=20, value=10)
-            
-            pca_results = interpret_pca_components(all_embeddings, all_labels, n_components=n_components)
-            
-            # Wyświetlanie wyjaśnionej wariancji
-            st.write("### Wyjaśniona wariancja przez komponenty")
-            
-            explained_var_df = pd.DataFrame({
-                'Komponent': np.arange(1, n_components + 1),
-                'Wyjaśniona wariancja (%)': pca_results['explained_variance'] * 100,
-                'Skumulowana wariancja (%)': pca_results['cumulative_variance'] * 100
-            })
-            
-            fig_var = go.Figure()
-            fig_var.add_trace(go.Bar(
-                x=explained_var_df['Komponent'],
-                y=explained_var_df['Wyjaśniona wariancja (%)'],
-                name='Wyjaśniona wariancja'
-            ))
-            fig_var.add_trace(go.Scatter(
-                x=explained_var_df['Komponent'],
-                y=explained_var_df['Skumulowana wariancja (%)'],
-                name='Skumulowana wariancja',
-                mode='lines+markers'
-            ))
-            
-            fig_var.update_layout(
-                title="Wyjaśniona wariancja przez komponenty główne",
-                xaxis_title="Numer komponentu",
-                yaxis_title="Procent wyjaśnionej wariancji",
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-            )
-            
-            st.plotly_chart(fig_var, use_container_width=True)
-            
-            # Wartości komponentów dla kategorii
-            st.write("### Wartości komponentów dla kategorii")
-            
-            categories = list(pca_results['category_analysis'].keys())
-            selected_category = st.selectbox("Wybierz kategorię", categories)
-            
-            selected_cat_data = pca_results['category_analysis'][selected_category]
-            component_means = selected_cat_data['component_means']
-            component_stds = selected_cat_data['component_stds']
-            
-            component_df = pd.DataFrame({
-                'Komponent': np.arange(1, n_components + 1),
-                'Średnia': component_means,
-                'Odchylenie standardowe': component_stds
-            })
-            
-            fig_comp = go.Figure()
-            fig_comp.add_trace(go.Bar(
-                x=component_df['Komponent'],
-                y=component_df['Średnia'],
-                name='Średnia',
-                error_y=dict(
-                    type='data',
-                    array=component_df['Odchylenie standardowe'],
-                    visible=True
-                )
-            ))
-            
-            fig_comp.update_layout(
-                title=f"Wartości komponentów głównych dla kategorii {selected_category}",
-                xaxis_title="Numer komponentu",
-                yaxis_title="Wartość komponentu",
-                showlegend=True
-            )
-            
-            st.plotly_chart(fig_comp, use_container_width=True)
-        
-        elif analysis_type == "Walidacja krzyżowa klasyfikatora":
+        if analysis_type == "Walidacja krzyżowa klasyfikatora":
             st.subheader("Walidacja krzyżowa klasyfikatora")
             
             n_splits = st.slider("Liczba podziałów", min_value=3, max_value=10, value=5)
@@ -731,24 +773,20 @@ def run_streamlit_app():
             st.subheader("Analiza klastrów semantycznych")
             
             n_clusters = st.slider("Liczba klastrów", min_value=2, max_value=15, value=6)
-            auto_detect = st.checkbox("Automatycznie wykryj optymalną liczbę klastrów", value=True)
             
             if st.button("Przeprowadź analizę klastrów"):
                 with st.spinner("Przeprowadzanie analizy klastrów..."):
-                    cluster_results = semantic_cluster_analysis(
-                        all_embeddings, all_labels, 
-                        n_clusters=None if auto_detect else n_clusters
-                    )
+                    cluster_results = cluster_analysis_local(all_embeddings, all_labels, n_clusters=n_clusters)
                 
                 st.write("### Wyniki klastrowania")
                 
                 # KMeans
                 st.write("#### K-Means")
-                st.write(f"Czystość klastrów: {cluster_results['kmeans']['comparison']['purity']:.4f}")
-                st.write(f"Poprawne przypisania: {cluster_results['kmeans']['comparison']['correct_assignments']} / {cluster_results['kmeans']['comparison']['total_samples']}")
+                st.write(f"Czystość klastrów: {cluster_results['comparison']['purity']:.4f}")
+                st.write(f"Poprawne przypisania: {cluster_results['comparison']['correct_assignments']} / {cluster_results['comparison']['total_samples']}")
                 
                 # Wykres rozkładu klas w klastrach
-                cluster_mapping = cluster_results['kmeans']['comparison']['cluster_class_mapping']
+                cluster_mapping = cluster_results['comparison']['cluster_class_mapping']
                 cluster_data = []
                 
                 for cluster, info in cluster_mapping.items():
@@ -771,15 +809,6 @@ def run_streamlit_app():
                 )
                 
                 st.plotly_chart(fig_cluster, use_container_width=True)
-                
-                # DBSCAN
-                st.write("#### DBSCAN")
-                st.write(f"Czystość klastrów: {cluster_results['dbscan']['comparison']['purity']:.4f}")
-                st.write(f"Poprawne przypisania: {cluster_results['dbscan']['comparison']['correct_assignments']} / {cluster_results['dbscan']['comparison']['total_samples']}")
-                
-                # Liczba punktów zaklasyfikowanych jako szum
-                noise_points = np.sum(cluster_results['dbscan']['labels'] == -1)
-                st.write(f"Liczba punktów zaklasyfikowanych jako szum: {noise_points}")
         
         elif analysis_type == "Porównania międzyjęzykowe":
             st.subheader("Porównania międzyjęzykowe")
@@ -813,10 +842,10 @@ def run_streamlit_app():
                     emb2_col = embeddings["jap_col"]
                 
                 # Obliczenie odległości
-                cross_ind_ind = all_pairwise(emb1_ind, emb2_ind, "cosine")
-                cross_col_col = all_pairwise(emb1_col, emb2_col, "cosine")
-                cross_ind_col = all_pairwise(emb1_ind, emb2_col, "cosine")
-                cross_col_ind = all_pairwise(emb1_col, emb2_ind, "cosine")
+                cross_ind_ind = all_pairwise(emb1_ind, emb2_ind, metric='cosine')
+                cross_col_col = all_pairwise(emb1_col, emb2_col, metric='cosine')
+                cross_ind_col = all_pairwise(emb1_ind, emb2_col, metric='cosine')
+                cross_col_ind = all_pairwise(emb1_col, emb2_ind, metric='cosine')
                 
                 # Statystyki
                 stat_data = {
@@ -906,47 +935,7 @@ def run_streamlit_app():
         
         ## 2. Implikacje teoretyczne
         
-        Wyniki badania mają istotne implikacje dla teorii dotyczących relacji między językiem, kulturą i reprezentacjami wektorowymi:
-        
-        1. **Kontekst kulturowy w przestrzeni embeddingowej** - Embeddingi zdań wydają się odzwierciedlać koncepcje kulturowe związane z indywidualizmem i kolektywizmem, co sugeruje, że modele językowe "rozumieją" te subtelne różnice.
-        
-        2. **Specyfika językowa** - Mniejsze odległości wektorowe w języku polskim i japońskim mogą odzwierciedlać mniej wyraźne rozgraniczenie między postawami indywidualistycznymi i kolektywistycznymi w tych kulturach w porównaniu do kultury anglosaskiej.
-        
-        3. **Kontinuum indywidualizm-kolektywizm** - Różnica w oddzieleniu kategorii wskazuje, że kultury nie są dychotomicznie podzielone na indywidualistyczne i kolektywistyczne, ale raczej istnieją na kontinuum, co jest zgodne ze współczesnymi teoriami psychologii międzykulturowej.
-        
-        ## 3. Zastosowania praktyczne
-        
-        Wyniki badania mają potencjalne zastosowania w kilku obszarach:
-        
-        1. **Technologia językowa** - Lepsze zrozumienie, jak modele embeddingowe reprezentują niuanse kulturowe, może prowadzić do udoskonalenia systemów NLP w kontekście międzykulturowym.
-        
-        2. **Komunikacja międzykulturowa** - Ustalenia mogą pomóc w opracowaniu narzędzi wspierających tłumaczenie i komunikację międzykulturową, które uwzględniają subtelne różnice w ekspresji wartości.
-        
-        3. **Badania społeczne** - Metody ilościowe zastosowane w badaniu oferują nowe podejście do badania różnic kulturowych, które może uzupełniać tradycyjne metody jakościowe.
-        
-        ## 4. Ograniczenia i przyszłe kierunki badań
-        
-        Pomimo obiecujących rezultatów, badanie ma pewne ograniczenia:
-        
-        1. **Brak zróżnicowanych kontekstów** - Zdania użyte w badaniu były izolowane, bez szerszego kontekstu, który mógłby wpływać na ich interpretację.
-        
-        2. **Wpływ danych treningowych** - Model embeddingowy został wytrenowany na korpusie, w którym mogła dominować kultura anglosaska, co może wpływać na reprezentacje innych języków.
-        
-        ### Przyszłe kierunki badań:
-        
-        1. **Rozszerzenie zakresu językowego** - Uwzględnienie większej liczby języków z różnych grup językowych i kulturowych.
-        
-        2. **Kontekstualizacja** - Badanie zdań w szerszym kontekście dyskursywnym.
-        
-        3. **Analiza diachroniczna** - Śledzenie zmian w reprezentacjach wektorowych postaw wraz z ewolucją języka i wartości kulturowych.
-        
-        4. **Dokładniejsza kategoryzacja języków** - Zamiast prostego podziału na indywidualistyczne vs. kolektywistyczne, można uwzględnić dodatkowe wymiary kulturowe, takie jak dystans władzy czy unikanie niepewności.
-        
-        ## 5. Podsumowanie
-        
-        Przeprowadzone badanie dostarcza empirycznych dowodów na to, że modele embeddingowe skutecznie uchwytują kulturowe różnice w ekspresji postaw indywidualistycznych i kolektywistycznych. Wyniki wskazują na istotne różnice między językami, które odzwierciedlają kontinuum od silniejszego oddzielenia tych kategorii w języku angielskim do bardziej płynnego przejścia w językach polskim i japońskim.
-        
-        Metody zastosowane w badaniu pokazują potencjał analizy embeddingów jako narzędzia do badania subttelnych różnic kulturowych w sposób ilościowy i systematyczny, oferując nową perspektywę w badaniach nad relacją między językiem a kulturą.
+        Wyniki badania mają istotne implikacje dla teorii dotyczących relacji między językiem, kulturą i reprezentacjami wektorowymi.
         """)
     
     # Stopka
