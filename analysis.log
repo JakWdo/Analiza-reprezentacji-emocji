@@ -1,0 +1,117 @@
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie analizy...
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie run_analysis
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie load_sentences_and_embeddings
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie get_embeddings_for_list
+2025-02-25 10:26:41 - __main__ - INFO - Wczytano cache z 600 embeddingami
+2025-02-25 10:26:41 - __main__ - INFO - Liczba brakujących embeddingów: 0
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie get_embeddings_for_list, czas: 0.01s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie get_embeddings_for_list
+2025-02-25 10:26:41 - __main__ - INFO - Wczytano cache z 600 embeddingami
+2025-02-25 10:26:41 - __main__ - INFO - Liczba brakujących embeddingów: 0
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie get_embeddings_for_list, czas: 0.00s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie get_embeddings_for_list
+2025-02-25 10:26:41 - __main__ - INFO - Wczytano cache z 600 embeddingami
+2025-02-25 10:26:41 - __main__ - INFO - Liczba brakujących embeddingów: 0
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie get_embeddings_for_list, czas: 0.00s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie get_embeddings_for_list
+2025-02-25 10:26:41 - __main__ - INFO - Wczytano cache z 600 embeddingami
+2025-02-25 10:26:41 - __main__ - INFO - Liczba brakujących embeddingów: 0
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie get_embeddings_for_list, czas: 0.00s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie get_embeddings_for_list
+2025-02-25 10:26:41 - __main__ - INFO - Wczytano cache z 600 embeddingami
+2025-02-25 10:26:41 - __main__ - INFO - Liczba brakujących embeddingów: 0
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie get_embeddings_for_list, czas: 0.00s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie get_embeddings_for_list
+2025-02-25 10:26:41 - __main__ - INFO - Wczytano cache z 600 embeddingami
+2025-02-25 10:26:41 - __main__ - INFO - Liczba brakujących embeddingów: 0
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie get_embeddings_for_list, czas: 0.00s
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie load_sentences_and_embeddings, czas: 0.03s
+2025-02-25 10:26:41 - __main__ - INFO - Wczytano zdania i wygenerowano embeddingi dla 600 przykładów
+2025-02-25 10:26:41 - __main__ - INFO - Obliczono centroidy dla wszystkich kategorii
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie generate_statistical_report
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:41 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:41 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:42 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:42 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.03s
+2025-02-25 10:26:42 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:43 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.03s
+2025-02-25 10:26:43 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:43 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.03s
+2025-02-25 10:26:43 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:43 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.03s
+2025-02-25 10:26:43 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:43 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.03s
+2025-02-25 10:26:43 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:43 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.03s
+2025-02-25 10:26:43 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:43 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.03s
+2025-02-25 10:26:43 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:43 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.03s
+2025-02-25 10:26:43 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:43 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.03s
+2025-02-25 10:26:44 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:44 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:44 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:44 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:44 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:44 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:44 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:44 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:44 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:44 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:44 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:44 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:44 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:44 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:44 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:44 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:44 - __main__ - INFO - Rozpoczęcie all_pairwise
+2025-02-25 10:26:44 - __main__ - INFO - Zakończenie all_pairwise, czas: 0.01s
+2025-02-25 10:26:45 - __main__ - INFO - Zakończenie generate_statistical_report, czas: 4.15s
+2025-02-25 10:26:45 - __main__ - INFO - Zapisano raport statystyczny w pliku 'raport_statystyczny.txt'
+2025-02-25 10:26:45 - __main__ - INFO - Rozpoczęcie get_ml_classifier
+2025-02-25 10:26:45 - __main__ - INFO - Wczytano zapisany model ML.
+2025-02-25 10:26:45 - __main__ - INFO - Zakończenie get_ml_classifier, czas: 0.00s
+2025-02-25 10:26:45 - __main__ - INFO - Zakończenie run_analysis, czas: 4.19s
+2025-02-25 10:26:45 - __main__ - INFO - Rozpoczęcie get_embedding
+2025-02-25 10:26:46 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2025-02-25 10:26:46 - __main__ - INFO - Zakończenie get_embedding, czas: 1.09s
+2025-02-25 10:26:46 - __main__ - INFO - 
+Klasyfikacja testowego zdania (metoda centroidów):
+2025-02-25 10:26:46 - __main__ - INFO -  - eng_col: 0.6092
+2025-02-25 10:26:46 - __main__ - INFO -  - jap_col: 0.4665
+2025-02-25 10:26:46 - __main__ - INFO -  - eng_ind: 0.4123
+2025-02-25 10:26:46 - __main__ - INFO -  - pol_col: 0.3496
+2025-02-25 10:26:46 - __main__ - INFO -  - jap_ind: 0.2566
+2025-02-25 10:26:46 - __main__ - INFO -  - pol_ind: 0.2229
+2025-02-25 10:26:46 - __main__ - INFO - Rozpoczęcie get_embedding
+2025-02-25 10:26:47 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2025-02-25 10:26:47 - __main__ - INFO - Zakończenie get_embedding, czas: 0.68s
+2025-02-25 10:26:47 - __main__ - INFO - 
+Klasyfikacja testowego zdania (ML):
+2025-02-25 10:26:47 - __main__ - INFO -  Przewidywana etykieta: ENG_COL
+2025-02-25 10:26:47 - __main__ - INFO -  Rozkład prawdopodobieństwa:
+2025-02-25 10:26:47 - __main__ - INFO -    ENG_COL: 89.20%
+2025-02-25 10:26:47 - __main__ - INFO -    ENG_IND: 8.03%
+2025-02-25 10:26:47 - __main__ - INFO -    JAP_COL: 2.54%
+2025-02-25 10:26:47 - __main__ - INFO -    POL_COL: 0.20%
+2025-02-25 10:26:47 - __main__ - INFO -    POL_IND: 0.02%
+2025-02-25 10:26:47 - __main__ - INFO -    JAP_IND: 0.01%
+2025-02-25 10:26:47 - __main__ - INFO - 
+=== KONIEC ANALIZY ===

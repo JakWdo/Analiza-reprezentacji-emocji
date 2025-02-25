@@ -1,0 +1,114 @@
+
+=== Metryka: Euklides ===
+
+[H1] Porównanie INTRA vs. INTER w ramach jednego języka.
+Hipoteza: odległości inter (IND vs. COL) są większe niż intra (w obrębie IND lub COL). Inaczej mówiąc, model rozróżnia te podkategorie.
+
+  -> Normalność POL (intra): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Normalność POL (inter): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Test Manna-Whitneya (jednostronny) stat=190292696.0000, p=0.0000
+  [H1] Polski: Model wyraźnie różnicuje zdania IND od COL.
+  -> Normalność ENG (intra): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Normalność ENG (inter): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Test Manna-Whitneya (jednostronny) stat=194230742.0000, p=0.0000
+  [H1] Angielski: Model wyraźnie różnicuje zdania IND od COL.
+  -> Normalność JAP (intra): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Normalność JAP (inter): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Test Manna-Whitneya (jednostronny) stat=175472052.0000, p=0.0000
+  [H1] Japoński: Model wyraźnie różnicuje zdania IND od COL.
+--- KONIEC TESTU (H1: intra vs. inter) ---
+
+[H2/H3] Shapiro (Pol) p=0.0000, K-S (Pol) p=0.0000
+[H2/H3] Shapiro (Eng) p=0.0000, K-S (Eng) p=0.0000
+[H2/H3] Shapiro (Jap) p=0.0000, K-S (Jap) p=0.0000
+ [H2/H3] Mann–Whitney Eng (dwustronny): p(dwu)=0.0000 => p(jednostronne)=0.0000
+ [H2/H3] Mann–Whitney Jap (dwustronny): p(dwu)=0.0000 => p(jednostronne)=0.0000
+ [H2/H3] median(Pol)=1.0858, median(Eng)=1.2480, median(Jap)=1.1835
+ [H2/H3] Wynik Pol: Polskie zdania IND i COL są statystycznie bliżej siebie niż angielskie.
+ [H2/H3] Wynik Jap: Japońskie zdania IND i COL są statystycznie bliżej siebie niż angielskie.
+--- KONIEC TESTU (H2/H3: porównanie między językami) ---
+
+=== Metryka: Kosinus (1 - cos) ===
+
+[H1] Porównanie INTRA vs. INTER w ramach jednego języka.
+Hipoteza: odległości inter (IND vs. COL) są większe niż intra (w obrębie IND lub COL). Inaczej mówiąc, model rozróżnia te podkategorie.
+
+  -> Normalność POL (intra): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Normalność POL (inter): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Test Manna-Whitneya (jednostronny) stat=190292690.0000, p=0.0000
+  [H1] Polski: Model wyraźnie różnicuje zdania IND od COL.
+  -> Normalność ENG (intra): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Normalność ENG (inter): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Test Manna-Whitneya (jednostronny) stat=194230742.0000, p=0.0000
+  [H1] Angielski: Model wyraźnie różnicuje zdania IND od COL.
+  -> Normalność JAP (intra): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Normalność JAP (inter): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Test Manna-Whitneya (jednostronny) stat=175472054.0000, p=0.0000
+  [H1] Japoński: Model wyraźnie różnicuje zdania IND od COL.
+--- KONIEC TESTU (H1: intra vs. inter) ---
+
+[H2/H3] Shapiro (Pol) p=0.0000, K-S (Pol) p=0.0000
+[H2/H3] Shapiro (Eng) p=0.0000, K-S (Eng) p=0.0000
+[H2/H3] Shapiro (Jap) p=0.0000, K-S (Jap) p=0.0000
+ [H2/H3] Mann–Whitney Eng (dwustronny): p(dwu)=0.0000 => p(jednostronne)=0.0000
+ [H2/H3] Mann–Whitney Jap (dwustronny): p(dwu)=0.0000 => p(jednostronne)=0.0000
+ [H2/H3] median(Pol)=0.5894, median(Eng)=0.7788, median(Jap)=0.7004
+ [H2/H3] Wynik Pol: Polskie zdania IND i COL są statystycznie bliżej siebie niż angielskie.
+ [H2/H3] Wynik Jap: Japońskie zdania IND i COL są statystycznie bliżej siebie niż angielskie.
+--- KONIEC TESTU (H2/H3: porównanie między językami) ---
+
+=== Metryka: Manhattan ===
+
+[H1] Porównanie INTRA vs. INTER w ramach jednego języka.
+Hipoteza: odległości inter (IND vs. COL) są większe niż intra (w obrębie IND lub COL). Inaczej mówiąc, model rozróżnia te podkategorie.
+
+  -> Normalność POL (intra): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Normalność POL (inter): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Test Manna-Whitneya (jednostronny) stat=190061308.0000, p=0.0000
+  [H1] Polski: Model wyraźnie różnicuje zdania IND od COL.
+  -> Normalność ENG (intra): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Normalność ENG (inter): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Test Manna-Whitneya (jednostronny) stat=194085090.0000, p=0.0000
+  [H1] Angielski: Model wyraźnie różnicuje zdania IND od COL.
+  -> Normalność JAP (intra): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Normalność JAP (inter): Shapiro p=0.0000, K-S p=0.0000, czy normalny? False
+  -> Test Manna-Whitneya (jednostronny) stat=175402268.0000, p=0.0000
+  [H1] Japoński: Model wyraźnie różnicuje zdania IND od COL.
+--- KONIEC TESTU (H1: intra vs. inter) ---
+
+[H2/H3] Shapiro (Pol) p=0.0000, K-S (Pol) p=0.0000
+[H2/H3] Shapiro (Eng) p=0.0000, K-S (Eng) p=0.0000
+[H2/H3] Shapiro (Jap) p=0.0000, K-S (Jap) p=0.0000
+ [H2/H3] Mann–Whitney Eng (dwustronny): p(dwu)=0.0000 => p(jednostronne)=0.0000
+ [H2/H3] Mann–Whitney Jap (dwustronny): p(dwu)=0.0000 => p(jednostronne)=0.0000
+ [H2/H3] median(Pol)=46.7398, median(Eng)=53.7099, median(Jap)=50.8755
+ [H2/H3] Wynik Pol: Polskie zdania IND i COL są statystycznie bliżej siebie niż angielskie.
+ [H2/H3] Wynik Jap: Japońskie zdania IND i COL są statystycznie bliżej siebie niż angielskie.
+--- KONIEC TESTU (H2/H3: porównanie między językami) ---
+
+=== Korekcja Bonferroniego dla wielokrotnych testów ===
+[H1] P-wartości oryginalne: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
+[H1] P-wartości skorygowane: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
+[H1] Odrzucenie H0: True, True, True, True, True, True, True, True, True
+
+[H2/H3] P-wartości oryginalne: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
+[H2/H3] P-wartości skorygowane: 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000
+[H2/H3] Odrzucenie H0: True, True, True, True, True, True
+
+=== PODSUMOWANIE ===
+
+Wyniki pokazują, że w każdym z testów porównawczych między kategoriami ("INTRA" vs. "INTER") model skutecznie rozróżnia zdania IND od COL w trzech językach (polski, angielski, japoński). P-wartości są ekstremalnie niskie (0.0000), co wskazuje na istotne różnice, mimo że testy wykazały brak normalności w danych. W przypadku porównań między językami (H2/H3), polskie i japońskie zdania IND i COL są statystycznie bliżej siebie niż w przypadku angielskiego, co sugeruje, że różnice między tymi zestawami zdań są mniejsze w tych dwóch językach. Po zastosowaniu korekcji Bonferroniego (na poprawę wielokrotnego testowania) p-wartości pozostają zerowe, co oznacza, że wyniki są nadal bardzo istotne, i hipoteza zerowa została odrzucona w każdym przypadku. for 15 seconds
+Podsumowując wyniki:
+
+Testy wewnątrz-językowe (H₁):
+Dla każdej metryki (Euklides, Kosinus, Manhattan) sprawdzono, czy odległość między zdaniami indywidualistycznymi (IND) a kolektywistycznymi (COL) (odległość INTER) jest większa niż różnice wewnątrz jednej kategorii (odległość INTRA). Wyniki (p-wartości = 0.0000) pokazują, że model wyraźnie rozróżnia te dwie grupy w każdym języku (polskim, angielskim i japońskim).
+
+Testy międzyjęzykowe (H₂/H₃):
+Porównano mediany odległości między IND i COL dla poszczególnych języków.
+
+W języku angielskim odległości są największe, co oznacza, że zdania IND i COL są najbardziej od siebie oddzielone.
+W języku polskim i japońskim te odległości są mniejsze, czyli kategorie te są semantycznie bliżej siebie.
+Korekcja Bonferroniego:
+Po zastosowaniu korekcji dla wielokrotnych testów wszystkie p-wartości pozostają zerowe, co potwierdza bardzo silną istotność statystyczną wyników.
+
+W skrócie: Model embeddingowy wyraźnie rozróżnia zdania IND i COL, a to rozróżnienie jest najmocniejsze w języku angielskim, natomiast w języku polskim i japońskim te kategorie są bardziej zbliżone – wyniki są statystycznie bardzo istotne.

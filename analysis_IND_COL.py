@@ -1040,7 +1040,7 @@ def apply_multiple_testing_correction(p_values, method='bonferroni'):
     tuple
         (reject, pvals_corrected) - czy odrzucamy hipotezę zerową, skorygowane wartości p.
     """
-    return multipletests(p_values, method=method)
+    return multipletests(p_values, method=method)[:2]
 
 
 @timeit
