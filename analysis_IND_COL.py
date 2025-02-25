@@ -92,13 +92,13 @@ W przetwarzaniu języka naturalnego (NLP) komputer musi "zrozumieć" tekst, któ
 ### **2.1. Co oznacza 3072 wymiary?**
 
 W modelu `text-embedding-3-large` każde zdanie jest reprezentowane przez **3072 liczby**. Możemy traktować te liczby jako ukryte „cechy" języka czy informację zawarte w danym tekście, które model wyodrębnił podczas treningu. Każdy wymiar może odpowiadać (w dużym uproszczeniu):
- - Na przykład za ton emocjonalny zdania,
- - Za formalność lub rejestr językowy,
- - Za aspekty kulturowe czy specyficzne słownictwo,
- - Za kontekst semantyczny, umożliwiający rozróżnienie między wieloma znaczeniami słów (np. „zamek" jako budowla obronna, zamek od drzwi lub zamek błyskawiczny),
- - Za intencje wypowiedzi, pomagając określić, czy zdanie jest pytaniem, stwierdzeniem czy rozkazem,
- - Za specyficzne domeny tematyczne, takie jak język medyczny, prawniczy czy technologiczny,
- - Oraz za niuanse językowe, które pozwalają modelowi uchwycić gramatykę, składnię i idiomatyczność języka, co jest kluczowe dla rozumienia zarówno języka mówionego, jak i pisanego.
+- Na przykład za ton emocjonalny zdania,
+- Za formalność lub rejestr językowy,
+- Za aspekty kulturowe czy specyficzne słownictwo,
+- Za kontekst semantyczny, umożliwiający rozróżnienie między wieloma znaczeniami słów (np. „zamek" jako budowla obronna, zamek od drzwi lub zamek błyskawiczny),
+- Za intencje wypowiedzi, pomagając określić, czy zdanie jest pytaniem, stwierdzeniem czy rozkazem,
+- Za specyficzne domeny tematyczne, takie jak język medyczny, prawniczy czy technologiczny,
+- Oraz za niuanse językowe, które pozwalają modelowi uchwycić gramatykę, składnię i idiomatyczność języka, co jest kluczowe dla rozumienia zarówno języka mówionego, jak i pisanego.
 
 Z uwagi na bardzo wysoką liczbę wymiarów trudno jest bezpośrednio wizualizować takie dane. Dlatego stosuje się metody redukcji wymiarowości, takie jak **PCA** (Principal Component Analysis) czy **t-SNE** (t-Distributed Stochastic Neighbor Embedding). Pozwalają one „spłaszczyć" przestrzeń 3072-wymiarową do 2D lub 3D, co umożliwia nam wizualne porównanie położeń wektorów. W ten sposób, jeśli dwa wektory (czyli reprezentacje dwóch zdań) są blisko siebie w przestrzeni, uznajemy, że zdania te są semantycznie podobne.
 
@@ -111,35 +111,37 @@ Celem tego projektu jest sprawdzenie, czy **istnieją rzeczywiste różnice kult
 ### **Hipotezy badawcze**
 
 1. **Różnicowanie kategorii w różnych językach**  
-   **Hipoteza H₁:** Model embeddingowy odróżnia zdania indywidualistyczne (IND) od kolektywistycznych (COL) w każdym języku.  
-   Statystycznie, oznacza to, że rozkłady odległości (np. miara kosinusowa lub euklidesowa) pomiędzy embeddingami zdań IND i COL będą istotnie różne w ramach danego języka.
+  **Hipoteza H₁:** Model embeddingowy odróżnia zdania indywidualistyczne (IND) od kolektywistycznych (COL) w każdym języku.  
+  Statystycznie, oznacza to, że rozkłady odległości (np. miara kosinusowa lub euklidesowa) pomiędzy embeddingami zdań IND i COL będą istotnie różne w ramach danego języka.
 
 2. **Porównanie dystansów między kategoriami w zależności od języka**  
-   **Hipoteza H₂:** W języku polskim i japońskim różnice między zdaniami IND i COL (mierzone odległościami wektorowymi) są mniejsze niż w języku angielskim.  
-   Statystycznie, oznacza to, że mediana odległości między wektorami zdań IND a COL w polskim i japońskim będzie niższa niż w angielskim, co można przetestować używając testu Manna–Whitneya (alternatywa dla t-testu, gdy rozkłady nie są normalne) przy poziomie istotności p < 0.01.
+  **Hipoteza H₂:** W języku polskim i japońskim różnice między zdaniami IND i COL (mierzone odległościami wektorowymi) są mniejsze niż w języku angielskim.  
+  Statystycznie, oznacza to, że mediana odległości między wektorami zdań IND a COL w polskim i japońskim będzie niższa niż w angielskim, co można przetestować używając testu Manna–Whitneya (alternatywa dla t-testu, gdy rozkłady nie są normalne) przy poziomie istotności p < 0.01.
 
 3. **Statystyczna istotność obserwowanych różnic**  
-   **Hipoteza H₃:** Zaobserwowane różnice w dystansach między kategoriami nie są przypadkowe.  
-   W tym celu stosujemy testy normalności (np. Shapiro-Wilka oraz test Kolmogorova-Smirnova), a następnie testy porównawcze (t-test lub test Manna–Whitneya) dla różnych metryk odległości (Euklides, Kosinus, Manhattan). Wynik p < 0.01 wskazuje, że różnice są statystycznie istotne.
+  **Hipoteza H₃:** Zaobserwowane różnice w dystansach między kategoriami nie są przypadkowe.  
+  W tym celu stosuję testy normalności (np. Shapiro-Wilka oraz test Kolmogorova-Smirnova), a następnie testy porównawcze (t-test lub test Manna–Whitneya) dla różnych metryk odległości (Euklides, Kosinus, Manhattan). Wynik p < 0.01 wskazuje, że różnice są statystycznie istotne.
 
 ### **Sposób testowania hipotez**
 
-- **Obliczanie odległości:** Dla każdej pary zdań (między zdaniami IND i COL w danym języku, czyli każde zdanie IND jest połączone z każdym zdaniem COl. Daje to nam 100x100 kombinacji) obliczamy odległości przy użyciu wybranych metryk (np. kosinusowej – 1 − cosinus, euklidesowej czy Manhattan).
+- **Obliczanie odległości:** Dla każdej pary zdań (między zdaniami IND i COL w danym języku, czyli każde zdanie IND jest połączone z każdym zdaniem COL. Daje to nam 100x100 kombinacji) obliczam odległości przy użyciu wybranych metryk (np. kosinusowej – 1 − cosinus, euklidesowej czy Manhattan).
 
-- **Analiza rozkładu:** Sprawdzamy, czy rozkłady obliczonych odległości są zgodne z rozkładem normalnym przy użyciu testów Shapiro-Wilka i Kolmogorova-Smirnova. Jeśli rozkład nie jest normalny, stosujemy test nieparametryczny, taki jak test Manna–Whitneya.
+- **Analiza rozkładu:** Sprawdzam, czy rozkłady obliczonych odległości są zgodne z rozkładem normalnym przy użyciu testów Shapiro-Wilka i Kolmogorova-Smirnova. Jeśli rozkład nie jest normalny, stosuję test nieparametryczny, taki jak test Manna–Whitneya.
 
-- **Porównanie median:** Porównujemy mediany odległości między embeddingami zdań IND i COL dla języka angielskiego, polskiego oraz japońskiego. Hipoteza H₂ przewiduje, że mediana dla języka polskiego oraz japońskiego będzie mniejsza niż dla języka angielskiego.
+- **Porównanie median:** Porównuję mediany odległości między embeddingami zdań IND i COL dla języka angielskiego, polskiego oraz japońskiego. Hipoteza H₂ przewiduje, że mediana dla języka polskiego oraz japońskiego będzie mniejsza niż dla języka angielskiego.
 
-- **Test istotności:** Jeśli wynik testu (np. test Manna–Whitneya) dla porównania mediana_angielski vs. mediana_polski (lub japoński) daje p < 0.01, można odrzucić hipotezę zerową, że różnice są przypadkowe, i przyjąć, że różnice te są statystycznie istotne.
+- **Test istotności:** Jeśli wynik testu (np. test Manna–Whitneya) dla porównania mediana_angielski vs. mediana_polski (lub japoński) daje p < 0.01, mogę odrzucić hipotezę zerową, że różnice są przypadkowe, i przyjąć, że różnice te są statystycznie istotne.
+
+- **Korekcja dla wielokrotnych testów:** Stosuję poprawkę Bonferroniego dla wszystkich wykonywanych testów statystycznych, aby kontrolować łączny poziom błędu typu I (fałszywie pozytywnych wyników).
 
 ### **Wnioski teoretyczne**
 
 W kontekście teoretycznym założenie, że model embeddingowy potrafi uchwycić subtelne różnice kulturowe, opiera się na następującej idei:  
 - **Semantyczna reprezentacja:** Jeśli model został dobrze wytrenowany, to zdania o podobnym znaczeniu (np. wyrażające indywidualizm) powinny być reprezentowane przez wektory bliskie sobie w przestrzeni wektorowej.  
 - **Różnice kulturowe:** W praktyce sposób, w jaki dana kultura wyraża indywidualizm lub kolektywizm, może się różnić – np. język angielski może silniej rozróżniać te kategorie, podczas gdy język polski lub japoński może wykazywać mniejsze różnice.  
-- **Testy statystyczne:** Użycie testów statystycznych pozwala na ilościową weryfikację tej różnicy. Jeśli badania wykażą, że odległości między embeddingami zdań IND i COL w języku polskim są mniejsze i różnica ta jest istotna statystycznie, możemy wywnioskować, że model oddaje te subtelne różnice kulturowe.
+- **Testy statystyczne:** Użycie testów statystycznych pozwala na ilościową weryfikację tej różnicy. Jeśli badania wykażą, że odległości między embeddingami zdań IND i COL w języku polskim są mniejsze i różnica ta jest istotna statystycznie, mogę wywnioskować, że model oddaje te subtelne różnice kulturowe.
 
-Podsumowując, projekt opiera się na hipotezach mówiących o różnicach w sposobie reprezentacji semantycznej zdań w zależności od języka, a ich weryfikacja odbywa się przez porównanie rozkładów odległości w przestrzeni embeddingowej oraz zastosowanie odpowiednich testów statystycznych (przy założeniu poziomu istotności p < 0.01). Taki podejście pozwala nie tylko na wizualną eksplorację danych, ale również na ilościową analizę różnic, co stanowi solidne narzędzie do badań nad kulturą i językiem.
+Podsumowując, projekt opiera się na hipotezach mówiących o różnicach w sposobie reprezentacji semantycznej zdań w zależności od języka, a ich weryfikacja odbywa się przez porównanie rozkładów odległości w przestrzeni embeddingowej oraz zastosowanie odpowiednich testów statystycznych (przy założeniu poziomu istotności p < 0.01). Takie podejście pozwala nie tylko na wizualną eksplorację danych, ale również na ilościową analizę różnic, co stanowi solidne narzędzie do badań nad kulturą i językiem.
 
 ---
 
@@ -147,8 +149,8 @@ Podsumowując, projekt opiera się na hipotezach mówiących o różnicach w spo
 
 ### **4.1. Zbiór danych i podział**
 
-Zgromadziliśmy zdania w trzech językach: **angielskim**, **polskim** i **japońskim**.  
-W każdym języku wyróżniono dwie grupy zdań, każda po 100 zdań:
+Zgromadziłem zdania w trzech językach: **angielskim**, **polskim** i **japońskim**.  
+W każdym języku wyróżniłem dwie grupy zdań, każda po 100 zdań:
 
 - **IND (Individualistic)** – przykłady: „Działam samodzielnie", „Jestem niezależny".  
 - **COL (Collectivistic)** – przykłady: „Zespół jest siłą", „Wspólnie się wspieramy".
@@ -161,19 +163,21 @@ Te grupy razem dają **6 kategorii**:
 5. `JAP_IND`  
 6. `JAP_COL`
 
-Każde zdanie przekształciliśmy w wektor (embedding) **3072D** za pomocą modelu `text-embedding-3-large`. Następnie porównujemy i wizualizujemy te wektory, by sprawdzić, **jak daleko** (lub **jak blisko**) są zdania IND i COL w każdym języku.
+Dodatkowo, aby zwiększyć rozmiar zbioru danych i jego reprezentatywność, implementuję możliwość rozszerzenia istniejącego korpusu zdań poprzez generowanie semantycznych wariantów, które zachowują charakter indywidualistyczny lub kolektywistyczny oryginalnych zdań.
+
+Każde zdanie przekształciłem w wektor (embedding) **3072D** za pomocą modelu `text-embedding-3-large`. Następnie porównuję i wizualizuję te wektory, by sprawdzić, **jak daleko** (lub **jak blisko**) są zdania IND i COL w każdym języku.
 
 ---
 
 ### **4.2. Wizualizacje (PCA i t-SNE)**
 
 #### **PCA (Principal Component Analysis)**
-Jest to metoda liniowa, która szuka głównych kierunków maksymalnej różnorodności w danych i pozwala zobaczyć w 2D lub 3D, **gdzie** dane (wektory) układają się najdalej od siebie. Dzięki temu możemy dostrzec np. czy `POL_IND` i `POL_COL` tworzą zbliżone skupisko, czy bardziej rozchodzą się w przestrzeni.
+Jest to metoda liniowa, która szuka głównych kierunków maksymalnej różnorodności w danych i pozwala zobaczyć w 2D lub 3D, **gdzie** dane (wektory) układają się najdalej od siebie. Dzięki temu mogę dostrzec np. czy `POL_IND` i `POL_COL` tworzą zbliżone skupisko, czy bardziej rozchodzą się w przestrzeni.
 
 #### **t-SNE (t-Distributed Stochastic Neighbor Embedding)**
 To metoda nieliniowa, której zadaniem jest **utrzymanie bliskości** punktów, które w oryginalnych 3072 wymiarach również były blisko. Jeśli w 3072D dwa zdania były podobne, to t-SNE stara się pokazać je blisko siebie również w niskim wymiarze (2D lub 3D). 
 
-W aplikacji możemy sprawdzić, czy np. zdania indywidualistyczne i kolektywistyczne w języku japońskim **układają się** w osobne rejony, czy raczej się **mieszają**.
+W aplikacji mogę sprawdzić, czy np. zdania indywidualistyczne i kolektywistyczne w języku japońskim **układają się** w osobne rejony, czy raczej się **mieszają**.
 
 ---
 
@@ -181,42 +185,44 @@ W aplikacji możemy sprawdzić, czy np. zdania indywidualistyczne i kolektywisty
 
 #### **Metoda centroidów**
 1. Każda kategoria (np. `ENG_IND`) ma swój **centroid** – czyli średnią wartość wszystkich zdań przypisanych do tej kategorii. Można to sobie wyobrazić jako "punkt środkowy" grupy zdań w przestrzeni liczb.  
-2. Nowy tekst zamieniamy na wektor (ciąg **3072 liczb**) – jest to matematyczna reprezentacja znaczenia tego zdania.  
-3. Sprawdzamy, do której kategorii tekst pasuje najlepiej, mierząc **podobieństwo** między jego wektorem a centroidami.  
-   - Używamy do tego **miary kosinusowej** – sprawdza ona kąt między wektorami.  
-   - Jeśli kąt między dwoma wektorami jest mały, oznacza to, że zdania są bardzo podobne.  
-   - Jeśli kąt jest duży, teksty są różne.  
-   - Można to porównać do porównywania kierunków dwóch strzałek – im bardziej są do siebie równoległe, tym bardziej pasują.  
-4. Tekst przypisujemy do kategorii, której centroid jest **najbliżej** (czyli ma najmniejszy kąt względem wektora zdania).  
-5. Dzięki tej metodzie możemy również analizować, jak dobrze nowy tekst pasuje do zbioru:  
-   - Jeśli wektor jest blisko centroidu, to tekst dobrze wpisuje się w daną kategorię.  
-   - Jeśli jest daleko, może być niejednoznaczny lub pasować do kilku kategorii jednocześnie.  
+2. Nowy tekst zamieniam na wektor (ciąg **3072 liczb**) – jest to matematyczna reprezentacja znaczenia tego zdania.  
+3. Sprawdzam, do której kategorii tekst pasuje najlepiej, mierząc **podobieństwo** między jego wektorem a centroidami.  
+  - Używam do tego **miary kosinusowej** – sprawdza ona kąt między wektorami.  
+  - Jeśli kąt między dwoma wektorami jest mały, oznacza to, że zdania są bardzo podobne.  
+  - Jeśli kąt jest duży, teksty są różne.  
+  - Można to porównać do porównywania kierunków dwóch strzałek – im bardziej są do siebie równoległe, tym bardziej pasują.  
+4. Tekst przypisuję do kategorii, której centroid jest **najbliżej** (czyli ma najmniejszy kąt względem wektora zdania).  
+5. Dzięki tej metodzie mogę również analizować, jak dobrze nowy tekst pasuje do zbioru:  
+  - Jeśli wektor jest blisko centroidu, to tekst dobrze wpisuje się w daną kategorię.  
+  - Jeśli jest daleko, może być niejednoznaczny lub pasować do kilku kategorii jednocześnie.  
 
 #### **Klasyfikator ML (Regresja Logistyczna)**
-1. Zamiast liczyć średnią wartość kategorii (jak w metodzie centroidów), uczymy model analizować **cały zbiór** wektorów przypisanych do poszczególnych kategorii (`ENG_IND`, `POL_COL` itd.).  
+1. Zamiast liczyć średnią wartość kategorii (jak w metodzie centroidów), uczę model analizować **cały zbiór** wektorów przypisanych do poszczególnych kategorii (`ENG_IND`, `POL_COL` itd.).  
 2. Po przekształceniu nowego zdania na wektor (3072 liczby), model przewiduje, do której kategorii należy.  
 3. Oprócz samej klasy zwraca także **prawdopodobieństwa**, czyli ocenę pewności swojej decyzji.  
-   - Przykładowo:  
-     - `ENG_IND`: 85%  
-     - `POL_COL`: 10%  
-     - `ENG_COL`: 5%  
-   - To oznacza, że model jest w 85% pewien, że zdanie należy do kategorii `ENG_IND`.  
+  - Przykładowo:  
+    - `ENG_IND`: 85%  
+    - `POL_COL`: 10%  
+    - `ENG_COL`: 5%  
+  - To oznacza, że model jest w 85% pewien, że zdanie należy do kategorii `ENG_IND`.  
 4. Model ML jest dokładniejszy od metody centroidów, ponieważ:  
-   - Nie tylko sprawdza średnią wartość kategorii, ale analizuje **pełny rozkład wszystkich zdań**.  
-   - Potrafi dostrzec **bardziej subtelne różnice**, np. wykryć, że dwa podobne zdania mogą jednak należeć do różnych kategorii ze względu na niuanse językowe.  
-   - Może też wykrywać **mniej typowe przypadki**, które nie są blisko żadnego centroidu, ale mimo to pasują do konkretnej kategorii.  
+  - Nie tylko sprawdza średnią wartość kategorii, ale analizuje **pełny rozkład wszystkich zdań**.  
+  - Potrafi dostrzec **bardziej subtelne różnice**, np. wykryć, że dwa podobne zdania mogą jednak należeć do różnych kategorii ze względu na niuanse językowe.  
+  - Może też wykrywać **mniej typowe przypadki**, które nie są blisko żadnego centroidu, ale mimo to pasują do konkretnej kategorii.  
 
 ---
 
 ### **4.4. Raport statystyczny**
 
 - **Miary odległości**: Euklides, Kosinus (1 − cosinus), Manhattan.  
-- **Test normalności**: sprawdzamy, czy rozkład jest zbliżony do normalnego (Shapiro-Wilka, K-S).  
-- **Test Manna–Whitneya / t-Studenta**: jeśli p < 0.01, uznajemy, że zaobserwowana różnica jest znikomo prawdopodobna jako przypadek.
+- **Test normalności**: sprawdzam, czy rozkład jest zbliżony do normalnego (Shapiro-Wilka, K-S).  
+- **Test Manna–Whitneya / t-Studenta**: jeśli p < 0.01, uznaję, że zaobserwowana różnica jest znikomo prawdopodobna jako przypadek.
+- **Korekcja dla wielokrotnych testów**: stosuję poprawkę Bonferroniego, aby kontrolować łączny poziom błędu typu I.
 
 #### **Interpretacja wyników**  
 - **Niższa mediana odległości** w danym języku (IND vs. COL) → zdania indywidualistyczne i kolektywistyczne są **bliżej** siebie w przestrzeni wektorowej (model słabiej je rozróżnia).  
 - **Wartość p** < 0.01 → różnica między np. polskim a angielskim jest statystycznie **istotna**.
+- **Odrzucenie hipotezy zerowej** po korekcji Bonferroniego → obserwowane różnice mają małe prawdopodobieństwo wystąpienia przez przypadek.
 '''
 
 ###############################################
